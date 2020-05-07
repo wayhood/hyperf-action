@@ -92,7 +92,7 @@ class IndexAction extends AbstractAction
 =====
 响应格式如下
 注意: responses数组的顺序通常与requests一致, 但也可能通过responses里的dispatch知道是哪个响应
-
+```json
 {
    "code": 0,    //最外层的code，0是成功  非0失败  是说明这个请求正确（如，请求方法post，请求格式，即json，等等，但不代表具体的请求接口）
    "message": "成功",   //描述，非0会有具体面描述
@@ -109,6 +109,6 @@ class IndexAction extends AbstractAction
        }
    ]
 }
-
+```
 
 
