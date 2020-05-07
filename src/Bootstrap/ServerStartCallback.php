@@ -20,7 +20,7 @@ class ServerStartCallback extends \Hyperf\Framework\Bootstrap\ServerStartCallbac
     public function initAnnotationDispatch(array $collector): void {
         foreach ($collector as $className => $metadata) {
             if (isset($metadata['_c'][Action::class])) {
-                ActionCollector::set($metadata['_c'][Action::class]->mapper, $className);
+                ActionCollector::set($metadata['_c'][Action::class]->mapping, $className);
             }
         }
     }
