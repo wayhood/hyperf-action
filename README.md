@@ -6,7 +6,7 @@
 
 配置
 =====
-```
+```shell
 composer require hyperf-action
 ```
 
@@ -15,14 +15,14 @@ composer require hyperf-action
 =====
 全局使用一个Controller，（其实可以没有controller，直接挂在router上，
 配置 config/routers.php
-```
+```php
 Router::addRoute(['POST'], '/', 'Wayhood\HyperfAction\Controller\MainController@index');
 //Action调度都在MainController@index
 ```
 
 修改callback事件  config/autoload/server.php 修改SwooleEvent::ON_BEFORE_START
 这里用于收集Action注解，（暂时没找个最合适的位置）
-```
+```php
 SwooleEvent::ON_BEFORE_START => [Wayhood\HyperfAction\Bootstrap\ServerStartCallback::class, 'beforeStart'],
 ```
 
@@ -31,7 +31,7 @@ SwooleEvent::ON_BEFORE_START => [Wayhood\HyperfAction\Bootstrap\ServerStartCallb
 
 在App下创建Action目录，并创建Action, 类上加入Action注解，注意不要有重复的值
 Action和Controller类似，可以使用$this->request $this->response
-```
+```php
 <?php
 
 declare(strict_types=1);
@@ -59,7 +59,7 @@ class IndexAction extends AbstractAction
 请求参数 POST
 =====
 
-```
+```json
 {
      "extras:": { //附加字段，用于用户追踪
         "uuid": "xxxxxxxxx",                 //设备Id
