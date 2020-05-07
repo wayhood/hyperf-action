@@ -3,19 +3,41 @@
 declare(strict_types=1);
 namespace Wayhood\HyperfAction\Controller;
 
+use Hyperf\HttpServer\Contract\RequestInterface;
+use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Utils\Context;
 use Hyperf\Utils\Exception\ParallelExecutionException;
 use Hyperf\Utils\Parallel;
+use Hyperf\Di\Annotation\Inject;
+use Psr\Container\ContainerInterface;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 class MainController
 {
+    /**
+     * @Inject
+     * @var ContainerInterface
+     */
+    protected $container;
+
+    /**
+     * @Inject
+     * @var RequestInterface
+     */
+    protected $request;
+
+    /**
+     * @Inject
+     * @var ResponseInterface
+     */
+    protected $response;
+
     public function index()
     {
-        $requestMapper = ['index.list', 'test.list'];
+        $requestMapping = ['index.list', 'test.list'];
 
-        $parallel = new Parallel(count($requestMapper));
-        for($i=0; $i<count($requestMapper); $i++) {
-            $mapping = $requestMapper[$i];
+        $parallel = new Parallel(count($requestMapping));
+        for($i=0; $i<count($requestMapping); $i++) {
+            $mapping = $requestMapping[$i];
             $actionName = ActionCollector::get($mapping);
             $action = $this->container->get($actionName);
             $parallel->add(function() use ($action) {

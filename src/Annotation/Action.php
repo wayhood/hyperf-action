@@ -14,12 +14,12 @@ class Action extends AbstractAnnotation
     /**
      * @var null|string
      */
-    public $mapper = '';
+    public $mapping = '';
 
     public function __construct($value = null)
     {
         parent::__construct($value);
-        $this->bindMainProperty('mapper', $value);
+        $this->bindMainProperty('mapping', $value);
     }
 
 }

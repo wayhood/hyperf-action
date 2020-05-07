@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Wayhood\HyperfAction\Bootstrap;
 
 
-use App\Annotation\Action;
-use App\Collector\ActionCollector;
+use Wayhood\HyperfAction\Annotation\Action;
+use Wayhood\HyperfAction\Collector\ActionCollector;
 use Hyperf\Di\Annotation\AnnotationCollector;
 
 class ServerStartCallback extends \Hyperf\Framework\Bootstrap\ServerStartCallback
