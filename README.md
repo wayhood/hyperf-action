@@ -43,9 +43,37 @@ use Wayhood\HyperfAction\Action\AbstractAction;
 use \Hyperf\DB\DB;
 
 /**
- * Class IndexAction
- * @package App\Action
+ * 操作Mapping
  * @Action("index.list")
+ *
+ * 以下注解用于生成文档, 校验请求数据类型，以及过滤响应输出
+ *
+ * 分类
+ * @Category("首页")
+ *
+ * 描述
+ * @Description("首页列表")
+ *
+ * 请求参数
+ * 格式:  name="名称",  type="类型", require=是否必须, example=示例值, description="描述"
+ * 简写:  n="名称",  t="类型", r=是否必须, e=示例值, d="描述"
+ * @RequestParam(name="start", type="int", require=false, example=0, description="记录起始位置, 默认从0开始")
+ * @RequestParam(n="limit",       t="int", r=false, e=0,  d="获取记录条数, 默认10条")
+ * @RequestParam(n="category_id", t="int", r=false, e=10, d="分类ID")
+ *
+ * 响应参数
+ * 格式:  name="名称",  type="类型", example=示例值, description="描述"
+ * 简写:  n="名称",  t="类型", e=示例值, d="描述"
+ * @ResponseParam(name="a", type="string", example="1", description="abcdefg")
+ * @ResponseParam(n="b", t="string", e="1", d="abcdefg")
+ *
+ * 错误代码
+ * 格式: code=错误代码, message="描述"
+ * 简写: c=错误代码, m="描述"
+ * @ErrorCode(code=1001, message="分类不存在")
+ *
+ * 是否可用 true可用 false不可用
+ * @Usable(false)
  */
 class IndexAction extends AbstractAction
 {
