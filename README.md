@@ -88,6 +88,27 @@ class IndexAction extends AbstractAction
 }
 ```
 
+响应格式
+=====
+响应格式如下
+注意: responses数组的顺序通常与requests一致, 但也可能通过responses里的dispatch知道是哪个响应
+
+{
+   "code": 0,    //最外层的code，0是成功  非0失败  是说明这个请求正确（如，请求方法post，请求格式，即json，等等，但不代表具体的请求接口）
+   "message": "成功",   //描述，非0会有具体面描述
+   "timestamp": 1458291720, //服务器时间戳
+   "deviation": 8 //误差, 即请求的时间戳 与服务器时间的误差
+   "responses": [    //响应，对应请求的requests部份
+       { //第一个请求响应
+         "code": 0,   //0是成功，非0失败
+         "message": "成功"， //描述，非0会有具本描述
+         "data": {   //响应数据，非0没有
+           "success": "true"
+         },
+         "dispatch": "test"   //对应的调用方式
+       }
+   ]
+}
 
 
 
