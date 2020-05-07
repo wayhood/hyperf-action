@@ -6,6 +6,7 @@ namespace Wayhood\HyperfAction\Controller;
 use Hyperf\Utils\Context;
 use Hyperf\Utils\Exception\ParallelExecutionException;
 use Hyperf\Utils\Parallel;
+use Wayhood\HyperfAction\Collector\ActionCollector;
 class MainController
 {
     public function index()
@@ -15,7 +16,7 @@ class MainController
         $parallel = new Parallel(count($requestMapper));
         for($i=0; $i<count($requestMapper); $i++) {
             $mapping = $requestMapper[$i];
-            $actionName = \App\Collector\ActionCollector::get($mapping);
+            $actionName = ActionCollector::get($mapping);
             $action = $this->container->get($actionName);
             $parallel->add(function() use ($action) {
                 Context::copy(\Swoole\Coroutine::getPcid());
