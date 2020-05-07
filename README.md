@@ -37,8 +37,13 @@ Action和Controller类似，可以使用$this->request $this->response
 declare(strict_types=1);
 namespace App\Action;
 
-
 use Wayhood\HyperfAction\Annotation\Action;
+use Wayhood\HyperfAction\Annotation\RequestParam;
+use Wayhood\HyperfAction\Annotation\ResponseParam;
+use Wayhood\HyperfAction\Annotation\Category;
+use Wayhood\HyperfAction\Annotation\Description;
+use Wayhood\HyperfAction\Annotation\ErrorCode;
+use Wayhood\HyperfAction\Annotation\Usable;
 use Wayhood\HyperfAction\Action\AbstractAction;
 use \Hyperf\DB\DB;
 
