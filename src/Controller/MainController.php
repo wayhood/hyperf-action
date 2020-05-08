@@ -176,7 +176,7 @@ class MainController
             //开启协程
             $parallel = new Parallel($actionRequesCount);
             foreach($okRequest as $mapping => $value) {
-                $parallel->add(function () use ($value) {
+                $parallel->add(function () use ($value, $extras, $headers) {
                     Context::copy(\Swoole\Coroutine::getPcid());
                     $result = $value['container']->run($value['params'], $extras, $headers);
                     //\Swoole\Coroutine::sleep(1);
@@ -186,7 +186,6 @@ class MainController
 
             try {
                 $responseResults = $parallel->wait();
-                var_dump($responseResults);
             }  catch(ParallelExecutionException $e){
                 //echo $e->getMessage();
                 //var_dump($e->getResults()); // 获取协程中的返回值。
