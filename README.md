@@ -16,14 +16,12 @@ composer require hyperf-action
 全局使用一个Controller，（其实可以没有controller，直接挂在router上，
 配置 config/routers.php
 ```php
-Router::addRoute(['POST'], '/', 'Wayhood\HyperfAction\Controller\MainController@index');
-//Action调度都在MainController@index
-```
+Router::addRoute(['GET', 'POST'], "/",
+    'Wayhood\HyperfAction\Controller\MainController@index',
+    ['middleware' => [\Wayhood\HyperfAction\Middleware\ActionMiddleware::class]]);
 
-修改callback事件  config/autoload/server.php 修改SwooleEvent::ON_BEFORE_START
-这里用于收集Action注解，（暂时没找个最合适的位置）
-```php
-SwooleEvent::ON_BEFORE_START => [Wayhood\HyperfAction\Bootstrap\ServerStartCallback::class, 'beforeStart'],
+Router::get('/doc',
+    'Wayhood\HyperfAction\Controller\MainController@doc');
 ```
 
 创建Action
@@ -35,57 +33,71 @@ Action和Controller类似，可以使用$this->request $this->response
 <?php
 
 declare(strict_types=1);
-namespace App\Action;
+namespace App\Action\Test;
 
+use Hyperf\DB\DB;
 use Wayhood\HyperfAction\Annotation\Action;
-use Wayhood\HyperfAction\Annotation\RequestParam;
-use Wayhood\HyperfAction\Annotation\ResponseParam;
 use Wayhood\HyperfAction\Annotation\Category;
 use Wayhood\HyperfAction\Annotation\Description;
-use Wayhood\HyperfAction\Annotation\ErrorCode;
+use Wayhood\HyperfAction\Annotation\RequestParam;
+use Wayhood\HyperfAction\Annotation\ResponseParam;
 use Wayhood\HyperfAction\Annotation\Usable;
+use Wayhood\HyperfAction\Annotation\ErrorCode;
+use Wayhood\HyperfAction\Annotation\Token;
 use Wayhood\HyperfAction\Action\AbstractAction;
-use \Hyperf\DB\DB;
 
 /**
- * 操作Mapping
- * @Action("index.list")
+ * @Action("test.get")
  *
- * 以下注解用于生成文档, 校验请求数据类型，以及过滤响应输出
+ * 以下注解用于生成文档校验数据类型和过滤响应输出
  *
  * 分类
- * @Category("首页")
+ * @Category("测试")
  *
  * 描述
- * @Description("首页列表")
+ * @Description("测试请求")
  *
  * 请求参数
  * 格式:  name="名称",  type="类型", require=是否必须, example=示例值, description="描述"
  * 简写:  n="名称",  t="类型", r=是否必须, e=示例值, d="描述"
- * @RequestParam(name="start", type="int", require=false, example=0, description="记录起始位置, 默认从0开始")
- * @RequestParam(n="limit",       t="int", r=false, e=0,  d="获取记录条数, 默认10条")
- * @RequestParam(n="category_id", t="int", r=false, e=10, d="分类ID")
+ * @RequestParam(name="nick", type="string", require=true, example="test", description="用户昵称")
+ * @RequestParam(n="a",       t="string", r=true, e="a",  d="请求参数a")
+ * @RequestParam(n="b",       t="int",   r=true, e=1,   d="请求参数b")
+ * @RequestParam(n="c",       t="float", r=true, e=0.1, d="请求参数c")
  *
  * 响应参数
  * 格式:  name="名称",  type="类型", example=示例值, description="描述"
  * 简写:  n="名称",  t="类型", e=示例值, d="描述"
- * @ResponseParam(name="a", type="string", example="1", description="abcdefg")
- * @ResponseParam(n="b", t="string", e="1", d="abcdefg")
+ * @ResponseParam(n="user",           t="map",      e="无",          d="返回用户信息")
+ * @ResponseParam(n="user.name",      t="string",   e="syang",       d="返回用户名称")
+ * @ResponseParam(n="user.age",       t="int",      e=40,            d="返回用户年龄")
+ * @ResponseParam(n="user.tel",       t="string",   e="12345789001", d="返回用户电话")
  *
  * 错误代码
  * 格式: code=错误代码, message="描述"
  * 简写: c=错误代码, m="描述"
- * @ErrorCode(code=1001, message="分类不存在")
+ * @ErrorCode(code=1000, message="不知道")
  *
  * 是否可用 true可用 false不可用
- * @Usable(false)
+ * @Usable(true)
+ *
+ * 是否需要Token 必须传Token false不做要求
+ * @Token(false)
  */
-class IndexAction extends AbstractAction
+class GetAction extends AbstractAction
 {
+    public $cache = null;
     public function run() {
-        $res = DB::query("SELECT * FROM `banner` where id=2");
-        return $res;
+
+        if (is_null($this->cache)) {
+            $res = DB::query("SELECT * FROM `admin` where id=1");
+            $this->cache = $res;
+        }
+
+        return $this->successReturn($this->cache);
     }
+
+
 }
 ```
 

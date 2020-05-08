@@ -6,7 +6,7 @@ namespace Wayhood\HyperfAction\Collector;
 
 use Hyperf\Di\MetadataCollector;
 
-class ActionCollector extends MetadataCollector
+class TokenCollector extends MetadataCollector
 {
     /**
      * @var array
@@ -15,6 +15,6 @@ class ActionCollector extends MetadataCollector
 
     public static function collectClass(string $class, string $annotation, $value): void
     {
-        static::$container[$value] = $class;
+        static::$container[$class] = $value;
     }
 }

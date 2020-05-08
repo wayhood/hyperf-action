@@ -5,23 +5,16 @@ namespace Wayhood\HyperfAction\Bootstrap;
 
 
 use Wayhood\HyperfAction\Annotation\Action;
+use Wayhood\HyperfAction\Annotation\ResponseParam;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 use Hyperf\Di\Annotation\AnnotationCollector;
+use Wayhood\HyperfAction\Collector\ResponseParamCollector;
+use Wayhood\HyperfAction\Collector\RequestParamCollector;
 
 class ServerStartCallback extends \Hyperf\Framework\Bootstrap\ServerStartCallback
 {
-    protected $actions = [];
     public function beforeStart()
     {
-        $this->initAnnotationDispatch(AnnotationCollector::list());
         parent::beforeStart();
-    }
-
-    public function initAnnotationDispatch(array $collector): void {
-        foreach ($collector as $className => $metadata) {
-            if (isset($metadata['_c'][Action::class])) {
-                ActionCollector::set($metadata['_c'][Action::class]->mapping, $className);
-            }
-        }
     }
 }

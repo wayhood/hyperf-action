@@ -5,27 +5,29 @@ namespace Wayhood\HyperfAction\Annotation;
 
 
 use Hyperf\Di\Annotation\AbstractAnnotation;
-use Wayhood\HyperfAction\Collector\ActionCollector;
+use Wayhood\HyperfAction\Collector\CategoryCollector;
 
 /**
  * @Annotation
  * @Target({"CLASS"})
  */
-class Action extends AbstractAnnotation
+class Category extends AbstractAnnotation
 {
     /**
      * @var string
      */
-    public $mapping = '';
+    public $name = '未分类';
 
-    public function __construct($value)
+    public function __construct($value = null)
     {
         parent::__construct($value);
-        $this->bindMainProperty('mapping', $value);
+        $this->bindMainProperty('name', $value);
     }
+    
 
     public function collectClass(string $className): void
     {
-        ActionCollector::collectClass($className, static::class, $this->mapping);
+        CategoryCollector::collectClass($className, static::class, $this->name);
     }
+
 }
