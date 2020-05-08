@@ -594,7 +594,7 @@ EOF;
             foreach($requestParams as $requestParam) {
                 $requestParamHtml .= "<tr><td>" . $requestParam->name . "</td>\n";
                 $requestParamHtml .= "<td>" . $requestParam->type . "</td>\n";
-                $requestParamHtml .= "<td>" . $requestParam->require == true ? "true" : "false" . "</td>\n";
+                $requestParamHtml .= "<td>" . ($requestParam->require == true ? "true" : "false") . "</td>\n";
                 $requestParamHtml .= "<td>" . strval($requestParam->example) . "</td>\n";
                 $requestParamHtml .= "<td>" . $requestParam->description . "</td></tr>\n";
             }
