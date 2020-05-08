@@ -18,49 +18,49 @@ class DocHtml
      * 目录html
      * @var array
      */
-    public static array $tableOfContentHtml = [];
+    public static $tableOfContentHtml = [];
 
     /**
      * 目录内容
      * @var array
      */
-    public static array $tableOfContent = [];
+    public static $tableOfContent = [];
 
     /**
      * 请求参数Html
      * @var array
      */
-    public static array $requestParamHtmls = [];
+    public static $requestParamHtmls = [];
 
     /**
      * 请求参数示例Html
      * @var array
      */
-    public static array $requestParamExampleHtmls = [];
+    public static $requestParamExampleHtmls = [];
 
     /**
      * 响应参数Html
      * @var array
      */
-    public static array $responseParamHtmls = [];
+    public static $responseParamHtmls = [];
 
     /**
      * 响应参数示例Html
      * @var array
      */
-    public static array $responseParamExampleHtml = [];
+    public static $responseParamExampleHtml = [];
 
     /**
      * 错误代码html
      * @var array
      */
-    public static array $errorCodeHtml = [];
+    public static $errorCodeHtml = [];
 
     /**
      * 左侧html模版
      * @var string
      */
-    public static string $leftHtml = <<<EOF
+    public static $leftHtml = <<<EOF
     <!-- 左边内容 -->
     <div class="col-lg-2" style="padding:5px;">
         {{tableOfContent}}
@@ -71,7 +71,7 @@ EOF;
      * 右侧html模版
      * @var string
      */
-    public static string $rightHtml = <<<EOF
+    public static $rightHtml = <<<EOF
     <div class="col-lg-10" style="padding:5px;">
         <h1 style="{{style}}">{{dispatch}} ({{desc}})</h1>
         {{token}}
@@ -127,7 +127,7 @@ EOF;
      * 底部Html模版
      * @var string
      */
-    public static string $footerHtml = <<<EOF
+    public static $footerHtml = <<<EOF
     </div>
     </body>
 </html>
