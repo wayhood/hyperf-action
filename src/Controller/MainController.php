@@ -75,7 +75,8 @@ class MainController
     {
         $this->responses = [];
         $actionRequests = $this->request->getAttribute("actionRequests");
-        $actionSysInfo = $this->request->getAttribute("actionSysInfo");
+        $extras = $this->request->getAttribute("extras");
+        $headers = $this->request->getHeaders();
 
         $okRequest = [];
         foreach($actionRequests as $actionRequest) {
@@ -100,7 +101,7 @@ class MainController
         $actionRequesCount = count($okRequest);
         if ($actionRequesCount == 1) {
             foreach($okRequest as $mapping => $value) {
-                $responseResults[$mapping] = $value['container']->run($value['params']);
+                $responseResults[$mapping] = $value['container']->run($value['params'], $extras, $headers);
             }
         } else if (count($okRequest) > 1) {
             //开启协程
@@ -108,7 +109,7 @@ class MainController
             foreach($okRequest as $mapping => $value) {
                 $parallel->add(function () use ($value) {
                     Context::copy(\Swoole\Coroutine::getPcid());
-                    $result = $value['container']->run($value['params']);
+                    $result = $value['container']->run($value['params'], $extras, $headers);
                     //\Swoole\Coroutine::sleep(1);
                     return $result;
                 }, $mapping);
@@ -591,7 +592,7 @@ EOF;
         }
         return $html;
     }
-    
+
 
     public function getResponseParamsPreHtml($mapping, $paramData) {
         $ret = [];
@@ -691,9 +692,9 @@ EOF;
                 foreach($data as $line) {
                     $active = '';
                     //if ($a == true) {
-                        if ($line['dispatch'] == $mapping) {
-                            $active = ' active';
-                        }
+                    if ($line['dispatch'] == $mapping) {
+                        $active = ' active';
+                    }
                     //}
 
                     $token = '';
@@ -737,6 +738,6 @@ EOF;
         }
         $this->tableOfContentHtml['index'] = $html;
     }
-    
-    
+
+
 }

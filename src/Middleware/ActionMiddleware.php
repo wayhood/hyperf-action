@@ -72,35 +72,9 @@ class ActionMiddleware implements MiddlewareInterface
         }
 
         //分析设备信息
-        $sysInfo = [];
+        $extras = [];
         if (array_key_exists('extras', $body) && is_array($body['extras'])) {
             $extras = $body['extras'];
-            if (array_key_exists('uuid', $extras)) {
-                $sysInfo['_uuid'] = $extras['uuid'];                 //设备Id
-            }
-            if (array_key_exists('device_token', $extras)) {
-                $sysInfo['_device_token'] = $extras['device_token']; //推送id
-            }
-
-            if (array_key_exists('idfa', $extras)) {
-                $sysInfo['_idfa'] =$extras['idfa'];                 //苹果广告id
-            }
-
-            if (array_key_exists('mac', $extras)) {
-                $sysInfo['_mac'] = $extras['mac'];                   //mac地址
-            }
-
-            if (array_key_exists('os', $extras)) {
-                $sysInfo['_os'] = $extras['os'];                     //操作系统 android ios
-            }
-
-            if (array_key_exists('app_version', $extras)) {
-                $sysInfo['_app_version'] = $extras['app_version'];   //app 版本
-            }
-
-            if (array_key_exists('screen', $extras)) {
-                $sysInfo['_screen'] = $extras['screen'];             //屏幕宽x高
-            }
         }
 
         //多请求处理
@@ -113,9 +87,7 @@ class ActionMiddleware implements MiddlewareInterface
         }
 
         $request = $request->withAttribute('actionRequests', $body['requests']);
-        $request = $request->withAttribute('actionSysInfo', $sysInfo);
-        //$request->withAttribute('actionSysInfo', $body['requests']);
-        //Context::set(ServerRequestInterface::class, $request);
+        $request = $request->withAttribute('extras', $extras);
         return $handler->handle($request);
     }
 }

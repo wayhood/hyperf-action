@@ -5,9 +5,13 @@ use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Psr\Container\ContainerInterface;
+use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
 
 abstract class AbstractAction
 {
+    /**
+     * @var array
+     */
     protected $errorCodes = [];
     /**
      * @Inject
@@ -27,11 +31,13 @@ abstract class AbstractAction
      */
     protected $response;
 
-    abstract public function run();
+    abstract public function run($params, $extras, $headers);
 
-    protected function errorReturn($errorCode, $message = "", $replace = []) {
-        if (isset($this->errorCodes[$errorCode]) && empty($message)) {
-            $message = $this->errorCodes[$errorCode]['desc'];
+    protected function errorReturn(int $errorCode, string $message = "", array $replace = []) {
+        $errorCodes = ErrorCodeCollector::result()[get_called_class()] ?? "";
+
+        if (isset($errorCodes[$errorCode]) && empty($message)) {
+            $message = $errorCodes[$errorCode]['message'];
         }
         if (count($replace) > 0) {
             $message = strtr($message, $replace);
