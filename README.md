@@ -87,18 +87,15 @@ use Wayhood\HyperfAction\Action\AbstractAction;
  */
 class GetAction extends AbstractAction
 {
-    public $cache = null;
-    public function run() {
-
-        if (is_null($this->cache)) {
-            $res = DB::query("SELECT * FROM `admin` where id=1");
-            $this->cache = $res;
-        }
-
-        return $this->successReturn($this->cache);
+    public function run($params, $extras, $headers) {
+        return $this->successReturn([
+            'user' => [
+                'name' => 'syang',
+                'age' => 40,
+                'tel' => '1234567890'
+            ]
+        ]);
     }
-
-
 }
 ```
 
