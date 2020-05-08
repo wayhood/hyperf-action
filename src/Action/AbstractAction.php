@@ -6,6 +6,7 @@ use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Psr\Container\ContainerInterface;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
+use Wayhood\HyperfAction\Util\ResponseFilter;
 
 abstract class AbstractAction
 {
@@ -61,12 +62,8 @@ abstract class AbstractAction
         if (is_array($data) && count($data) == 0) {
             $data = new \stdClass();
         }
-//        $systemParams = Yii::$app->params;
-//        if (isset($systemParams['responseFilter']) && $systemParams['responseFilter'] == true) {
-//            $data = ApiHelper::processResponseData($data, $this->dispatch);
-//        } else {
 
-//        }
+        $data = ResponseFilter::processResponseData($data, get_called_class());
         return [
             'code' => 0,
             'message' => '成功',

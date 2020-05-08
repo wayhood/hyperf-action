@@ -21,6 +21,7 @@ use Wayhood\HyperfAction\Collector\RequestParamCollector;
 use Wayhood\HyperfAction\Collector\ResponseParamCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
+use Wayhood\HyperfAction\Util\DocHtml;
 
 /**
  * Class MainController
@@ -71,6 +72,50 @@ class MainController
         Context::set(__CLASS__ .':responses',  $responses);
     }
 
+    public function validateParam($requestParam, $params, $actionMapping) {
+        $key = $requestParam['name'];
+        $require = $requestParam['require'];
+        if ($require == 'true') {
+            if (!isset($params[$key])) {
+                $this->systemExceptionReturn(9901, "缺少参数: ". $key, $actionMapping);
+                return false;
+            }
+            //判断类型
+            $type = $requestParam['type'];
+            $value = $params[$key];
+            if ($type == 'string') {
+                if (!is_string($value)) {
+                    $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+                    return false;
+                }
+            }
+
+            if ($type == 'int') {
+                if (!is_int($value)) {
+                    $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+                    return false;
+                }
+            }
+
+            if ($type == 'float') {
+                if (!is_float($value)) {
+                    $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+                    return false;
+                }
+            }
+
+            if ($type == 'array') {
+                if (!is_array($value)) {
+                    $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return true;
+        }
+    }
+
     public function index()
     {
         $this->responses = [];
@@ -84,11 +129,35 @@ class MainController
                 continue;
             }
             $actionMapping = array_key_exists('dispatch', $actionRequest) ? $actionRequest['dispatch'] : null;
-            $actionName = ActionCollector::get($actionMapping);
-            if (is_null($actionName)) {
+            if (is_null($actionMapping)) {
                 $this->systemExceptionReturn(8003, '请求参数有误', $actionMapping);   //请求参数有误
                 continue;
             }
+
+            $actionName = ActionCollector::list()[$actionMapping]?? null;
+            if (is_null($actionName)) {
+                $this->systemExceptionReturn(8001, '调度不可用', $actionMapping); //调度名不可用
+                continue;
+            }
+
+            $usable = UsableCollector::list()[$actionName]?? false;
+            if ($usable == false) {
+                $this->systemExceptionReturn(8002, '调度暂停使用', $actionMapping); //调度名不可用
+                continue;
+            }
+
+            $defineRequestParam = RequestParamCollector::result()[$actionName]?? [];
+            $validateParam = true;
+            foreach($defineRequestParam as $params) {
+                if (!$this->validateParam($params, $actionRequest['params'], $actionMapping)) {
+                    $validateParam = false;
+                    break;
+                }
+            }
+            if ($validateParam == false) {
+                break;
+            }
+
 
             $okRequest[$actionMapping] = [
                 'container' => $this->container->get($actionName),
@@ -142,601 +211,10 @@ class MainController
         Context::set(\Psr\Http\Message\ResponseInterface::class, $response);
         $action = $this->request->input("dispatch", "");
         if ($action == "") {
-            return $this->response->raw($this->getIndexHtml($this->request->getUri(), $this->request->getPathInfo()));
+            return $this->response->raw(DocHtml::getIndexHtml($this->request->getUri(), $this->request->getPathInfo()));
         }
 
-        if (count($this->requestParamHtmls) == 0) {
-            $this->genRequestParamHtml($action);
-        }
-
-        if (count($this->responseParamHtmls) == 0) {
-            $this->genResponseParamHtml($action);
-        }
-
-        if (count($this->errorCodeHtml) == 0) {
-            $this->getErrorCodeHtml();
-        }
-
-
-        $actionMap = ActionCollector::list();
-        $actionName = $actionMap[$action];
-        $requestParamHtml = $this->requestParamHtmls[$actionName];
-
-        $html = $this->getHeaderHtml($action, $actionName, $this->request->getPathInfo()) . $this->getLeftHtml($action, $actionName, $this->request->getPathInfo()) . $this->getRightHtml($action, $actionName, $this->request->getPathInfo()) . $this->footerHtml;
-
-        return $this->response->raw($html);
-    }
-
-    public function getIndexHtml($uri, $pathInfo) {
-        $this->getTableOfContentHtml($pathInfo);
-        $tableOfContent = $this->tableOfContentHtml['index'];
-        $html =<<<EOF
-<!DOCTYPE html>
-<html lang="en-US">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>接口文档</title>
-    <link href="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
-<body>
-<div class="container-fluid">
-    <h3>接口文档</h3>
-</div>
-<div class="container-fluid">
-
-    <!-- 左边内容 -->
-    <div class="col-lg-2" style="padding:5px;">
-        {$tableOfContent}
-    </div>
-    <div class="col-lg-10" style="padding:5px;">
-        <h3>所有接口请求方式为POST, 接口地址: {$uri}</h3><h5>请求格式如下</h5><pre>
-{
-     "timestamp": "xxxxxx",  //当前时间戳 字符串或数字都可以, 注意时间戳允许与服务器时间误差正负600秒
-     "signature": "xxxxxxxxxxxxxxxxxxx",   //签名 暂时未使用
-     "requests":[  //开始
-        //第一个调用开始
-        {
-          "params":{    // 这是请求参数
-               "test": "Hello"
-          },
-          "dispatch":"test"  //调用名
-        }
-        //第一个调用结束
-
-        //这里可以有多个调用, 最多5个, 也就是说, 如果多个调用之前没有关连, 可并行调用
-
-    ]
-}
-</pre>    </pre><h5>响应格式如下 </h5><p style="color:red">注意: responses数组的顺序通常与requests一致, 但也可能通过responses里的dispatch知道是哪个响应 </p><pre>
-{
-   "code": 0,    //最外层的code，0是成功  非0失败  是说明这个请求正确（如，请求方法post，请求格式，即json，等等，但不代表具体的请求接口）
-   "message": "成功",   //描述，非0会有具体面描述
-   "timestamp": 1458291720, //服务器时间戳
-   "deviation": 8 //误差, 即请求的时间戳 与服务器时间的误差
-   "responses": [    //响应，对应请求的requests部份
-       { //第一个请求响应
-         "code": 0,   //0是成功，非0失败
-         "message": "成功"， //描述，非0会有具本描述
-         "data": {   //响应数据，非0没有
-           "success": "true"
-         },
-         "dispatch": "test"   //对应的调用方式
-       }
-   ]
-}
-</pre><h5>命名规范</h5>
-<p>xxx.xxx.add  //表示 添加数据</p>
-<p>xxx.xxx.set   //表示 更新数据</p>
-<p>xxx.xxx.get  //表示 获取数据</p>
-<p>xxx.xxx.del  //表示 删除数据</p>
-<p>xxx.xxx.list  //表示 获取列表数据</p>
-
-<p>特殊</p>
-<p>没有后标识的，可能即写即读。</p>
-<p>比如 user.login wx.login等等。</p>
-
-<h5>Token传入</h5>
-<p>需要token的接口，请在请求http中，加入Authorization</p>
-<pre>
-Authorization: token值
-</pre>
-        <h3>系统错误代码</h3>
-        <table class="table table-striped table-bordered">
-            <tbody><tr>
-                <th width="30%">代码</th>
-                <th width="70%">描述</th>
-            </tr>
-            <tr>
-                <td>9000</td>
-                <td>请求方法不对 必须是post请求</td>
-            </tr>
-            <tr>
-                <td>9001</td>
-                <td>payloads结构有误 请求结构不对</td>
-            </tr>
-            <tr>
-                <td>9002</td>
-                <td>requests无效 没有requests段</td>
-            </tr>
-            <tr>
-                <td>9003</td>
-                <td>requests结构有误 requests段没有具体请求方法或结构不对</td>
-            </tr>
-            <tr>
-                <td>9005</td>
-                <td>timestamp无效 </td>
-            </tr>
-            <tr>
-                <td>9006</td>
-                <td>手机时间与服务器时间误差 不在允许范围</td>
-            </tr>
-            <tr>
-                <td>9007</td>
-                <td>signature无效</td>
-            </tr>
-            <tr>
-                <td>9008</td>
-                <td>signature结构有误</td>
-            </tr>
-            <tr>
-                <td>9009</td>
-                <td>请求来源有误</td>
-            </tr>
-            <tr>
-                <td>8001</td>
-                <td>调度不可用 dispatch不正确</td>
-            </tr>
-            <tr>
-                <td>8002</td>
-                <td>调度暂停使用 dispatch暂时不可用</td>
-            </tr>
-            <tr>
-                <td>8003</td>
-                <td>请求参数有误 request结构中没有指定dispatch</td>
-            </tr>
-            <tr>
-                <td>8005</td>
-                <td>token失效 由于token过期</td>
-            </tr>
-            <tr>
-                <td>8006</td>
-                <td>token失效 需要token的接口，没接收到token</td>
-            </tr>
-            </tbody>
-        </table>
-        <h3>调度错误代码</h3>
-        <table class="table table-striped table-bordered">
-            <tbody>
-                <tr>
-                    <th width="30%">代码</th>
-                    <th width="70%">描述</th>
-                </tr>
-                <tr>
-                    <td>9901</td>
-                    <td>缺少请求参数</td>
-                </tr>
-                <tr>
-                    <td>9902</td>
-                    <td>请求参数类型不匹配</td>
-                </tr>
-            </tbody>
-        </table>
-        <h3>签名计算</h3>
-        <pre>
-            签名测试，
-            第一步：
-            timestamp的值，计算secret_key
-            代码示例
-            secret_key = substr(md5(timestamp), 0, 16);
-
-            即，取16位md5的值
-
-            第二步：
-            获取内容
-            循环requests，获取request中的params
-            params的key:value，按key排序
-            组成
-            key1:value2,key2:value2
-            注意：如果value2非标量值 即：不是 integer、float、double, string 或 boolean 这些值，则忽略掉这对key:value
-            然后通过|与dispatch的值字符串连接
-            例如：
-            sys.launch.get|height:2208,width:1242
-
-            如果有多个requests，每段request通过/连接，
-            例如
-            index.list|/sys.launch.get|height:2208,width:1242
-            注：index.list如果没有params，则params段的值为空
-            格式： dispatch1|params_content1/dispatch2|params_content2
-
-            第三步：
-            计算签名
-
-            通过HmacSHA1 计算值（字节或binary)
-            再md5加密生成16进制字符串， 即为签名，大小写均可
-
-            第四步:
-            将上面的签名值，放到最外层
-            例如
-{
-	"requests": [{
-		"dispatch": "sys.launch.get",
-		"params": {
-			"width": 1242,
-			"height": 2208
-		}
-	}],
-	"signature": "ed2eac434ebacdf0d6c3a301cabf6323",
-	"timestamp": "1572167919297"
-}
-
-            签名计算, 参考
-
-            timestamp = 1572167919297
-            secret_key = 2872fe9ea22381dd
-            content = sys.launch.get|height:2208,width:1242
-            sign = ed2eac434ebacdf0d6c3a301cabf6323
-
-        </pre>
-    </div>
-</div>
-</body>
-</html>
-
-EOF;
-        return $html;
-
-    }
-    /**
-     * @var array
-     */
-    public $requestParamHtmls = [];
-
-    /**
-     * @var array
-     */
-    public $requestParamExampleHtmls = [];
-
-    /**
-     * @var array
-     */
-    public $responseParamHtmls = [];
-
-    /**
-     * @var array
-     */
-    public $responseParamExampleHtml = [];
-
-    public $errorCodeHtml = [];
-
-    public $leftHtml = <<<EOF
-    <!-- 左边内容 -->
-    <div class="col-lg-2" style="padding:5px;">
-        {{tableOfContent}}
-    </div>
-EOF;
-
-    public $rightHtml = <<<EOF
-    <div class="col-lg-10" style="padding:5px;">
-        <h1 style="{{style}}">{{dispatch}} ({{desc}})</h1>
-        {{token}}
-        <h3>请求参数</h3>
-        <table class="table table-striped table-bordered">
-            <tr>
-                <th width="15%">名称</th>
-                <th width="10%">类型</th>
-                <th width="10%">必须</th>
-                <th width="25%">示例值</th>
-                <th width="40%">描述</th>
-            </tr>
-            {{requestParams}}
-        </table>
-
-        <h3>响应参数</h3>
-        <table class="table table-striped table-bordered">
-            <tr>
-                <th width="15%">名称</th>
-                <th width="10%">类型</th>
-                <th width="35%">示例值</th>
-                <th width="40%">描述</th>
-            </tr>
-            {{responseParams}}
-        </table>
-
-        <h3>请求示例</h3>
-        <code class="language-json" data-lang="json" style="white-space: pre-wrap;">{
-        "requests": [{
-            "dispatch": "{{dispatch}}",
-            "params": {
-{{params}}
-            }
-        }]
-}</code>
-
-        <h3>响应示例</h3>
-        <pre>{{responseExampleParams}}</pre>
-
-        <h3>错误代码</h3>
-        <table class="table table-striped table-bordered">
-            <tr>
-                <th width="30%">代码</th>
-                <th width="70%">描述</th>
-            </tr>
-            {{errorCodes}}
-        </table>
-    </div>
-EOF;
-
-    public $footerHtml = <<<EOF
-    </div>
-    </body>
-</html>
-EOF;
-
-    public $headerHtml = <<<EOF
-<!DOCTYPE html>
-<html lang="en-US">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>接口文档</title>
-    <link href="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
-<body>
-<div class="container-fluid">
-    <h3>接口文档 <a href="{{index}}" class="btn btn-default">返回首页</a></h3>
-</div>
-<div class="container-fluid">
-EOF;
-
-    public function getLeftHtml($mapping, $actionName, $pathInfo) {
-        if (count($this->tableOfContentHtml) == 0) {
-            $this->getTableOfContentHtml($pathInfo);
-        }
-        $html = str_replace("{{tableOfContent}}", $this->tableOfContentHtml[$actionName], $this->leftHtml);
-        return $html;
-    }
-    public function getRightHtml($mapping, $actionName, $pathInfo) {
-        $html = str_replace("{{requestParams}}", $this->requestParamHtmls[$actionName], $this->rightHtml);
-        $html = str_replace("{{responseParams}}", $this->responseParamHtmls[$actionName], $html);
-        $html = str_replace("{{params}}", $this->requestParamExampleHtmls[$actionName], $html);
-        $html = str_replace("{{responseExampleParams}}", $this->responseParamExampleHtml[$actionName], $html);
-        $html = str_replace("{{errorCodes}}", $this->errorCodeHtml[$actionName], $html);
-        $html = str_replace("{{dispatch}}", $mapping, $html);
-        $html = str_replace("{{desc}}", DescriptionCollector::list()[$actionName], $html);
-        $html = str_replace("{{style}}", UsableCollector::list()[$actionName] == false ? "text-decoration: line-through;" : "", $html);
-        $html = str_replace("{{token}}", TokenCollector::list()[$actionName] == true ? $this->getTokenHtml() : "", $html);
-
-        return $html;
-    }
-
-    public function getHeaderHtml($mapping, $actionName, $pathInfo) {
-        $html = str_replace("{{index}}", $pathInfo, $this->headerHtml);
-        return $html;
-    }
-    public function getErrorCodeHtml() {
-        $errorCodeCollector = ErrorCodeCollector::result();
-        foreach($errorCodeCollector as $class => $errCode) {
-            $html = '';
-            foreach($errCode as $error) {
-                $html .= "<tr><td>". $error['code'] ."</td>\n";
-                $html .= "<td>". $error['message'] ."</td></tr>\n";
-            }
-            $this->errorCodeHtml[$class] = $html;
-        }
-    }
-
-    public function genRequestParamHtml($action) {
-        $requestParamCollector = RequestParamCollector::list();
-        foreach($requestParamCollector as $class => $requestParams) {
-            $requestParamHtml = "";
-            foreach($requestParams as $requestParam) {
-                $requestParamHtml .= "<tr><td>" . $requestParam->name . "</td>\n";
-                $requestParamHtml .= "<td>" . $requestParam->type . "</td>\n";
-                $requestParamHtml .= "<td>" . strval($requestParam->require) . "</td>\n";
-                $requestParamHtml .= "<td>" . strval($requestParam->example) . "</td>\n";
-                $requestParamHtml .= "<td>" . $requestParam->description . "</td></tr>\n";
-            }
-            $this->requestParamHtmls[$class] = $requestParamHtml;
-            $this->requestParamExampleHtmls[$class] = $this->getRequestParamExampleHtml($requestParams);
-        }
-    }
-
-    //
-    public function genResponseParamHtml($action) {
-        $responseParamCollector = ResponseParamCollector::result();
-        foreach($responseParamCollector as $class => $responseParams) {
-            $this->responseParamHtmls[$class] = $this->getResponseParamHtmlOne($responseParams, 0);
-            $this->responseParamExampleHtml[$class] = $this->getResponseParamsPreHtml($action, $responseParams);
-        }
-    }
-
-
-    public function getRequestParamExampleHtml($requestParams) {
-        $prefix = "                 ";
-        $html = "";
-        $i = count($requestParams);
-        foreach($requestParams as $requestParam) {
-            $html .=  $prefix.'"'.$requestParam->name.'":';
-            if ($requestParam->type == 'string') {
-                $html .= '"'. strval($requestParam->example) .'"';
-            } else {
-                $html .= strval($requestParam->example);
-            }
-            $i--;
-            if ($i != 0) {
-                $html .= ",\n";
-            }
-        }
-        return $html;
-    }
-
-    public function getResponseParamHtmlOne($data, $indent) {
-        $html = '';
-        $itString = "";
-        for($i=0; $i<=$indent; $i++) {
-            $itString .= "&nbsp;&nbsp;";
-        }
-        foreach($data as $key => $responseParam) {
-            if (!is_numeric($key)) {
-                $html .= "<tr><td>" . $itString . $key . "</td>\n";
-                $html .= "<td>" . $responseParam['type'] . "</td>\n";
-                $html .= "<td>" . $responseParam['example'] . "</td>\n";
-                $html .= "<td>" . $responseParam['desc'] . "</td></tr>\n";
-            }
-            if (isset($responseParam['children'])) {
-                if (!is_numeric($key)) {
-                    $indent = $indent + 2;
-                }
-                $html .= $this->getResponseParamHtmlOne($responseParam['children'], $indent);
-            }
-            //}
-        }
-        return $html;
-    }
-
-
-    public function getResponseParamsPreHtml($mapping, $paramData) {
-        $ret = [];
-        $ret[0] = [
-            'code' => 0,
-            'message' => '成功',
-            'dispatch' => $mapping
-        ];
-        $ret[0]['data'] = $this->getResponseParamExampleHtml($paramData);
-
-        $responses["responses"] = $ret;
-        $result_pretty = json_encode($responses,JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        return $result_pretty;
-    }
-
-    public function getResponseParamExampleHtml($data) {
-        $jsonData = [];
-        foreach($data as $key => $line) {
-            if (is_numeric($key)) {
-                $jsonData[] = $this->getResponseParamExampleHtml($line['children']);
-                return $jsonData;
-            }
-
-            if ($line['type'] != 'string') {
-                if ($line['type'] != 'map' && $line['type'] != 'array') {
-                    if ($line['type'] == 'int') {
-                        $jsonData[$line['name']] = @intval($line['example']);
-                    }
-                    if ($line['type'] == 'boolean') {
-                        $jsonData[$line['name']] = @boolval($line['example']);
-                    }
-                    if ($line['type'] == 'float') {
-                        $jsonData[$line['name']] = @floatval($line['example']);
-                    }
-                }
-                if (isset($line['children'])) {
-                    $jsonData[$line['name']] = $this->getResponseParamExampleHtml($line['children']);
-                }
-            } else {
-                $jsonData[$line['name']] = strval($line['example']);
-            }
-        }
-        return $jsonData;
-    }
-
-    public $tableOfContent = [];
-    public function getTableOfContent() {
-        if (count($this->tableOfContent) == 0) {
-            $tableOfContent = [];
-            $actions = ActionCollector::list();
-            foreach ($actions as $mapping => $class) {
-                $category = CategoryCollector::list()[$class];
-                if (!isset($tableOfContent[$category])) {
-                    $tableOfContent[$category] = [];
-                }
-
-                $tableOfContent[$category][] = [
-                    'dispatch' => $mapping,
-                    'name' => DescriptionCollector::list()[$class],
-                    'usable' => UsableCollector::list()[$class] ?? false,
-                    'token' => TokenCollector::list()[$class] ?? false,
-                ];
-            }
-            $this->tableOfContent = $tableOfContent;
-        }
-        return $this->tableOfContent;
-    }
-
-    public function getTokenHtml() {
-        $html =<<<EOF
-        <h3>Header参数</h3>
-        <table class="table table-striped table-bordered">
-            <tr>
-                <th width="30%">key:</th>
-                <th width="30%">value</th>
-                <th width="40%">说明</th>
-            </tr>
-            <tr>
-                <td width="30%">Authorization:</td>
-                <td width="30%">token值</td>
-                <td width="40%">本接口必须传token值</td>
-            </tr>
-        </table>
-EOF;
-
-        return $html;
-    }
-
-    public $tableOfContentHtml = [];
-    public function getTableOfContentHtml($pathInfo) {
-        $tableOfContent = $this->getTableOfContent();
-        foreach(ActionCollector::list() as $mapping => $class) {
-            $html = "";
-            foreach($tableOfContent as $category => $data) {
-                $html .= "<h5>". $category ."</h5>";
-                $html .= '    <div class="list-group">';
-                foreach($data as $line) {
-                    $active = '';
-                    //if ($a == true) {
-                    if ($line['dispatch'] == $mapping) {
-                        $active = ' active';
-                    }
-                    //}
-
-                    $token = '';
-                    if ($line['token'] == true) {
-                        $token = '<span class="glyphicon glyphicon-user"></span>';
-                    }
-                    $text = $line['dispatch'];
-                    if ($line['usable'] != true) {
-                        $text = "<span style='text-decoration: line-through;'>". $text .'</span>';
-                    }
-
-                    $text = $text.$token. "<br />". $line['name'];
-
-                    $html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
-                }
-                $html .= '    </div>';
-            }
-            $this->tableOfContentHtml[$class] = $html;
-        }
-        $html = "";
-        foreach($tableOfContent as $category => $data) {
-            $html .= "<h5>". $category ."</h5>";
-            $html .= '    <div class="list-group">';
-            foreach($data as $line) {
-                $active = '';
-
-                $token = '';
-                if ($line['token'] == true) {
-                    $token = '<span class="glyphicon glyphicon-user"></span>';
-                }
-                $text = $line['dispatch'];
-                if ($line['usable'] != true) {
-                    $text = "<span style='text-decoration: line-through;'>". $text .'</span>';
-                }
-
-                $text = $text.$token. "<br />". $line['name'];
-
-                $html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
-            }
-            $html .= '    </div>';
-        }
-        $this->tableOfContentHtml['index'] = $html;
+        return $this->response->raw(DocHtml::getActionHtml($action, $this->request->getPathInfo()));
     }
 
 
