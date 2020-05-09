@@ -12,12 +12,16 @@ declare(strict_types=1);
 
 namespace Wayhood\HyperfAction;
 
+use Wayhood\HyperfAction\Contract\TokenInterface;
+use Wayhood\HyperfAction\Service\TokenService;
+
 class ConfigProvider
 {
     public function __invoke(): array
     {
         return [
             'dependencies' => [
+                TokenInterface::class => TokenService::class
             ],
             'commands' => [
             ],
@@ -27,7 +31,7 @@ class ConfigProvider
                         __DIR__,
                     ],
                 ],
-            ],
+            ]
         ];
     }
 }

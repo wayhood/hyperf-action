@@ -21,6 +21,7 @@ use Wayhood\HyperfAction\Collector\RequestParamCollector;
 use Wayhood\HyperfAction\Collector\ResponseParamCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
+use Wayhood\HyperfAction\Contract\TokenInterface;
 use Wayhood\HyperfAction\Util\DocHtml;
 
 /**
@@ -46,6 +47,12 @@ class MainController
      * @var ResponseInterface
      */
     protected $response;
+
+    /**
+     * @Inject()
+     * @var TokenInterface
+     */
+    protected $token;
 
     public function systemExceptionReturn(int $errorCode, string $message, string $actionName)
     {
@@ -161,7 +168,8 @@ class MainController
 
             $okRequest[$actionMapping] = [
                 'container' => $this->container->get($actionName),
-                'params' => $actionRequest['params'] ?? []
+                'params' => $actionRequest['params'] ?? [],
+                'hasToken' => TokenCollector::list()[$actionName]? true : false
             ];
         }
 
@@ -170,6 +178,17 @@ class MainController
         $actionRequesCount = count($okRequest);
         if ($actionRequesCount == 1) {
             foreach($okRequest as $mapping => $value) {
+                if ($value['hasToken'] == true) {
+                    $token = $this->getTokenByHeader($headers);
+                    if (!$this->token->verify($token)) {
+                        $ret = [
+                            'code' => 8005,
+                            'message' => 'token失效',
+                            'data' => new \stdClass(),
+                        ];
+                        return $ret;
+                    }
+                }
                 $responseResults[$mapping] = $value['container']->run($value['params'], $extras, $headers);
             }
         } else if (count($okRequest) > 1) {
@@ -178,6 +197,18 @@ class MainController
             foreach($okRequest as $mapping => $value) {
                 $parallel->add(function () use ($value, $extras, $headers) {
                     Context::copy(\Swoole\Coroutine::getPcid());
+                    if ($value['hasToken'] == true) {
+                        $token = $this->getTokenByHeader($headers);
+                        if (!$this->token->verify($token)) {
+                            $ret = [
+                                'code' => 8005,
+                                'message' => 'token失效',
+                                'data' => new \stdClass(),
+                            ];
+                            return $ret;
+                        }
+                        $this->token->set($token);
+                    }
                     $result = $value['container']->run($value['params'], $extras, $headers);
                     //\Swoole\Coroutine::sleep(1);
                     return $result;
@@ -187,7 +218,8 @@ class MainController
             try {
                 $responseResults = $parallel->wait();
             }  catch(ParallelExecutionException $e){
-                //echo $e->getMessage();
+                //var_dump(1);
+                echo $e->getMessage();
                 //var_dump($e->getResults()); // 获取协程中的返回值。
                 //var_dump($e->getThrowables()); // 获取协程中出现的异常。
             }
@@ -202,6 +234,13 @@ class MainController
             'message' => '成功',
             'response' => $responses
         ]);
+    }
+
+    public function getTokenByHeader($headers) {
+        if (isset($headers['authorization'][0])) {
+            return $headers['authorization'][0];
+        }
+        return "";
     }
 
     public function doc() {
