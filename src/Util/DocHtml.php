@@ -515,15 +515,15 @@ Authorization: token值
             将上面的签名值，放到最外层
             例如
 {
-  "requests": [{
-    "dispatch": "sys.launch.get",
-    "params": {
-      "width": 1242,
-      "height": 2208
-    }
-  }],
-  "signature": "ed2eac434ebacdf0d6c3a301cabf6323",
-  "timestamp": "1572167919297"
+	"requests": [{
+		"dispatch": "sys.launch.get",
+		"params": {
+			"width": 1242,
+			"height": 2208
+		}
+	}],
+	"signature": "ed2eac434ebacdf0d6c3a301cabf6323",
+	"timestamp": "1572167919297"
 }
 
             签名计算, 参考

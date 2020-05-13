@@ -4,6 +4,7 @@ namespace Wayhood\HyperfAction\Action;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
+use Hyperf\Logger\LoggerFactory;
 use Psr\Container\ContainerInterface;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
 use Wayhood\HyperfAction\Util\ResponseFilter;
@@ -31,6 +32,7 @@ abstract class AbstractAction
      * @var ResponseInterface
      */
     protected $response;
+
 
     abstract public function run($params, $extras, $headers);
 

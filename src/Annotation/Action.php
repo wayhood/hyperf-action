@@ -1,34 +1,31 @@
 <?php
 
 declare(strict_types=1);
-namespace Wayhood\HyperfAction\Collector;
+namespace Wayhood\HyperfAction\Annotation;
 
 
-use Hyperf\Di\MetadataCollector;
+use Hyperf\Di\Annotation\AbstractAnnotation;
+use Wayhood\HyperfAction\Collector\ActionCollector;
 
-class ActionCollector extends MetadataCollector
+/**
+ * @Annotation
+ * @Target({"CLASS"})
+ */
+class Action extends AbstractAnnotation
 {
     /**
-     * @var array
+     * @var string
      */
-    protected static $container = [];
+    public $mapping = '';
 
-    /**
-     * @var array
-     */
-    protected static $result = [];
-
-    public static function collectClass(string $class, string $annotation, $value): void
+    public function __construct($value)
     {
-        static::$container[$value] = $class;
+        parent::__construct($value);
+        $this->bindMainProperty('mapping', $value);
     }
 
-    public static function result() {
-        if (count(static::$result) == 0) {
-            foreach(static::$container as $key => $value) {
-                static::$result[$value] = $key;
-            }
-        }
-        return static::$result;
+    public function collectClass(string $className): void
+    {
+        ActionCollector::collectClass($className, static::class, $this->mapping);
     }
 }
