@@ -144,6 +144,8 @@ EOF;
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>接口文档</title>
     <link href="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script>
     var formatJson = function (json, options) {
         var reg = null,
@@ -318,6 +320,9 @@ EOF;
     };
     </script>
     <style>
+    .panel-body {
+        padding: 0;
+    }
     pre {
         display: block;
         padding: 9.5px;
@@ -462,19 +467,41 @@ EOF;
      */
     public static function getTableOfContentHtml(string $pathInfo) {
         $tableOfContent = static::getTableOfContent();
+        $i = 0;
         foreach(ActionCollector::list() as $mapping => $class) {
             $html = "";
             foreach($tableOfContent as $category => $data) {
-                $html .= "<h5>". $category ."</h5>";
-                $html .= '    <div class="list-group">';
+                $i++;
+                $html .= <<<EOF
+<div class="panel panel-default">
+		<div class="panel-heading">
+			<h4 class="panel-title">
+				<a data-toggle="collapse" data-parent="#accordion" 
+				   href="#collapse_{$i}">{$category}
+            </a>
+			</h4>
+		</div>
+EOF;
+                $in = "";
                 foreach($data as $line) {
+                    if ($line['dispatch'] == $mapping) {
+                        $in = ' in';
+                        break;
+                    }
+                }
+                $html .= <<<EOF
+        <div id="collapse_{$i}" class="panel-collapse list-group collapse {$in}">
+EOF;
+
+                foreach($data as $line) {
+                    $html .= <<<EOF
+
+			<div class="panel-body">
+EOF;
                     $active = '';
-                    //if ($a == true) {
                     if ($line['dispatch'] == $mapping) {
                         $active = ' active';
                     }
-                    //}
-
                     $token = '';
                     if ($line['token'] == true) {
                         $token = '<span class="glyphicon glyphicon-user"></span>';
@@ -487,16 +514,36 @@ EOF;
                     $text = $text.$token. "<br />". $line['name'];
 
                     $html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
+                    $html .= <<<EOF
+			</div>
+EOF;
                 }
-                $html .= '    </div>';
+                $html .= '		</div>    </div>';
             }
             static::$tableOfContentHtml[$class] = $html;
         }
         $html = "";
+        $i = 0;
         foreach($tableOfContent as $category => $data) {
-            $html .= "<h5>". $category ."</h5>";
-            $html .= '    <div class="list-group">';
+            $i++;
+            $html .= <<<EOF
+<div class="panel panel-default">
+		<div class="panel-heading">
+			<h4 class="panel-title">
+				<a data-toggle="collapse" data-parent="#accordion" 
+				   href="#collapse_{$i}">{$category}
+            </a>
+			</h4>
+		</div>
+EOF;
+            $html .= <<<EOF
+        <div id="collapse_{$i}" class="panel-collapse collapse list-group">
+EOF;
             foreach($data as $line) {
+                $html .= <<<EOF
+
+			<div class="panel-body">
+EOF;
                 $active = '';
 
                 $token = '';
@@ -511,8 +558,11 @@ EOF;
                 $text = $text.$token. "<br />". $line['name'];
 
                 $html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
+                $html .= <<<EOF
+			</div>
+EOF;
             }
-            $html .= '    </div>';
+            $html .= '		</div>    </div>';
         }
         static::$tableOfContentHtml['index'] = $html;
     }
@@ -565,7 +615,12 @@ EOF;
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>接口文档</title>
     <link href="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <style>
+    .panel-body {
+        padding: 0;
+    }
     pre {
         display: block;
         padding: 9.5px;
