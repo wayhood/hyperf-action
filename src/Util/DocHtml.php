@@ -62,7 +62,7 @@ class DocHtml
      */
     public static $leftHtml = <<<EOF
     <!-- 左边内容 -->
-    <div class="col-lg-2" style="padding:5px;">
+    <div class="col-lg-2" style="padding:5px 15px 5px 5px;">
         {{tableOfContent}}
     </div>
 EOF;
@@ -72,11 +72,11 @@ EOF;
      * @var string
      */
     public static $rightHtml = <<<EOF
-    <div class="col-lg-10" style="padding:5px;">
+    <div class="col-lg-9" style="padding:5px;">
         <h1 style="{{style}}">{{dispatch}} ({{desc}})</h1>
         {{token}}
         <h3>请求参数</h3>
-        <table class="table table-striped table-bordered">
+        <table class="table table-bordered">
             <tr>
                 <th width="15%">名称</th>
                 <th width="10%">类型</th>
@@ -88,7 +88,7 @@ EOF;
         </table>
 
         <h3>响应参数</h3>
-        <table class="table table-striped table-bordered">
+        <table class="table table-bordered">
             <tr>
                 <th width="15%">名称</th>
                 <th width="10%">类型</th>
@@ -99,20 +99,13 @@ EOF;
         </table>
 
         <h3>请求示例</h3>
-        <code class="language-json" data-lang="json" style="white-space: pre-wrap;">{
-        "requests": [{
-            "dispatch": "{{dispatch}}",
-            "params": {
-{{params}}
-            }
-        }]
-}</code>
+        <div id="requestCanvas"></div>
 
         <h3>响应示例</h3>
-        <pre>{{responseExampleParams}}</pre>
+        <div id="responseCanvas"></div>
 
         <h3>错误代码</h3>
-        <table class="table table-striped table-bordered">
+        <table class="table table-bordered">
             <tr>
                 <th width="30%">代码</th>
                 <th width="70%">描述</th>
@@ -120,6 +113,12 @@ EOF;
             {{errorCodes}}
         </table>
     </div>
+    <script>
+        var responseJsonText = '{{responseExampleParams}}';
+        var requestJsonText = '{{requestExampleParams}}';
+        Process(responseJsonText, "responseCanvas");
+        Process(requestJsonText, "requestCanvas");
+    </script>
 EOF;
 
 
@@ -145,6 +144,237 @@ EOF;
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>接口文档</title>
     <link href="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+    var formatJson = function (json, options) {
+        var reg = null,
+                formatted = '',
+                pad = 0,
+                PADDING = '    ';
+        options = options || {};
+        options.newlineAfterColonIfBeforeBraceOrBracket = (options.newlineAfterColonIfBeforeBraceOrBracket === true) ? true : false;
+        options.spaceAfterColon = (options.spaceAfterColon === false) ? false : true;
+        if (typeof json !== 'string') {
+            json = JSON.stringify(json);
+        } else {
+            json = JSON.parse(json);
+            json = JSON.stringify(json);
+        }
+        reg = /([\{\}])/g;
+        json = json.replace(reg, '\\r\\n$1\\r\\n');
+        reg = /([\[\]])/g;
+        json = json.replace(reg, '\\r\\n$1\\r\\n');
+        reg = /(\,)/g;
+        json = json.replace(reg, '$1\\r\\n');
+        reg = /(\\r\\n\\r\\n)/g;
+        json = json.replace(reg, '\\r\\n');
+        reg = /\\r\\n\,/g;
+        json = json.replace(reg, ',');
+        if (!options.newlineAfterColonIfBeforeBraceOrBracket) {
+            reg = /\:\\r\\n\{/g;
+            json = json.replace(reg, ':{');
+            reg = /\:\\r\\n\[/g;
+            json = json.replace(reg, ':[');
+        }
+        if (options.spaceAfterColon) {
+            reg = /\:/g;
+            json = json.replace(reg, ':');
+        }
+        (json.split('\\r\\n')).forEach(function (node, index) {
+            //console.log(node);
+            var i = 0,
+                indent = 0,
+                padding = '';
+    
+            if (node.match(/\{$/) || node.match(/\[$/)) {
+                indent = 1;
+            } else if (node.match(/\}/) || node.match(/\]/)) {
+                if (pad !== 0) {
+                    pad -= 1;
+                }
+            } else {
+                    indent = 0;
+            }
+    
+            for (i = 0; i < pad; i++) {
+                padding += PADDING;
+            }
+    
+            formatted += padding + node + '\\r\\n';
+            pad += indent;
+        });
+        return formatted;
+    };
+
+    
+    window.TAB = "    ";
+    function IsArray(obj) {
+      return obj &&
+          typeof obj === 'object' &&  typeof obj.length === 'number' && !(obj.propertyIsEnumerable('length'));
+    }
+    function Process(json, domName) {
+        document.getElementById(domName).style.display = "block";
+        var html = "";
+        try {
+            if (json == "") {
+                json = '""';
+            }
+            var obj = eval("[" + json + "]");
+            html = ProcessObject(obj[0], 0, false, false, false);
+            document.getElementById(domName).innerHTML = "<PRE class='CodeContainer'>" + html + "</PRE>";
+        } catch(e) {
+            alert("json error:\\n" + e.message);
+            document.getElementById(domName).innerHTML = "";
+        }
+    }
+    function ProcessObject(obj, indent, addComma, isArray, isPropertyContent) {
+        var html = "";
+        var comma = (addComma) ? "<span class='Comma'>,</span> ": "";
+        var type = typeof obj;
+        if (IsArray(obj)) {
+            if (obj.length == 0) {
+                html += GetRow(indent, "<span class='ArrayBrace'>[ ]</span>" + comma, isPropertyContent);
+            } else {
+                html += GetRow(indent, "<span class='ArrayBrace'>[</span>", isPropertyContent);
+                for (var i = 0; i < obj.length; i++) {
+                    html += ProcessObject(obj[i], indent + 1, i < (obj.length - 1), true, false);
+                }
+                html += GetRow(indent, "<span class='ArrayBrace'>]</span>" + comma);
+            }
+        } else {
+            if (type == "object" && obj == null) {
+                html += FormatLiteral("null", "", comma, indent, isArray, "Null");
+            } else {
+                if (type == "object") {
+                    var numProps = 0;
+                    for (var prop in obj) {
+                        numProps++;
+                    }
+                    if (numProps == 0) {
+                        html += GetRow(indent, "<span class='ObjectBrace'>{ }</span>" + comma, isPropertyContent)
+                    } else {
+                        html += GetRow(indent, "<span class='ObjectBrace'>{</span>", isPropertyContent);
+                        var j = 0;
+                        for (var prop in obj) {
+                            html += GetRow(indent + 1, '<span class="PropertyName">"' + prop + '"</span>: ' + ProcessObject(obj[prop], indent + 1, ++j < numProps, false, true))
+                        }
+                        html += GetRow(indent, "<span class='ObjectBrace'>}</span>" + comma);
+                    }
+                } else {
+                    if (type == "number") {
+                        html += FormatLiteral(obj, "", comma, indent, isArray, "Number");
+                    } else {
+                        if (type == "boolean") {
+                            html += FormatLiteral(obj, "", comma, indent, isArray, "Boolean");
+                        } else {
+                            if (type == "function") {
+                                obj = FormatFunction(indent, obj);
+                                html += FormatLiteral(obj, "", comma, indent, isArray, "Function");
+                            } else {
+                                if (type == "undefined") {
+                                    html += FormatLiteral("undefined", "", comma, indent, isArray, "Null");
+                                } else {
+                                    html += FormatLiteral(obj, '"', comma, indent, isArray, "String");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return html;
+    };
+    
+    function FormatLiteral(literal, quote, comma, indent, isArray, style) {
+        if (typeof literal == "string") {
+            literal = literal.split("<").join("&lt;").split(">").join("&gt;");
+        }
+        var str = "<span class='" + style + "'>" + quote + literal + quote + comma + "</span>";
+        if (isArray) {
+            str = GetRow(indent, str);
+        }
+        return str;
+    }
+    function FormatFunction(indent, obj) {
+        var tabs = "";
+        for (var i = 0; i < indent; i++) {
+            tabs += window.TAB;
+        }
+        var funcStrArray = obj.toString().split("\\n");
+        var str = "";
+        for (var i = 0; i < funcStrArray.length; i++) {
+            str += ((i == 0) ? "": tabs) + funcStrArray[i] + "\\n";
+        }
+        return str;
+    }
+    function GetRow(indent, data, isPropertyContent) {
+        var tabs = "";
+        for (var i = 0; i < indent && !isPropertyContent; i++) {
+            tabs += window.TAB;
+        }
+        if (data != null && data.length > 0 && data.charAt(data.length - 1) != "\\n") {
+            data = data + "\\n";
+        }
+        return tabs + data;
+    };
+    </script>
+    <style>
+    pre {
+        display: block;
+        padding: 9.5px;
+        margin: 0 0 10px;
+        font-size: 13px;
+        line-height: 1.42857143;
+        color: #333;
+        word-break: break-all;
+        word-wrap: break-word;
+        background-color: #fff;
+        /* border: 1px solid #ccc; */
+        border-radius: 4px;
+        /* font-family:'consolas'; */
+    }
+    .Canvas {
+        font:14px/18px 'consolas';
+        background-color: #ECECEC;
+        color: #000000;
+        border: solid 1px #CECECE;
+    }
+    .ObjectBrace {
+        color: #00AA00;
+        font-weight: bold;
+    }
+    .ArrayBrace {
+        color: #0033FF;
+        font-weight: bold;
+    }
+    .PropertyName {
+        color: #CC0000;
+        font-weight: bold;
+    }
+    .String {
+        color: #007777;
+    }
+    .Number {
+        color: #AA00AA;
+    }
+    .Boolean {
+        color: #0000FF;
+    }
+    .Function {
+        color: #AA6633;
+        text-decoration: italic;
+    }
+    .Null {
+        color: #0000FF;
+    }
+    .Comma {
+        color: #000000;
+        font-weight: bold;
+    }
+    PRE.CodeContainer {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+    </style>
 <body>
 <div class="container-fluid">
     <h3>接口文档 <a href="{{index}}" class="btn btn-default">返回首页</a></h3>
@@ -177,7 +407,7 @@ EOF;
     public static function getRightHtml(string $mapping, string $actionName, string $pathInfo) {
         $html = str_replace("{{requestParams}}", static::$requestParamHtmls[$actionName], static::$rightHtml);
         $html = str_replace("{{responseParams}}", static::$responseParamHtmls[$actionName], $html);
-        $html = str_replace("{{params}}", static::$requestParamExampleHtmls[$actionName], $html);
+        $html = str_replace("{{requestExampleParams}}", static::$requestParamExampleHtmls[$actionName], $html);
         $html = str_replace("{{responseExampleParams}}", static::$responseParamExampleHtml[$actionName], $html);
         $html = str_replace("{{errorCodes}}", static::$errorCodeHtml[$actionName], $html);
         $html = str_replace("{{dispatch}}", $mapping, $html);
@@ -335,6 +565,22 @@ EOF;
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>接口文档</title>
     <link href="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+    pre {
+        display: block;
+        padding: 9.5px;
+        margin: 0 0 10px;
+        font-size: 13px;
+        line-height: 1.42857143;
+        color: #333;
+        word-break: break-all;
+        word-wrap: break-word;
+        background-color: #fff;
+        /* border: 1px solid #ccc; */
+        border-radius: 4px;
+        /* font-family:'consolas'; */
+    }
+    </style>
 <body>
 <div class="container-fluid">
     <h3>接口文档</h3>
@@ -398,7 +644,7 @@ EOF;
 Authorization: token值
 </pre>
         <h3>系统错误代码</h3>
-        <table class="table table-striped table-bordered">
+        <table class="table table-bordered">
             <tbody><tr>
                 <th width="30%">代码</th>
                 <th width="70%">描述</th>
@@ -462,7 +708,7 @@ Authorization: token值
             </tbody>
         </table>
         <h3>调度错误代码</h3>
-        <table class="table table-striped table-bordered">
+        <table class="table table-bordered">
             <tbody>
                 <tr>
                     <th width="30%">代码</th>
@@ -480,58 +726,58 @@ Authorization: token值
         </table>
         <h3>签名计算</h3>
         <pre>
-            签名测试，
-            第一步：
-            timestamp的值，计算secret_key
-            代码示例
-            secret_key = substr(md5(timestamp), 0, 16);
+签名测试，
+第一步：
+timestamp的值，计算secret_key
+代码示例
+secret_key = substr(md5(timestamp), 0, 16);
 
-            即，取16位md5的值
+即，取16位md5的值
 
-            第二步：
-            获取内容
-            循环requests，获取request中的params
-            params的key:value，按key排序
-            组成
-            key1:value2,key2:value2
-            注意：如果value2非标量值 即：不是 integer、float、double, string 或 boolean 这些值，则忽略掉这对key:value
-            然后通过|与dispatch的值字符串连接
-            例如：
-            sys.launch.get|height:2208,width:1242
+第二步：
+获取内容
+循环requests，获取request中的params
+params的key:value，按key排序
+组成
+key1:value2,key2:value2
+注意：如果value2非标量值 即：不是 integer、float、double, string 或 boolean 这些值，则忽略掉这对key:value
+然后通过|与dispatch的值字符串连接
+例如：
+sys.launch.get|height:2208,width:1242
 
-            如果有多个requests，每段request通过/连接，
-            例如
-            index.list|/sys.launch.get|height:2208,width:1242
-            注：index.list如果没有params，则params段的值为空
-            格式： dispatch1|params_content1/dispatch2|params_content2
+如果有多个requests，每段request通过/连接，
+例如
+index.list|/sys.launch.get|height:2208,width:1242
+注：index.list如果没有params，则params段的值为空
+格式： dispatch1|params_content1/dispatch2|params_content2
 
-            第三步：
-            计算签名
+第三步：
+计算签名
 
-            通过HmacSHA1 计算值（字节或binary)
-            再md5加密生成16进制字符串， 即为签名，大小写均可
+通过HmacSHA1 计算值（字节或binary)
+再md5加密生成16进制字符串， 即为签名，大小写均可
 
-            第四步:
-            将上面的签名值，放到最外层
-            例如
+第四步:
+将上面的签名值，放到最外层
+例如
 {
-	"requests": [{
-		"dispatch": "sys.launch.get",
-		"params": {
-			"width": 1242,
-			"height": 2208
-		}
-	}],
-	"signature": "ed2eac434ebacdf0d6c3a301cabf6323",
-	"timestamp": "1572167919297"
+    "requests": [{
+        "dispatch": "sys.launch.get",
+        "params": {
+            "width": 1242,
+            "height": 2208
+        }
+    }],
+    "signature": "ed2eac434ebacdf0d6c3a301cabf6323",
+    "timestamp": "1572167919297"
 }
 
-            签名计算, 参考
+签名计算, 参考
 
-            timestamp = 1572167919297
-            secret_key = 2872fe9ea22381dd
-            content = sys.launch.get|height:2208,width:1242
-            sign = ed2eac434ebacdf0d6c3a301cabf6323
+timestamp = 1572167919297
+secret_key = 2872fe9ea22381dd
+content = sys.launch.get|height:2208,width:1242
+sign = ed2eac434ebacdf0d6c3a301cabf6323
 
         </pre>
     </div>
@@ -551,7 +797,7 @@ EOF;
     public static function getTokenHtml() {
         $html =<<<EOF
         <h3>Header参数</h3>
-        <table class="table table-striped table-bordered">
+        <table class="table table-bordered">
             <tr>
                 <th width="30%">key:</th>
                 <th width="30%">value</th>
@@ -589,6 +835,7 @@ EOF;
      */
     public static function genRequestParamHtml(string $action) {
         $requestParamCollector = RequestParamCollector::list();
+        $map = ActionCollector::result();
         foreach($requestParamCollector as $class => $requestParams) {
             $requestParamHtml = "";
             foreach($requestParams as $requestParam) {
@@ -599,7 +846,7 @@ EOF;
                 $requestParamHtml .= "<td>" . $requestParam->description . "</td></tr>\n";
             }
             static::$requestParamHtmls[$class] = $requestParamHtml;
-            static::$requestParamExampleHtmls[$class] = static::getRequestParamExampleHtml($requestParams);
+            static::$requestParamExampleHtmls[$class] = static::getRequestParamExampleHtml($map[$class], $requestParams);
         }
     }
 
@@ -608,23 +855,34 @@ EOF;
      * @param array $requestParams
      * @return string
      */
-    public static function getRequestParamExampleHtml(array $requestParams) {
-        $prefix = "                 ";
-        $html = "";
-        $i = count($requestParams);
+    public static function getRequestParamExampleHtml(string $mapping, array $requestParams) {
+        $req = [];
+        $req[0] = [
+            'dispatch' => $mapping
+        ];
+
+        $params = [];
         foreach($requestParams as $requestParam) {
-            $html .=  $prefix.'"'.$requestParam->name.'":';
             if ($requestParam->type == 'string') {
-                $html .= '"'. strval($requestParam->example) .'"';
+                $params[$requestParam->name] = strval($requestParam->example);
+            } else if ($requestParam->type == 'int') {
+                $params[$requestParam->name] = intval($requestParam->example);
+                //$html .= intval($requestParam->example);
+            } else if ($requestParam->type == 'float') {
+                $params[$requestParam->name] = floatval($requestParam->example);
+            } else if ($requestParam->type == 'bool') {
+                $params[$requestParam->name] = boolval($requestParam->example);
             } else {
-                $html .= strval($requestParam->example);
-            }
-            $i--;
-            if ($i != 0) {
-                $html .= ",\n";
+                $params[$requestParam->name] = $requestParam->example;
             }
         }
-        return $html;
+        if (count($params) == 0) {
+            $params = new \stdClass();
+        }
+        $req[0]["params"] = $params;
+        $request['requests'] = $req;
+        $result_pretty = json_encode($request, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        return $result_pretty;
     }
 
 
@@ -687,7 +945,8 @@ EOF;
         $ret[0]['data'] = static::getResponseParamExampleHtml($paramData);
 
         $responses["responses"] = $ret;
-        $result_pretty = json_encode($responses,JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        //$result_pretty = json_encode($responses,JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $result_pretty = json_encode($responses, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         return $result_pretty;
     }
 
