@@ -188,6 +188,7 @@ class MainController
                         ];
                         return $ret;
                     }
+                    $this->token->set($token);
                 }
                 $responseResults[$mapping] = $value['container']->run($value['params'], $extras, $headers);
             }

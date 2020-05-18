@@ -33,6 +33,12 @@ abstract class AbstractAction
      */
     protected $response;
 
+    protected function getTokenByHeader($headers) {
+        if (isset($headers['authorization'][0])) {
+            return $headers['authorization'][0];
+        }
+        return "";
+    }
 
     abstract public function run($params, $extras, $headers);
 
