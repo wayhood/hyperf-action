@@ -414,7 +414,7 @@ EOF;
         $html = str_replace("{{responseParams}}", static::$responseParamHtmls[$actionName], $html);
         $html = str_replace("{{requestExampleParams}}", static::$requestParamExampleHtmls[$actionName], $html);
         $html = str_replace("{{responseExampleParams}}", static::$responseParamExampleHtml[$actionName], $html);
-        $html = str_replace("{{errorCodes}}", static::$errorCodeHtml[$actionName], $html);
+        $html = str_replace("{{errorCodes}}", isset(static::$errorCodeHtml[$actionName])?? "", $html);
         $html = str_replace("{{dispatch}}", $mapping, $html);
         $html = str_replace("{{desc}}", DescriptionCollector::list()[$actionName], $html);
         $html = str_replace("{{style}}", UsableCollector::list()[$actionName] == false ? "text-decoration: line-through;" : "", $html);
