@@ -412,7 +412,12 @@ EOF;
     public static function getRightHtml(string $mapping, string $actionName, string $pathInfo) {
         $html = str_replace("{{requestParams}}", static::$requestParamHtmls[$actionName], static::$rightHtml);
         $html = str_replace("{{responseParams}}", static::$responseParamHtmls[$actionName], $html);
-        $html = str_replace("{{requestExampleParams}}", static::$requestParamExampleHtmls[$actionName], $html);
+        if (isset(static::$requestParamExampleHtmls[$actionName])) {
+            $html = str_replace("{{requestExampleParams}}", static::$requestParamExampleHtmls[$actionName], $html);
+
+        } else {
+            $html = str_replace("{{requestExampleParams}}", static::getEmptyRequestParamExampleHtmls($mapping), $html);
+        }
         $html = str_replace("{{responseExampleParams}}", static::$responseParamExampleHtml[$actionName], $html);
         $html = str_replace("{{errorCodes}}", isset(static::$errorCodeHtml[$actionName])?? "", $html);
         $html = str_replace("{{dispatch}}", $mapping, $html);
@@ -423,6 +428,19 @@ EOF;
         return $html;
     }
 
+    public static function getEmptyRequestParamExampleHtmls($mapping) {
+        $req = [];
+        $req[0] = [
+            'dispatch' => $mapping
+        ];
+
+        $params = new \stdClass();
+        $req[0]["params"] = $params;
+        $request['requests'] = $req;
+        $result_pretty = json_encode($request, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        return $result_pretty;
+    }
+    
     /**
      * 获取头部html
      * @param string $mapping
