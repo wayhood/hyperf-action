@@ -410,7 +410,7 @@ EOF;
      * @return string|string[]
      */
     public static function getRightHtml(string $mapping, string $actionName, string $pathInfo) {
-        $html = str_replace("{{requestParams}}", static::$requestParamHtmls[$actionName], static::$rightHtml);
+        $html = str_replace("{{requestParams}}", isset(static::$requestParamHtmls[$actionName])?? "", static::$rightHtml);
         $html = str_replace("{{responseParams}}", static::$responseParamHtmls[$actionName], $html);
         if (isset(static::$requestParamExampleHtmls[$actionName])) {
             $html = str_replace("{{requestExampleParams}}", static::$requestParamExampleHtmls[$actionName], $html);
@@ -440,7 +440,7 @@ EOF;
         $result_pretty = json_encode($request, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         return $result_pretty;
     }
-    
+
     /**
      * 获取头部html
      * @param string $mapping
@@ -606,7 +606,7 @@ EOF;
 
         $actionMap = ActionCollector::list();
         $actionName = $actionMap[$action];
-        $requestParamHtml = static::$requestParamHtmls[$actionName];
+        $requestParamHtml = isset(static::$requestParamHtmls[$actionName])?? "";
 
         $html = static::getHeaderHtml($action, $actionName, $pathInfo) .
             static::getLeftHtml($action, $actionName, $pathInfo) .
