@@ -190,7 +190,12 @@ class MainController
                     }
                     $this->token->set($token);
                 }
-                $responseResults[$mapping] = $value['container']->run($value['params'], $extras, $headers);
+                $beforeResult = $value['container']->beforeRun($value['params'], $extras, $headers);
+                if ($beforeResult === true) {
+                    $responseResults[$mapping] = $value['container']->run($value['params'], $extras, $headers);
+                } else {
+                    $responseResults[$mapping] = $beforeResult;
+                }
             }
         } else if (count($okRequest) > 1) {
             //开启协程
@@ -210,7 +215,12 @@ class MainController
                         }
                         $this->token->set($token);
                     }
-                    $result = $value['container']->run($value['params'], $extras, $headers);
+                    $beforeResult = $value['container']->beforeRun($value['params'], $extras, $headers);
+                    if ($beforeResult === true) {
+                        $result = $value['container']->run($value['params'], $extras, $headers);
+                    } else {
+                        $result = $beforeResult;
+                    }
                     //\Swoole\Coroutine::sleep(1);
                     return $result;
                 }, $mapping);

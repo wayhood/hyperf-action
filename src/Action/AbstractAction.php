@@ -40,6 +40,8 @@ abstract class AbstractAction
         return "";
     }
 
+    abstract public function beforeRun($params, $extras, $headers);
+
     abstract public function run($params, $extras, $headers);
 
     protected function errorReturn(int $errorCode, string $message = "", array $replace = []) {
