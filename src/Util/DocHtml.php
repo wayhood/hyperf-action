@@ -410,7 +410,12 @@ EOF;
      * @return string|string[]
      */
     public static function getRightHtml(string $mapping, string $actionName, string $pathInfo) {
-        $html = str_replace("{{requestParams}}", isset(static::$requestParamHtmls[$actionName])?? "", static::$rightHtml);
+        if (isset(static::$requestParamHtmls[$actionName])) {
+            $html = str_replace("{{requestParams}}", static::$requestParamHtmls[$actionName], static::$rightHtml);
+        } else {
+            $html = str_replace("{{requestParams}}", "", static::$rightHtml);
+        }
+
         $html = str_replace("{{responseParams}}", static::$responseParamHtmls[$actionName], $html);
         if (isset(static::$requestParamExampleHtmls[$actionName])) {
             $html = str_replace("{{requestExampleParams}}", static::$requestParamExampleHtmls[$actionName], $html);
@@ -419,7 +424,12 @@ EOF;
             $html = str_replace("{{requestExampleParams}}", static::getEmptyRequestParamExampleHtmls($mapping), $html);
         }
         $html = str_replace("{{responseExampleParams}}", static::$responseParamExampleHtml[$actionName], $html);
-        $html = str_replace("{{errorCodes}}", isset(static::$errorCodeHtml[$actionName])?? "", $html);
+        if (isset(static::$errorCodeHtml[$actionName])) {
+            $html = str_replace("{{errorCodes}}", static::$errorCodeHtml[$actionName], $html);
+        } else {
+            $html = str_replace("{{errorCodes}}", "", $html);
+        }
+
         $html = str_replace("{{dispatch}}", $mapping, $html);
         $html = str_replace("{{desc}}", DescriptionCollector::list()[$actionName], $html);
         $html = str_replace("{{style}}", UsableCollector::list()[$actionName] == false ? "text-decoration: line-through;" : "", $html);
@@ -606,7 +616,6 @@ EOF;
 
         $actionMap = ActionCollector::list();
         $actionName = $actionMap[$action];
-        $requestParamHtml = isset(static::$requestParamHtmls[$actionName])?? "";
 
         $html = static::getHeaderHtml($action, $actionName, $pathInfo) .
             static::getLeftHtml($action, $actionName, $pathInfo) .
