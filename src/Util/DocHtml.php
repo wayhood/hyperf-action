@@ -954,6 +954,12 @@ EOF;
                 $params[$requestParam->name] = floatval($requestParam->example);
             } else if ($requestParam->type == 'bool') {
                 $params[$requestParam->name] = boolval($requestParam->example);
+            } else if ($requestParam->type == 'array') {
+                $example = @json_decode($requestParam->example, true);
+                if (!is_array($example)) {
+                    $example = [];
+                }
+                $params[$requestParam->name] = $example;
             } else {
                 $params[$requestParam->name] = $requestParam->example;
             }
