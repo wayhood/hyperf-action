@@ -922,10 +922,10 @@ EOF;
             $requestParamHtml = "";
             foreach($requestParams as $requestParam) {
                 $requestParamHtml .= "<tr><td>" . $requestParam->name . "</td>\n";
-                $requestParamHtml .= "<td>" . $requestParam->type . "</td>\n";
-                $requestParamHtml .= "<td>" . ($requestParam->require == true ? "true" : "false") . "</td>\n";
-                $requestParamHtml .= "<td>" . strval($requestParam->example) . "</td>\n";
-                $requestParamHtml .= "<td>" . $requestParam->description . "</td></tr>\n";
+                $requestParamHtml .= "<td style=\"word-break:break-all;\">" . $requestParam->type . "</td>\n";
+                $requestParamHtml .= "<td style=\"word-break:break-all;\">" . ($requestParam->require == true ? "true" : "false") . "</td>\n";
+                $requestParamHtml .= "<td style=\"word-break:break-all;\">" . strval($requestParam->example) . "</td>\n";
+                $requestParamHtml .= "<td style=\"word-break:break-all;\">" . $requestParam->description . "</td></tr>\n";
             }
             static::$requestParamHtmls[$class] = $requestParamHtml;
             static::$requestParamExampleHtmls[$class] = static::getRequestParamExampleHtml($map[$class], $requestParams);
@@ -1002,9 +1002,9 @@ EOF;
         foreach($data as $key => $responseParam) {
             if (!is_numeric($key)) {
                 $html .= "<tr><td>" . $itString . $key . "</td>\n";
-                $html .= "<td>" . $responseParam['type'] . "</td>\n";
-                $html .= "<td>" . $responseParam['example'] . "</td>\n";
-                $html .= "<td>" . $responseParam['desc'] . "</td></tr>\n";
+                $html .= "<td style=\"word-break:break-all;\">" . $responseParam['type'] . "</td>\n";
+                $html .= "<td style=\"word-break:break-all;\">" . $responseParam['example'] . "</td>\n";
+                $html .= "<td style=\"word-break:break-all;\">" . $responseParam['desc'] . "</td></tr>\n";
             }
             if (isset($responseParam['children'])) {
                 if (!is_numeric($key)) {
