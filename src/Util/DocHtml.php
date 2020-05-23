@@ -1061,7 +1061,6 @@ EOF;
      * @return array
      */
     public static function getResponseParamExampleHtml(array $data) {
-        print_R($data);
         $jsonData = [];
         foreach($data as $key => $line) {
             if (is_numeric($key)) {
