@@ -38,12 +38,21 @@ class RequestParam extends AbstractAnnotation
      */
     public $description = '无';
 
+    /**
+     * 示例是否使用base64
+     * @var bool
+     */
+    public $base64 = false;
+
     public function __construct($value = null)
     {
         parent::__construct($value);
         if (is_array($value)) {
             foreach ($value as $key => $val) {
                 switch($key) {
+                    case "b":
+                        $this->base64 = $val;
+                        break;
                     case "n":
                         $this->name = $val;
                         break;

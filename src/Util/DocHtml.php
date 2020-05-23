@@ -924,7 +924,11 @@ EOF;
                 $requestParamHtml .= "<tr><td>" . $requestParam->name . "</td>\n";
                 $requestParamHtml .= "<td style=\"word-break:break-all;\">" . $requestParam->type . "</td>\n";
                 $requestParamHtml .= "<td style=\"word-break:break-all;\">" . ($requestParam->require == true ? "true" : "false") . "</td>\n";
-                $requestParamHtml .= "<td style=\"word-break:break-all;\">" . strval($requestParam->example) . "</td>\n";
+                if ($requestParam->base64 == true) {
+                    $requestParamHtml .= "<td style=\"word-break:break-all;\">" . htmlentities(base64_decode(strval($requestParam->example))) . "</td>\n";
+                } else {
+                    $requestParamHtml .= "<td style=\"word-break:break-all;\">" . htmlentities(strval($requestParam->example)) . "</td>\n";
+                }
                 $requestParamHtml .= "<td style=\"word-break:break-all;\">" . $requestParam->description . "</td></tr>\n";
             }
             static::$requestParamHtmls[$class] = $requestParamHtml;
@@ -955,9 +959,23 @@ EOF;
             } else if ($requestParam->type == 'bool') {
                 $params[$requestParam->name] = boolval($requestParam->example);
             } else if ($requestParam->type == 'array') {
-                $example = @json_decode($requestParam->example, true);
+                $example = $requestParam->example;
+                if ($requestParam->base64 == true) {
+                    $example = base64_decode($example);
+                }
+                $example = @json_decode($example, true);
                 if (!is_array($example)) {
                     $example = [];
+                }
+                $params[$requestParam->name] = $example;
+            } else if ($requestParam->type == 'object') {
+                $example = $requestParam->example;
+                if ($requestParam->base64 == true) {
+                    $example = base64_decode($example);
+                }
+                $example = @json_decode($example, true);
+                if (!is_array($example)) {
+                    $example = new \stdClass();
                 }
                 $params[$requestParam->name] = $example;
             } else {
@@ -1012,7 +1030,6 @@ EOF;
                 }
                 $html .= static::getResponseParamHtmlOne($responseParam['children'], $indent);
             }
-            //}
         }
         return $html;
     }
@@ -1044,6 +1061,7 @@ EOF;
      * @return array
      */
     public static function getResponseParamExampleHtml(array $data) {
+        print_R($data);
         $jsonData = [];
         foreach($data as $key => $line) {
             if (is_numeric($key)) {
