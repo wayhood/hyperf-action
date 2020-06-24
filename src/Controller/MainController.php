@@ -240,7 +240,7 @@ class MainController
         $responses = Context::get(__CLASS__ .':responses',  []);
         return $this->response->json([
             'code' => 0,
-            'timesamp' => time(),
+            'timestamp' => time(),
             'deviation' => 0,
             'message' => '成功',
             'response' => $responses
