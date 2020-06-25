@@ -195,7 +195,8 @@ class MainController
                                 'data' => new \stdClass(),
                             ];
                         }
-                        return $ret;
+                        $responseResults[$mapping] = $ret;
+                        continue;
                     }
                     $this->token->set($token);
                 }
@@ -214,12 +215,21 @@ class MainController
                     Context::copy(\Swoole\Coroutine::getPcid());
                     if ($value['hasToken'] == true) {
                         $token = $this->getTokenByHeader($headers);
-                        if (!$this->token->verify($token)) {
-                            $ret = [
-                                'code' => 8005,
-                                'message' => 'token失效',
-                                'data' => new \stdClass(),
-                            ];
+                        $verify = $this->token->verify($token);
+                        if ($verify != 1) {
+                            if ($verify == 0) {
+                                $ret = [
+                                    'code' => 8005,
+                                    'message' => 'token失效',
+                                    'data' => new \stdClass(),
+                                ];
+                            } else {
+                                $ret = [
+                                    'code' => 8006,
+                                    'message' => '当前账号在其他终端登录',
+                                    'data' => new \stdClass(),
+                                ];
+                            }
                             return $ret;
                         }
                         $this->token->set($token);
