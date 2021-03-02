@@ -7,7 +7,7 @@
 配置
 =====
 ```shell
-composer require hyperf-action
+composer require hyperf-action2
 ```
 
 
@@ -108,9 +108,7 @@ class GetAction extends AbstractAction
      },
      "timestamp": "xxxxxx",  //当前时间戳 字符串或数字都可以, 注意时间戳允许与服务器时间误差正负600秒
      "signature": "xxxxxxxxxxxxxxxxxxx",   //签名 暂时未使用
-     "requests":[  //开始
-        //第一个调用开始
-        {
+     "request": {
           "params":{    // 这是请求参数
              "nick":"test",
              "a":"a",
@@ -118,43 +116,27 @@ class GetAction extends AbstractAction
              "c":0.1
           },
           "dispatch":"test"  //调用名 dispatch对应一个Action
-        }
-        //第一个调用结束
-        //第二个调用开始
-        ,{
-             "dispatch": "test.list",
-             "params": {
-                  "start":0,
-                  "limit":10
-             }
-         }
-         //第二个调用结束
-        //这里可以有多个调用, 最多5个, 也就是说, 如果多个调用之间没有关连, 可并行调用, 如果requests有多个将开启协程 调用Action
-    ]
+     }
 }
 ```
 
 响应格式
 =====
 响应格式如下
-注意: responses数组的顺序通常与requests一致, 也有可能不一致，但也可以通过responses里的dispatch知道是哪个响应
-需要前端处理
 ```json
 {
    "code": 0,    //最外层的code，0是成功  非0失败  是说明这个请求正确（如，请求方法post，请求格式，即json，等等，但不代表具体的请求接口）
    "message": "成功",   //描述，非0会有具体面描述
    "timestamp": 1458291720, //服务器时间戳
    "deviation": 8, //误差, 即请求的时间戳 与服务器时间的误差
-   "responses": [    //响应，对应请求的requests部份
-       { //第一个调用响应
+   "response": {    //响应
          "code": 0,   //0是成功，非0失败
          "message": "成功"， //描述，非0会有具本描述
          "data": {   //响应数据，非0没有
            "success": "true"
          },
          "dispatch": "test"   //对应的调用方式
-       }, //第二个调用响应
-   ]
+   }
 }
 ```
 

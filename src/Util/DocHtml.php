@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace Wayhood\HyperfAction\Util;
 
+use Hyperf\Utils\ApplicationContext;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\CategoryCollector;
 use Wayhood\HyperfAction\Collector\DescriptionCollector;
@@ -13,7 +14,6 @@ use Wayhood\HyperfAction\Collector\UsableCollector;
 
 class DocHtml
 {
-
     /**
      * 目录html
      * @var array
@@ -61,9 +61,15 @@ class DocHtml
      * @var string
      */
     public static $leftHtml = <<<EOF
-    <!-- 左边内容 -->
-    <div class="col-lg-2" style="padding:5px 15px 5px 5px;">
+    <div class="book-summary">
+      <div class="search-box form-group">
+          <input type="text" class="form-control" id="inputSearch" placeholder="搜索接口">
+          <span class="glyphicon glyphicon-search form-control-feedback" aria-hidden="true"></span>
+      </div>
+
+      <div id="accordion" class="catalog">
         {{tableOfContent}}
+      </div>
     </div>
 EOF;
 
@@ -72,53 +78,71 @@ EOF;
      * @var string
      */
     public static $rightHtml = <<<EOF
-    <div class="col-lg-9" style="padding:5px;">
-        <h1 style="{{style}}">{{dispatch}} ({{desc}})</h1>
-        {{token}}
-        <h3>请求参数</h3>
-        <table class="table table-bordered">
-            <tr>
-                <th width="15%">名称</th>
-                <th width="10%">类型</th>
-                <th width="10%">必须</th>
-                <th width="25%">示例值</th>
-                <th width="40%">描述</th>
-            </tr>
-            {{requestParams}}
-        </table>
-
-        <h3>响应参数</h3>
-        <table class="table table-bordered">
-            <tr>
-                <th width="15%">名称</th>
-                <th width="10%">类型</th>
-                <th width="35%">示例值</th>
-                <th width="40%">描述</th>
-            </tr>
-            {{responseParams}}
-        </table>
-
-        <h3>请求示例</h3>
-        <div id="requestCanvas"></div>
-
-        <h3>响应示例</h3>
-        <div id="responseCanvas"></div>
-
-        <h3>错误代码</h3>
-        <table class="table table-bordered">
-            <tr>
-                <th width="30%">代码</th>
-                <th width="70%">描述</th>
-            </tr>
-            {{errorCodes}}
-        </table>
+    <div class="book-body">
+        <div class="body-inner">
+            <div class="book-header">
+                <div class="d-flex justify-content-between">
+                    <a class="header-menu toggle-catalog" href="javascript:void(0)"><i
+                                class="glyphicon glyphicon-align-justify"></i> 目录</a>
+                </div>
+            </div>
+            <div class="page-wrapper">
+                <div class="page-inner">
+                    <div class="main-content">
+                        <div class="col-lg-11" style="padding:5px;">
+                            <h1 style="{{style}}">{{dispatch}} ({{desc}})</h1>
+                            {{token}}
+                            <h3>请求参数</h3>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th width="15%">名称</th>
+                                    <th width="10%">类型</th>
+                                    <th width="10%">必须</th>
+                                    <th width="25%">示例值</th>
+                                    <th width="40%">描述</th>
+                                </tr>
+                                {{requestParams}}
+                            </table>
+                    
+                            <h3>响应参数</h3>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th width="15%">名称</th>
+                                    <th width="10%">类型</th>
+                                    <th width="35%">示例值</th>
+                                    <th width="40%">描述</th>
+                                </tr>
+                                {{responseParams}}
+                            </table>
+                    
+                            <h3>请求示例</h3>
+                            <div id="requestCanvas"></div>
+                    
+                            <h3>响应示例</h3>
+                            <div id="responseCanvas"></div>
+                    
+                            <h3>错误代码</h3>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th width="30%">代码</th>
+                                    <th width="70%">描述</th>
+                                </tr>
+                                {{errorCodes}}
+                            </table>
+                        </div>
+                        <script>
+                            var responseJsonText = '{{responseExampleParams}}';
+                            var requestJsonText = {{requestExampleParams}};
+                            requestJsonText["timestamp"] = new Date().getTime();
+                            Process(responseJsonText, "responseCanvas");
+                            Process(JSON.stringify(requestJsonText), "requestCanvas");
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <script>
-        var responseJsonText = '{{responseExampleParams}}';
-        var requestJsonText = '{{requestExampleParams}}';
-        Process(responseJsonText, "responseCanvas");
-        Process(requestJsonText, "requestCanvas");
-    </script>
+
 EOF;
 
 
@@ -128,6 +152,41 @@ EOF;
      */
     public static $footerHtml = <<<EOF
     </div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script>
+<script>
+
+    var search_source_data = {{searchData}};
+
+
+    $('.toggle-catalog').click(function () {
+        $('.book').toggleClass('with-summary');
+    });
+
+    $('#inputSearch').autocomplete({hint: false}, [
+        {
+            source: function (query, callback) {
+                var result = [];
+                for(var i = 0; i !== search_source_data.length; i++){
+                    if(search_source_data[i].name.indexOf(query) !== -1){
+                        result.push(search_source_data[i]);
+                    }
+                }
+                callback(result);
+            },
+            displayKey: 'name',
+            templates: {
+                suggestion: function (suggestion) {
+                    return suggestion.name;
+                }
+            }
+        }
+    ]).on('autocomplete:selected', function (event, suggestion, dataset, context) {
+        self.location = suggestion.url;
+    });
+</script>
+
     </body>
 </html>
 EOF;
@@ -138,15 +197,72 @@ EOF;
      */
     public static $headerHtml = <<<EOF
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>接口文档</title>
-    <link href="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
-    <script src="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{name}} 接口文档</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <style>
+    pre {
+        display: block;
+        padding: 9.5px;
+        margin: 0 0 10px;
+        font-size: 13px;
+        line-height: 1.42857143;
+        color: #333;
+        word-break: break-all;
+        word-wrap: break-word;
+        background-color: #fff;
+        /* border: 1px solid #ccc; */
+        border-radius: 4px;
+        /* font-family:'consolas'; */
+    }
+    .Canvas {
+        font:14px/18px 'consolas';
+        background-color: #ECECEC;
+        color: #000000;
+        border: solid 1px #CECECE;
+    }
+    .ObjectBrace {
+        color: #00AA00;
+        font-weight: bold;
+    }
+    .ArrayBrace {
+        color: #0033FF;
+        font-weight: bold;
+    }
+    .PropertyName {
+        color: #CC0000;
+        font-weight: bold;
+    }
+    .String {
+        color: #007777;
+    }
+    .Number {
+        color: #AA00AA;
+    }
+    .Boolean {
+        color: #0000FF;
+    }
+    .Function {
+        color: #AA6633;
+        text-decoration: italic;
+    }
+    .Null {
+        color: #0000FF;
+    }
+    .Comma {
+        color: #000000;
+        font-weight: bold;
+    }
+    PRE.CodeContainer {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+    </style>
+        <script>
     var formatJson = function (json, options) {
         var reg = null,
                 formatted = '',
@@ -320,71 +436,264 @@ EOF;
     };
     </script>
     <style>
-    .panel-body {
-        padding: 0;
+body, html {
+    height: 100%;
+    overflow-y:hidden;
+}
+
+.book{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.book.with-summary .book-summary {
+    left: 0;
+}
+
+.book-summary {
+    position: absolute;
+    top: 0;
+    left: -350px;
+    bottom: 0;
+    z-index: 1;
+    overflow-y: auto;
+    width: 350px;
+    color: #364149;
+    background: #fafafa;
+    border-right: 1px solid rgba(0,0,0,.07);
+    -webkit-transition: left 250ms ease;
+    -moz-transition: left 250ms ease;
+    -o-transition: left 250ms ease;
+    transition: left 250ms ease;
+}
+
+.book-body {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    color: #333;
+    background: #fff;
+    -webkit-transition: left 250ms ease;
+    -moz-transition: left 250ms ease;
+    -o-transition: left 250ms ease;
+    transition: left 250ms ease;
+}
+
+.book-body .body-inner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding-top: 10px;
+}
+
+.book-header {
+    overflow: visible;
+    height: 50px;
+    z-index: 2;
+    font-size: .85em;
+    color: #7e888b;
+    background: 0 0;
+}
+
+.book-header a.header-menu{
+    font-size: 18px;
+    color: #555555;
+    padding: 10px;
+    text-decoration: none;
+}
+
+.book-header a.header-menu:hover{
+    text-decoration: none;
+    color: #000;
+}
+
+.page-wrapper {
+    position: relative;
+    outline: 0;
+}
+
+.book .book-body .page-wrapper .page-inner {
+    position: relative;
+    left: 0px;
+    transition: 300ms ease left;
+}
+
+.page-inner {
+    position: relative;
+    margin: 0 auto;
+    padding: 20px 15px 40px 15px;
+}
+
+@media (min-width: 600px){
+    .book.with-summary .book-body {
+        left: 350px;
     }
-    pre {
-        display: block;
-        padding: 9.5px;
-        margin: 0 0 10px;
-        font-size: 13px;
-        line-height: 1.42857143;
-        color: #333;
-        word-break: break-all;
-        word-wrap: break-word;
-        background-color: #fff;
-        /* border: 1px solid #ccc; */
-        border-radius: 4px;
-        /* font-family:'consolas'; */
+}
+
+@media (max-width: 600px){
+    .book-summary {
+        width: calc(100% - 60px);
+        bottom: 0;
+        left: -100%;
     }
-    .Canvas {
-        font:14px/18px 'consolas';
-        background-color: #ECECEC;
-        color: #000000;
-        border: solid 1px #CECECE;
+    .book.with-summary .book-body {
+        -webkit-transform: translate(calc(100% - 60px),0);
+        -moz-transform: translate(calc(100% - 60px),0);
+        -ms-transform: translate(calc(100% - 60px),0);
+        -o-transform: translate(calc(100% - 60px),0);
+        transform: translate(calc(100% - 60px),0);
     }
-    .ObjectBrace {
-        color: #00AA00;
-        font-weight: bold;
+}
+
+@media (max-width: 1240px){
+    .book-body {
+        -webkit-transition: -webkit-transform 250ms ease;
+        -moz-transition: -moz-transform 250ms ease;
+        -o-transition: -o-transform 250ms ease;
+        transition: transform 250ms ease;
+        padding-bottom: 20px;
     }
-    .ArrayBrace {
-        color: #0033FF;
-        font-weight: bold;
+}
+
+@media (max-width: 1240px){
+    .book-body .body-inner {
+        position: static;
+        min-height: calc(100% - 50px);
     }
-    .PropertyName {
-        color: #CC0000;
-        font-weight: bold;
+}
+
+.navbar{
+    background: #F7931E;
+    color: #FFF;
+}
+
+.navbar a{
+    color: #FFF;
+}
+.navbar-brand{
+    font-weight: 600;
+}
+
+@media (min-width: 768px){
+    .navbar {
+        border-radius: 0;
     }
-    .String {
-        color: #007777;
-    }
-    .Number {
-        color: #AA00AA;
-    }
-    .Boolean {
-        color: #0000FF;
-    }
-    .Function {
-        color: #AA6633;
-        text-decoration: italic;
-    }
-    .Null {
-        color: #0000FF;
-    }
-    .Comma {
-        color: #000000;
-        font-weight: bold;
-    }
-    PRE.CodeContainer {
-        margin-top: 0px;
-        margin-bottom: 0px;
-    }
-    </style>
+}
+
+.catalog .panel{
+    margin-bottom: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.catalog .catalog-title {
+    border-bottom: 1px solid #EAEAEA;
+    padding: 1rem 1.25rem;
+    background: rgba(0, 0, 0, .03);
+    cursor: pointer;
+    color: #333;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.catalog-item{
+    padding: 8px 15px;
+    margin-left: 15px;
+    color: #888;
+    border-bottom: solid #EEE 1px;
+    display: block;
+}
+
+.active {
+    background-color:#f3f3f3;
+}
+
+.action-item h2 a{
+    color: #888;
+    text-decoration: none;
+}
+
+a:hover{
+    color: #888;
+    text-decoration: none;
+}
+
+.search-box{
+    position: relative;
+    margin: 10px;
+}
+
+.navbar{
+    margin-bottom: 0;
+}
+
+.main-content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.text-bold{
+    font-weight: bold;
+}
+
+/**third part*/
+
+.algolia-autocomplete {
+    width: 100%;
+}
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+    width: 100%;
+}
+.algolia-autocomplete .aa-hint {
+    color: #888;
+}
+.algolia-autocomplete .aa-dropdown-menu {
+    width: 100%;
+    background-color: #ccc;
+    border: 1px solid #EEE;
+    border-top: none;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+    cursor: pointer;
+    padding: 5px 4px;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+    background-color: #F7931E;
+    color: #FFF;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+    font-weight: bold;
+    font-style: normal;
+}
+
+a {
+    text-decoration: none;
+}
+</style>
+</head>
 <body>
-<div class="container-fluid">
-    <h3>接口文档 <a href="{{index}}" class="btn btn-default">返回首页</a></h3>
-</div>
-<div class="container-fluid">
+<nav class="navbar">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{{index}}" style="text-decoration:none;color:#fff;">
+                {{name}} 接口文档
+            </a>
+        </div>
+    </div>
+</nav>
+<div class="book with-summary">
 EOF;
 
     /**
@@ -438,15 +747,22 @@ EOF;
         return $html;
     }
 
-    public static function getEmptyRequestParamExampleHtmls($mapping) {
-        $req = [];
-        $req[0] = [
-            'dispatch' => $mapping
-        ];
+    public static function getFooterHtml(string $mapping, string $actionName, string $pathInfo) {
+        if (count(static::$tableOfContentHtml) == 0) {
+            static::getTableOfContentHtml($pathInfo);
+        }
+        $search_data = json_encode(static::getSearchData($pathInfo));
+        $html = str_replace("{{searchData}}", $search_data, static::$footerHtml);
+        return $html;
 
+    }
+
+    public static function getEmptyRequestParamExampleHtmls($mapping) {
         $params = new \stdClass();
-        $req[0]["params"] = $params;
-        $request['requests'] = $req;
+        $request['request'] = [
+            'dispatch' => $mapping,
+            'params' => $params
+        ];
         $result_pretty = json_encode($request, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         return $result_pretty;
     }
@@ -460,6 +776,8 @@ EOF;
      */
     public static function getHeaderHtml(string $mapping, string $actionName, string $pathInfo) {
         $html = str_replace("{{index}}", $pathInfo, static::$headerHtml);
+        $config = ApplicationContext::getContainer()->get(\Hyperf\Contract\ConfigInterface::class);
+        $html = str_replace("{{name}}", $config->get('app_name'), $html);
         return $html;
     }
 
@@ -483,7 +801,8 @@ EOF;
                     'usable' => UsableCollector::list()[$class] ?? false,
                     'token' => TokenCollector::list()[$class] ?? false,
                 ];
-            }
+	    }
+            ksort($tableOfContent, SORT_STRING);
             static::$tableOfContent = $tableOfContent;
         }
         return static::$tableOfContent;
@@ -501,14 +820,11 @@ EOF;
             foreach($tableOfContent as $category => $data) {
                 $i++;
                 $html .= <<<EOF
-<div class="panel panel-default">
-		<div class="panel-heading">
-			<h4 class="panel-title">
-				<a data-toggle="collapse" data-parent="#accordion" 
-				   href="#collapse_{$i}">{$category}
-            </a>
-			</h4>
-		</div>
+<div class="panel">
+        <div id="heading{$i}" data-parent="#accordion" class="catalog-title" data-toggle="collapse"
+             aria-expanded="true" data-target="#collapse{$i}" aria-controls="collapse{$i}">
+            <i class="glyphicon glyphicon-th-list"></i> {$category}
+        </div>
 EOF;
                 $in = "";
                 foreach($data as $line) {
@@ -518,33 +834,28 @@ EOF;
                     }
                 }
                 $html .= <<<EOF
-        <div id="collapse_{$i}" class="panel-collapse list-group collapse {$in}">
+        <div id="collapse{$i}" class="collapse {$in} " aria-labelledby="heading{$i}">
 EOF;
 
                 foreach($data as $line) {
-                    $html .= <<<EOF
-
-			<div class="panel-body">
-EOF;
                     $active = '';
                     if ($line['dispatch'] == $mapping) {
                         $active = ' active';
                     }
                     $token = '';
                     if ($line['token'] == true) {
-                        $token = '<span class="glyphicon glyphicon-user"></span>';
+                        $token = '<span class="label label-warning"><span class="glyphicon glyphicon-user"></span></span>';
                     }
-                    $text = $line['dispatch'];
+                    $text = $line['name'];
                     if ($line['usable'] != true) {
                         $text = "<span style='text-decoration: line-through;'>". $text .'</span>';
                     }
 
-                    $text = $text.$token. "<br />". $line['name'];
+                    $dispatch = '<span class="label label-default">' . $line['dispatch'] .'</span>';
+                    $text = $text. " ". $dispatch . ' '. $token;
 
-                    $html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
-                    $html .= <<<EOF
-			</div>
-EOF;
+                    $html .= '<a class="catalog-item '. $active .'" href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'">'. $text ."</a>";
+                    //$html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
                 }
                 $html .= '		</div>    </div>';
             }
@@ -555,40 +866,32 @@ EOF;
         foreach($tableOfContent as $category => $data) {
             $i++;
             $html .= <<<EOF
-<div class="panel panel-default">
-		<div class="panel-heading">
-			<h4 class="panel-title">
-				<a data-toggle="collapse" data-parent="#accordion" 
-				   href="#collapse_{$i}">{$category}
-            </a>
-			</h4>
-		</div>
+<div class="panel">
+        <div id="heading{$i}" data-parent="#accordion" class="catalog-title collapsed" data-toggle="collapse"
+             aria-expanded="false" data-target="#collapse{$i}" aria-controls="collapse{$i}">
+            <i class="glyphicon glyphicon-th-list"></i> {$category}
+        </div>
 EOF;
             $html .= <<<EOF
-        <div id="collapse_{$i}" class="panel-collapse collapse list-group">
+        <div id="collapse{$i}" class="collapse" aria-labelledby="heading{$i}">
 EOF;
             foreach($data as $line) {
-                $html .= <<<EOF
-
-			<div class="panel-body">
-EOF;
                 $active = '';
 
                 $token = '';
                 if ($line['token'] == true) {
-                    $token = '<span class="glyphicon glyphicon-user"></span>';
+                    $token = '<span class="label label-warning"><span class="glyphicon glyphicon-user"></span></span>';
                 }
-                $text = $line['dispatch'];
+                $text = $line['name'];
                 if ($line['usable'] != true) {
                     $text = "<span style='text-decoration: line-through;'>". $text .'</span>';
                 }
 
-                $text = $text.$token. "<br />". $line['name'];
+                $dispatch = '<span class="label label-default">' . $line['dispatch'] .'</span>';
+                $text = $text. " ". $dispatch . ' '. $token;
 
-                $html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
-                $html .= <<<EOF
-			</div>
-EOF;
+                $html .= '<a class="catalog-item '. $active .'" href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'">'. $text ."</a>";
+                //$html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
             }
             $html .= '		</div>    </div>';
         }
@@ -614,16 +917,38 @@ EOF;
             static::getErrorCodeHtml();
         }
 
-        $actionMap = ActionCollector::list();
+	$actionMap = ActionCollector::list();
+	if (!isset($actionMap[$action])) {
+            return "Not Found Dispatch";
+        }
         $actionName = $actionMap[$action];
 
         $html = static::getHeaderHtml($action, $actionName, $pathInfo) .
             static::getLeftHtml($action, $actionName, $pathInfo) .
             static::getRightHtml($action, $actionName, $pathInfo) .
-            static::$footerHtml;
+            static::getFooterHtml($action, $actionName, $pathInfo);
         return $html;
     }
 
+    public static $searchData = [];
+
+    public static function getSearchData($pathInfo) {
+        if (count(static::$searchData) > 0) {
+            return static::$searchData;
+        }
+        $tableOfContent = static::getTableOfContent();
+        foreach($tableOfContent as $category => $data) {
+            $name = $category;
+            foreach ($data as $line) {
+                static::$searchData[] = [
+                    'name' => $name .'.'.$line['name']." ".$line['dispatch'],
+                    'url' => $pathInfo ."?dispatch=" .$line['dispatch']
+                ];
+            }
+        }
+        return static::$searchData;
+//    ];
+    }
     /**
      * 获得首页html
      * @param $uri
@@ -634,80 +959,319 @@ EOF;
         $url = str_replace($pathInfo, "", $uri);
         static::getTableOfContentHtml($pathInfo);
         $tableOfContent = static::$tableOfContentHtml['index'];
+        $search_data = json_encode(static::getSearchData($pathInfo));
         $html =<<<EOF
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>接口文档</title>
-    <link href="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
-    <script src="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{name}} 接口文档</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
     <style>
-    .panel-body {
-        padding: 0;
-    }
-    pre {
-        display: block;
-        padding: 9.5px;
-        margin: 0 0 10px;
-        font-size: 13px;
-        line-height: 1.42857143;
-        color: #333;
-        word-break: break-all;
-        word-wrap: break-word;
-        background-color: #fff;
-        /* border: 1px solid #ccc; */
-        border-radius: 4px;
-        /* font-family:'consolas'; */
-    }
-    </style>
-<body>
-<div class="container-fluid">
-    <h3>接口文档</h3>
-</div>
-<div class="container-fluid">
+body, html {
+    height: 100%;
+    overflow-y:hidden;
+}
 
-    <!-- 左边内容 -->
-    <div class="col-lg-2" style="padding:5px;">
-        {$tableOfContent}
+.book{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.book.with-summary .book-summary {
+    left: 0;
+}
+
+.book-summary {
+    position: absolute;
+    top: 0;
+    left: -350px;
+    bottom: 0;
+    z-index: 1;
+    overflow-y: auto;
+    width: 350px;
+    color: #364149;
+    background: #fafafa;
+    border-right: 1px solid rgba(0,0,0,.07);
+    -webkit-transition: left 250ms ease;
+    -moz-transition: left 250ms ease;
+    -o-transition: left 250ms ease;
+    transition: left 250ms ease;
+}
+
+.book-body {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    color: #333;
+    background: #fff;
+    -webkit-transition: left 250ms ease;
+    -moz-transition: left 250ms ease;
+    -o-transition: left 250ms ease;
+    transition: left 250ms ease;
+}
+
+.book-body .body-inner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding-top: 10px;
+}
+
+.book-header {
+    overflow: visible;
+    height: 50px;
+    z-index: 2;
+    font-size: .85em;
+    color: #7e888b;
+    background: 0 0;
+}
+
+.book-header a.header-menu{
+    font-size: 18px;
+    color: #555555;
+    padding: 10px;
+    text-decoration: none;
+}
+
+.book-header a.header-menu:hover{
+    text-decoration: none;
+    color: #000;
+}
+
+.page-wrapper {
+    position: relative;
+    outline: 0;
+}
+
+.book .book-body .page-wrapper .page-inner {
+    position: relative;
+    left: 0px;
+    transition: 300ms ease left;
+}
+
+.page-inner {
+    position: relative;
+    margin: 0 auto;
+    padding: 20px 15px 40px 15px;
+}
+
+@media (min-width: 600px){
+    .book.with-summary .book-body {
+        left: 350px;
+    }
+}
+
+@media (max-width: 600px){
+    .book-summary {
+        width: calc(100% - 60px);
+        bottom: 0;
+        left: -100%;
+    }
+    .book.with-summary .book-body {
+        -webkit-transform: translate(calc(100% - 60px),0);
+        -moz-transform: translate(calc(100% - 60px),0);
+        -ms-transform: translate(calc(100% - 60px),0);
+        -o-transform: translate(calc(100% - 60px),0);
+        transform: translate(calc(100% - 60px),0);
+    }
+}
+
+@media (max-width: 1240px){
+    .book-body {
+        -webkit-transition: -webkit-transform 250ms ease;
+        -moz-transition: -moz-transform 250ms ease;
+        -o-transition: -o-transform 250ms ease;
+        transition: transform 250ms ease;
+        padding-bottom: 20px;
+    }
+}
+
+@media (max-width: 1240px){
+    .book-body .body-inner {
+        position: static;
+        min-height: calc(100% - 50px);
+    }
+}
+
+.navbar{
+    background: #F7931E;
+    color: #FFF;
+}
+
+.navbar a{
+    color: #FFF;
+}
+.navbar-brand{
+    font-weight: 600;
+}
+
+@media (min-width: 768px){
+    .navbar {
+        border-radius: 0;
+    }
+}
+
+.catalog .panel{
+    margin-bottom: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.catalog .catalog-title {
+    border-bottom: 1px solid #EAEAEA;
+    padding: 1rem 1.25rem;
+    background: rgba(0, 0, 0, .03);
+    cursor: pointer;
+    color: #333;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.catalog-item{
+    padding: 8px 15px;
+    margin-left: 15px;
+    color: #888;
+    border-bottom: solid #EEE 1px;
+    display: block;
+}
+
+.action-item h2 a{
+    color: #888;
+    text-decoration: none;
+}
+
+a:hover{
+    color: #888;
+    text-decoration: none;
+}
+
+.search-box{
+    position: relative;
+    margin: 10px;
+}
+
+.navbar{
+    margin-bottom: 0;
+}
+
+.main-content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.text-bold{
+    font-weight: bold;
+}
+
+/**third part*/
+
+.algolia-autocomplete {
+    width: 100%;
+}
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+    width: 100%;
+}
+.algolia-autocomplete .aa-hint {
+    color: #888;
+}
+.algolia-autocomplete .aa-dropdown-menu {
+    width: 100%;
+    background-color: #ccc;
+    border: 1px solid #EEE;
+    border-top: none;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+    cursor: pointer;
+    padding: 5px 4px;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+    background-color: #F7931E;
+    color: #FFF;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+    font-weight: bold;
+    font-style: normal;
+}
+
+a {
+    text-decoration: none;
+}
+
+</style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{$pathInfo}" style="text-decoration:none;color:#fff;">
+                {{name}} 接口文档
+            </a>
+        </div>
     </div>
-    <div class="col-lg-10" style="padding:5px;">
+</nav>
+<div class="book with-summary">
+    <div class="book-summary">
+      <div class="search-box form-group">
+          <input type="text" class="form-control" id="inputSearch" placeholder="搜索接口">
+          <span class="glyphicon glyphicon-search form-control-feedback" aria-hidden="true"></span>
+      </div>
+
+      <div id="accordion" class="catalog">
+        {$tableOfContent}
+      </div>
+    </div>
+    <div class="book-body">
+        <div class="body-inner">
+            <div class="book-header">
+                <div class="d-flex justify-content-between">
+                    <a class="header-menu toggle-catalog" href="javascript:void(0)"><i
+                                class="glyphicon glyphicon-align-justify"></i> 目录</a>
+                </div>
+            </div>
+            <div class="page-wrapper">
+                <div class="page-inner">
+                    <div class="main-content">
+                        <div class="col-lg-11" style="padding:5px;">
         <h3>所有接口请求方式为POST, 接口地址: {$url}</h3><h5>请求格式如下</h5><pre>
 {
      "timestamp": "xxxxxx",  //当前时间戳 字符串或数字都可以, 注意时间戳允许与服务器时间误差正负600秒
      "signature": "xxxxxxxxxxxxxxxxxxx",   //签名 暂时未使用
-     "requests":[  //开始
-        //第一个调用开始
-        {
+     "request":{
           "params":{    // 这是请求参数
                "test": "Hello"
           },
           "dispatch":"test"  //调用名
-        }
-        //第一个调用结束
-
-        //这里可以有多个调用, 最多5个, 也就是说, 如果多个调用之前没有关连, 可并行调用
-
-    ]
+     }
 }
-</pre>    </pre><h5>响应格式如下 </h5><p style="color:red">注意: responses数组的顺序通常与requests一致, 但也可能通过responses里的dispatch知道是哪个响应 </p><pre>
+</pre>    </pre><h5>响应格式如下 </h5><pre>
 {
    "code": 0,    //最外层的code，0是成功  非0失败  是说明这个请求正确（如，请求方法post，请求格式，即json，等等，但不代表具体的请求接口）
    "message": "成功",   //描述，非0会有具体面描述
    "timestamp": 1458291720, //服务器时间戳
    "deviation": 8 //误差, 即请求的时间戳 与服务器时间的误差
-   "responses": [    //响应，对应请求的requests部份
-       { //第一个请求响应
+   "response": {
          "code": 0,   //0是成功，非0失败
          "message": "成功"， //描述，非0会有具本描述
          "data": {   //响应数据，非0没有
            "success": "true"
          },
          "dispatch": "test"   //对应的调用方式
-       }
-   ]
+   }
 }
 </pre><h5>命名规范</h5>
 <p>xxx.xxx.add  //表示 添加数据</p>
@@ -741,11 +1305,11 @@ Authorization: token值
             </tr>
             <tr>
                 <td>9002</td>
-                <td>requests无效 没有requests段</td>
+                <td>request无效 没有request段</td>
             </tr>
             <tr>
                 <td>9003</td>
-                <td>requests结构有误 requests段没有具体请求方法或结构不对</td>
+                <td>request结构有误 request段没有具体请求方法或结构不对</td>
             </tr>
             <tr>
                 <td>9005</td>
@@ -818,7 +1382,7 @@ secret_key = substr(md5(timestamp), 0, 16);
 
 第二步：
 获取内容
-循环requests，获取request中的params
+获取request中的params
 params的key:value，按key排序
 组成
 key1:value2,key2:value2
@@ -827,11 +1391,6 @@ key1:value2,key2:value2
 例如：
 sys.launch.get|height:2208,width:1242
 
-如果有多个requests，每段request通过/连接，
-例如
-index.list|/sys.launch.get|height:2208,width:1242
-注：index.list如果没有params，则params段的值为空
-格式： dispatch1|params_content1/dispatch2|params_content2
 
 第三步：
 计算签名
@@ -843,13 +1402,13 @@ index.list|/sys.launch.get|height:2208,width:1242
 将上面的签名值，放到最外层
 例如
 {
-    "requests": [{
+    "request": {
         "dispatch": "sys.launch.get",
         "params": {
             "width": 1242,
             "height": 2208
         }
-    }],
+    },
     "signature": "ed2eac434ebacdf0d6c3a301cabf6323",
     "timestamp": "1572167919297"
 }
@@ -862,12 +1421,51 @@ content = sys.launch.get|height:2208,width:1242
 sign = ed2eac434ebacdf0d6c3a301cabf6323
 
         </pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/google-code-prettify@1.0.5/bin/prettify.min.js"></script>
+<script>
+    var search_source_data = {$search_data};
+
+    $('.toggle-catalog').click(function () {
+        $('.book').toggleClass('with-summary');
+    });
+
+    $('#inputSearch').autocomplete({hint: false}, [
+        {
+            source: function (query, callback) {
+                var result = [];
+                for(var i = 0; i !== search_source_data.length; i++){
+                    if(search_source_data[i].name.indexOf(query) !== -1){
+                        result.push(search_source_data[i]);
+                    }
+                }
+                callback(result);
+            },
+            displayKey: 'name',
+            templates: {
+                suggestion: function (suggestion) {
+                    return suggestion.name;
+                }
+            }
+        }
+    ]).on('autocomplete:selected', function (event, suggestion, dataset, context) {
+        self.location = suggestion.url;
+    });
+</script>
 </body>
 </html>
-
 EOF;
+        $config = ApplicationContext::getContainer()->get(\Hyperf\Contract\ConfigInterface::class);
+        $html = str_replace("{{name}}", $config->get('app_name'), $html);
         return $html;
 
     }
@@ -942,8 +1540,7 @@ EOF;
      * @return string
      */
     public static function getRequestParamExampleHtml(string $mapping, array $requestParams) {
-        $req = [];
-        $req[0] = [
+        $req = [
             'dispatch' => $mapping
         ];
 
@@ -985,8 +1582,8 @@ EOF;
         if (count($params) == 0) {
             $params = new \stdClass();
         }
-        $req[0]["params"] = $params;
-        $request['requests'] = $req;
+        $req["params"] = $params;
+        $request['request'] = $req;
         $result_pretty = json_encode($request, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         return $result_pretty;
     }
@@ -1041,17 +1638,16 @@ EOF;
      * @return false|string
      */
     public static function getResponseParamsPreHtml(string $mapping, array $paramData) {
-        $ret = [];
-        $ret[0] = [
+        $ret = [
             'code' => 0,
             'message' => '成功',
             'dispatch' => $mapping
         ];
-        $ret[0]['data'] = static::getResponseParamExampleHtml($paramData);
+        $ret['data'] = static::getResponseParamExampleHtml($paramData);
 
-        $responses["responses"] = $ret;
-        //$result_pretty = json_encode($responses,JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $result_pretty = json_encode($responses, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $response["response"] = $ret;
+        //$result_pretty = json_encode($response,JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $result_pretty = json_encode($response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         return $result_pretty;
     }
 

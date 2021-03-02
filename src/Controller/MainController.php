@@ -56,27 +56,27 @@ class MainController
 
     public function systemExceptionReturn(int $errorCode, string $message, string $actionName)
     {
-        $responses = Context::get(__CLASS__ .':responses',  []);
-        $ret = [
+        $response = [
             'code' => $errorCode,
             'message' => $message,
             'data' => new \stdClass()
         ];
 
         if (!is_null($actionName)) {
-            $ret['dispatch'] = $actionName;
+            $response['dispatch'] = $actionName;
         }
-        $responses[] = $ret;
-        Context::set(__CLASS__ .':responses',  $responses);
+        return $response;
     }
 
-    public function systemReturn(array $responseResults) {
-        $responses = Context::get(__CLASS__ .':responses',  []);
-        foreach($responseResults as $mapping => $ret) {
-            $ret['dispatch'] = $mapping;
-            $responses[] = $ret;
-        }
-        Context::set(__CLASS__ .':responses',  $responses);
+    public function systemReturn($mapping, $response) {
+        $response['dispatch'] = $mapping;
+        return $this->response->json([
+            'code' => 0,
+            'timestamp' => time(),
+            'deviation' => 0,
+            'message' => '成功',
+            'response' => $response
+        ]);
     }
 
     public function validateParam($requestParam, $params, $actionMapping) {
@@ -84,37 +84,32 @@ class MainController
         $require = $requestParam['require'];
         if ($require == 'true') {
             if (!isset($params[$key])) {
-                $this->systemExceptionReturn(9901, "缺少参数: ". $key, $actionMapping);
-                return false;
+                return $this->systemExceptionReturn(9901, "缺少参数: ". $key, $actionMapping);
             }
             //判断类型
             $type = $requestParam['type'];
             $value = $params[$key];
             if ($type == 'string') {
                 if (!is_string($value)) {
-                    $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
-                    return false;
+                    return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
                 }
             }
 
             if ($type == 'int') {
                 if (!is_int($value)) {
-                    $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
-                    return false;
+                    return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
                 }
             }
 
             if ($type == 'float') {
                 if (!is_float($value)) {
-                    $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
-                    return false;
+                    return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
                 }
             }
 
             if ($type == 'array') {
                 if (!is_array($value)) {
-                    $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
-                    return false;
+                    return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
                 }
             }
             return true;
@@ -125,150 +120,106 @@ class MainController
 
     public function index()
     {
-        $this->responses = [];
-        $actionRequests = $this->request->getAttribute("actionRequests");
+        $actionRequest = $this->request->getAttribute("actionRequest");
         $extras = $this->request->getAttribute("extras");
         $headers = $this->request->getHeaders();
 
-        $okRequest = [];
-        foreach($actionRequests as $actionRequest) {
-            if (!is_array($actionRequest)) {
-                continue;
-            }
-            $actionMapping = array_key_exists('dispatch', $actionRequest) ? $actionRequest['dispatch'] : null;
-            if (is_null($actionMapping)) {
-                $this->systemExceptionReturn(8003, '请求参数有误', $actionMapping);   //请求参数有误
-                continue;
-            }
+        $actionMapping = array_key_exists('dispatch', $actionRequest) ? $actionRequest['dispatch'] : null;
+        if (is_null($actionMapping)) {
+            $response = $this->systemExceptionReturn(8003, '请求参数有误', is_null($actionMapping) ? "" : $actionMapping);   //请求参数有误
+            return $this->response->json([
+                'code' => 0,
+                'timestamp' => time(),
+                'deviation' => 0,
+                'message' => '成功',
+                'response' => $response
+            ]);
+        }
 
-            $actionName = ActionCollector::list()[$actionMapping]?? null;
-            if (is_null($actionName)) {
-                $this->systemExceptionReturn(8001, '调度不可用', $actionMapping); //调度名不可用
-                continue;
-            }
+        $actionName = ActionCollector::list()[$actionMapping]?? null;
+        if (is_null($actionName)) {
+            $response =  $this->systemExceptionReturn(8001, '调度不可用', $actionMapping); //调度名不可用
+            return $this->response->json([
+                'code' => 0,
+                'timestamp' => time(),
+                'deviation' => 0,
+                'message' => '成功',
+                'response' => $response
+            ]);
+        }
 
-            $usable = UsableCollector::list()[$actionName]?? false;
-            if ($usable == false) {
-                $this->systemExceptionReturn(8002, '调度暂停使用', $actionMapping); //调度名不可用
-                continue;
-            }
+        $usable = UsableCollector::list()[$actionName]?? false;
+        if ($usable == false) {
+            $response = $this->systemExceptionReturn(8002, '调度暂停使用', $actionMapping); //调度名不可用
+            return $this->response->json([
+                'code' => 0,
+                'timestamp' => time(),
+                'deviation' => 0,
+                'message' => '成功',
+                'response' => $response
+            ]);
+        }
 
-            $defineRequestParam = RequestParamCollector::result()[$actionName]?? [];
-            $validateParam = true;
-            foreach($defineRequestParam as $params) {
-                if (!$this->validateParam($params, $actionRequest['params'], $actionMapping)) {
-                    $validateParam = false;
-                    break;
-                }
-            }
-            if ($validateParam == false) {
+        $defineRequestParam = RequestParamCollector::result()[$actionName]?? [];
+        foreach($defineRequestParam as $params) {
+            $ret = $this->validateParam($params, $actionRequest['params'], $actionMapping);
+            if ($ret !== true) {
+                return $this->response->json([
+                    'code' => 0,
+                    'timestamp' => time(),
+                    'deviation' => 0,
+                    'message' => '成功',
+                    'response' => $ret
+	        ]);
                 break;
             }
-
-
-            $okRequest[$actionMapping] = [
-                'container' => $this->container->get($actionName),
-                'params' => $actionRequest['params'] ?? [],
-                'hasToken' => TokenCollector::list()[$actionName]? true : false
-            ];
         }
+
+        $okRequest = [
+            'mapping' => $actionMapping,
+            'container' => $this->container->get($actionName),
+            'params' => $actionRequest['params'] ?? [],
+            'hasToken' => TokenCollector::list()[$actionName]? true : false
+        ];
 
         //开始处理
-        $responseResults = [];
-        $actionRequesCount = count($okRequest);
-        if ($actionRequesCount == 1) {
-            foreach($okRequest as $mapping => $value) {
-                if ($value['hasToken'] == true) {
-                    $token = $this->getTokenByHeader($headers);
-                    $verify = $this->token->verify($token);
-                    if ($verify != 1) {
-                        if ($verify == 0) {
-                            $ret = [
-                                'code' => 8005,
-                                'message' => 'token失效',
-                                'data' => new \stdClass(),
-                            ];
-                        } else {
-                            $ret = [
-                                'code' => 8006,
-                                'message' => '当前账号在其他终端登录',
-                                'data' => new \stdClass(),
-                            ];
-                        }
-                        $responseResults[$mapping] = $ret;
-                        continue;
-                    }
-                    $this->token->set($token);
-                }
-                $beforeResult = $value['container']->beforeRun($value['params'], $extras, $headers);
-                if ($beforeResult === true) {
-                    $responseResults[$mapping] = $value['container']->run($value['params'], $extras, $headers);
+        if ($okRequest['hasToken'] == true) {
+            $token = $this->getTokenByHeader($headers);
+            $verify = $this->token->verify($token);
+            if ($verify != 1) {
+                if ($verify == 0) {
+                    $ret = [
+                        'code' => 8005,
+                        'message' => 'token失效',
+                        'data' => new \stdClass(),
+                    ];
                 } else {
-                    $responseResults[$mapping] = $beforeResult;
+                    $ret = [
+                        'code' => 8006,
+                        'message' => '当前账号在其他终端登录',
+                        'data' => new \stdClass(),
+                    ];
                 }
+                return $this->systemReturn($okRequest['mapping'], $ret);
             }
-        } else if (count($okRequest) > 1) {
-            //开启协程
-            $parallel = new Parallel($actionRequesCount);
-            foreach($okRequest as $mapping => $value) {
-                $parallel->add(function () use ($value, $extras, $headers) {
-                    Context::copy(\Swoole\Coroutine::getPcid());
-                    if ($value['hasToken'] == true) {
-                        $token = $this->getTokenByHeader($headers);
-                        $verify = $this->token->verify($token);
-                        if ($verify != 1) {
-                            if ($verify == 0) {
-                                $ret = [
-                                    'code' => 8005,
-                                    'message' => 'token失效',
-                                    'data' => new \stdClass(),
-                                ];
-                            } else {
-                                $ret = [
-                                    'code' => 8006,
-                                    'message' => '当前账号在其他终端登录',
-                                    'data' => new \stdClass(),
-                                ];
-                            }
-                            return $ret;
-                        }
-                        $this->token->set($token);
-                    }
-                    $beforeResult = $value['container']->beforeRun($value['params'], $extras, $headers);
-                    if ($beforeResult === true) {
-                        $result = $value['container']->run($value['params'], $extras, $headers);
-                    } else {
-                        $result = $beforeResult;
-                    }
-                    //\Swoole\Coroutine::sleep(1);
-                    return $result;
-                }, $mapping);
-            }
-
-            try {
-                $responseResults = $parallel->wait();
-            }  catch(ParallelExecutionException $e){
-                //var_dump(1);
-                echo $e->getMessage();
-                //var_dump($e->getResults()); // 获取协程中的返回值。
-                //var_dump($e->getThrowables()); // 获取协程中出现的异常。
-            }
+            $this->token->set($token);
         }
-
-        $this->systemReturn($responseResults);
-        $responses = Context::get(__CLASS__ .':responses',  []);
-        return $this->response->json([
-            'code' => 0,
-            'timestamp' => time(),
-            'deviation' => 0,
-            'message' => '成功',
-            'response' => $responses
-        ]);
+        $beforeResult = $okRequest['container']->beforeRun($okRequest['params'], $extras, $headers);
+        if ($beforeResult === true) {
+            $ret  = $okRequest['container']->run($okRequest['params'], $extras, $headers);
+            return $this->systemReturn($okRequest['mapping'], $ret);
+        } else {
+            return $this->systemReturn($okRequest['mapping'], $beforeResult);
+        }
     }
 
     public function getTokenByHeader($headers) {
-        if (isset($headers['authorization'][0])) {
-            return $headers['authorization'][0];
+        foreach($headers as $key => $value) {
+            if (strtolower($key) == 'authorization') {
+                if (isset($value[0])) {
+                    return $value[0];
+                }
+            }
         }
         return "";
     }

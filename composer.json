@@ -1,5 +1,5 @@
 {
-    "name": "wayhood/hyperf-action",
+    "name": "wayhood/hyperf-action2",
     "type": "library",
     "license": "MIT",
     "keywords": [
@@ -19,15 +19,8 @@
     },
     "require": {
         "php": ">=7.2",
-        "ext-swoole": ">=4.4",
-        "hyperf/framework": "~1.1.0",
-        "hyperf/di": "~1.1.0"
-    },
-    "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.14",
-        "phpstan/phpstan": "^0.10.5",
-        "hyperf/testing": "1.1.*",
-        "swoft/swoole-ide-helper": "dev-master"
+        "ext-swoole": ">=4.5",
+        "hyperf/framework": "~2.0.0"
     },
     "config": {
         "sort-packages": true

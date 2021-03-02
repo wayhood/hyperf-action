@@ -34,13 +34,19 @@ abstract class AbstractAction
     protected $response;
 
     protected function getTokenByHeader($headers) {
-        if (isset($headers['authorization'][0])) {
-            return $headers['authorization'][0];
+        foreach($headers as $key => $value) {
+            if (strtolower($key) == 'authorization') {
+                if (isset($value[0])) {
+                    return $value[0];
+                }
+            }
         }
         return "";
     }
 
-    abstract public function beforeRun($params, $extras, $headers);
+    public function beforeRun($params, $extras, $headers) {
+        return true;
+    }
 
     abstract public function run($params, $extras, $headers);
 
@@ -69,11 +75,10 @@ abstract class AbstractAction
 
     protected function successReturn($data = [])
     {
+        $data = ResponseFilter::processResponseData($data, get_called_class());
         if (is_array($data) && count($data) == 0) {
             $data = new \stdClass();
         }
-
-        $data = ResponseFilter::processResponseData($data, get_called_class());
         return [
             'code' => 0,
             'message' => '成功',
