@@ -20,8 +20,10 @@ class ActionCollector extends MetadataCollector
 
     public static function collectClass(string $class, string $annotation, $value): void
     {
-        $msg = "Duplicate definition Action(\"$value\") in ". static::$container[$value] .",". $class;
-        throw new \Exception($msg);
+        if (isset(static::$container[$value])) {
+            $msg = "Duplicate definition Action(\"$value\") in ". static::$container[$value] .",". $class;
+            throw new \Exception($msg);
+        }
         static::$container[$value] = $class;
     }
 
