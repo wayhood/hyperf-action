@@ -102,6 +102,9 @@ class MainController
             }
 
             if ($type == 'float') {
+                if (is_int($value)) {
+                    $value = floatval($value);
+                }
                 if (!is_float($value)) {
                     return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
                 }
