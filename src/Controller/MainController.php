@@ -183,7 +183,7 @@ class MainController
         $okRequest = [
             'mapping' => $actionMapping,
             'container' => $this->container->get($actionName),
-            'params' => $actionRequest['params'] ?? [],
+            'params' => $filterActionRequestParams ?? [],
             'hasToken' => TokenCollector::list()[$actionName]? true : false
         ];
 
