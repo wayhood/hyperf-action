@@ -86,39 +86,39 @@ class MainController
             if (!isset($params[$key])) {
                 return $this->systemExceptionReturn(9901, "缺少参数: ". $key, $actionMapping);
             }
-            //判断类型
-            $type = $requestParam['type'];
-            $value = $params[$key];
-            if ($type == 'string') {
-                if (!is_string($value)) {
-                    return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
-                }
-            }
-
-            if ($type == 'int') {
-                if (!is_int($value)) {
-                    return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
-                }
-            }
-
-            if ($type == 'float') {
-                if (is_int($value)) {
-                    $value = floatval($value);
-                }
-                if (!is_float($value)) {
-                    return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
-                }
-            }
-
-            if ($type == 'array') {
-                if (!is_array($value)) {
-                    return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
-                }
-            }
-            return true;
-        } else {
-            return true;
         }
+
+        //判断类型
+        $type = $requestParam['type'];
+        $value = $params[$key];
+        if ($type == 'string') {
+            if (!is_string($value)) {
+                return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+            }
+        }
+
+        if ($type == 'int') {
+            if (!is_int($value)) {
+                return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+            }
+        }
+
+        if ($type == 'float') {
+            if (is_int($value)) {
+                $value = floatval($value);
+            }
+            if (!is_float($value)) {
+                return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+            }
+        }
+
+        if ($type == 'array') {
+            if (!is_array($value)) {
+                return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+            }
+        }
+        
+        return true;
     }
 
     public function index()
@@ -164,6 +164,7 @@ class MainController
         }
 
         $defineRequestParam = RequestParamCollector::result()[$actionName]?? [];
+        $filterActionRequestParams = [];
         foreach($defineRequestParam as $params) {
             $ret = $this->validateParam($params, $actionRequest['params'], $actionMapping);
             if ($ret !== true) {
@@ -173,9 +174,10 @@ class MainController
                     'deviation' => 0,
                     'message' => '成功',
                     'response' => $ret
-	        ]);
+                ]);
                 break;
             }
+            $filterActionRequestParams[$params['name']] = $actionRequest['params']['name'];
         }
 
         $okRequest = [
