@@ -25,7 +25,7 @@ class ResponseFilter
             $newV = [];
             foreach ($mapData as $key => $value) {
                 if (array_key_exists($key, $v)) {
-                    $newV[$key] = self::processVarType($value['type'], $v[$key]);
+                    $newV[$key] = self::processVarType($value['type'], $v[$key], $value['example']);
                     if (array_key_exists('children', $value)) {
                         $newV[$key] = self::filterData($newV[$key], $value['children']);
                     }
@@ -36,7 +36,7 @@ class ResponseFilter
         return $newData;
     }
 
-    public static function processVarType($type, $value) {
+    public static function processVarType($type, $value, $example) {
         if ($type == 'string') {
             if (is_null($value)) {
                 $value = '';
@@ -44,7 +44,19 @@ class ResponseFilter
             if (!is_string($value)
                 && is_scalar($value)
             ) {
-                $value = strval(trim($value));
+                //float 转 string 丢失精度 获取$exmaple的精度
+                if (is_float($value)) {
+                    $tmp = explode('.', $example);
+                    if (count($tmp) == 2) {
+                        $decimal = strlen($tmp[1]);
+                        $value = number_format($value, $decimal, '.', '');
+                    } else {
+                        $decimal = 0;
+                        $value = strval(trim($value));
+                    }
+                } else {
+                    $value = strval(trim($value));
+                }
             }
         } else if ($type == 'int') {
             if (is_null($value)) {
@@ -81,7 +93,7 @@ class ResponseFilter
                 return $newData;
             }
             if (array_key_exists($key, $data)) {
-                $newData[$key] = self::processVarType($value['type'], $data[$key]);
+                $newData[$key] = self::processVarType($value['type'], $data[$key], $value['example']);
                 if (array_key_exists('children', $value)) {
                     $newData[$key] = self::filterData($newData[$key], $value['children']);
                 }
