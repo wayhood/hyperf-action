@@ -177,7 +177,7 @@ class MainController
                 ]);
                 break;
             }
-            $filterActionRequestParams[$params['name']] = $actionRequest['params']['name'];
+            $filterActionRequestParams[$params['name']] = $actionRequest['params'][$params['name']];
         }
 
         $okRequest = [
