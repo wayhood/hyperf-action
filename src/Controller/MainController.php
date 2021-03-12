@@ -90,31 +90,33 @@ class MainController
 
         //判断类型
         $type = $requestParam['type'];
-        $value = $params[$key];
-        if ($type == 'string') {
-            if (!is_string($value)) {
-                return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+        if (isset($params[$key])) {
+            $value = $params[$key];
+            if ($type == 'string') {
+                if (!is_string($value)) {
+                    return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+                }
             }
-        }
 
-        if ($type == 'int') {
-            if (!is_int($value)) {
-                return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+            if ($type == 'int') {
+                if (!is_int($value)) {
+                    return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+                }
             }
-        }
 
-        if ($type == 'float') {
-            if (is_int($value)) {
-                $value = floatval($value);
+            if ($type == 'float') {
+                if (is_int($value)) {
+                    $value = floatval($value);
+                }
+                if (!is_float($value)) {
+                    return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+                }
             }
-            if (!is_float($value)) {
-                return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
-            }
-        }
 
-        if ($type == 'array') {
-            if (!is_array($value)) {
-                return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+            if ($type == 'array') {
+                if (!is_array($value)) {
+                    return $this->systemExceptionReturn(9902, $key ." 类型不匹配，请查看文档", $actionMapping);
+                }
             }
         }
         
@@ -177,7 +179,9 @@ class MainController
                 ]);
                 break;
             }
-            $filterActionRequestParams[$params['name']] = $actionRequest['params'][$params['name']];
+            if (isset($actionRequest['params'][$params['name']])) {
+                $filterActionRequestParams[$params['name']] = $actionRequest['params'][$params['name']];
+            }
         }
 
         $okRequest = [
