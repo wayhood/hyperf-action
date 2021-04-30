@@ -14,7 +14,7 @@ class ResponseFilter
             return $data;
         }
         //根据配置，过滤响应参数
-        $data = self::filterData($data, ResponseParamCollector::result()[$className]??[]);
+        $data = self::filterData($data, ResponseParamCollector::result()[$className]??[], 'array');
         return $data;
     }
 
@@ -27,7 +27,7 @@ class ResponseFilter
                 if (array_key_exists($key, $v)) {
                     $newV[$key] = self::processVarType($value['type'], $v[$key], $value['example']);
                     if (array_key_exists('children', $value)) {
-                        $newV[$key] = self::filterData($newV[$key], $value['children']);
+                        $newV[$key] = self::filterData($newV[$key], $value['children'], $value['type']);
                     }
                 }
             }
@@ -84,7 +84,7 @@ class ResponseFilter
         return $value;
     }
 
-    public static function filterData($data, $mapData)
+    public static function filterData($data, $mapData, $type)
     {
         $newData = [];
         foreach ($mapData as $key => $value) {
@@ -95,8 +95,14 @@ class ResponseFilter
             if (array_key_exists($key, $data)) {
                 $newData[$key] = self::processVarType($value['type'], $data[$key], $value['example']);
                 if (array_key_exists('children', $value)) {
-                    $newData[$key] = self::filterData($newData[$key], $value['children']);
+                    $newData[$key] = self::filterData($newData[$key], $value['children'], $value['type']);
                 }
+            }
+        }
+
+        if ($type == 'map' || $type == 'object') {
+            if (empty($newData)) {
+                $newData = new \stdClass();
             }
         }
 
