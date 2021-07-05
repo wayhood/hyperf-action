@@ -18,9 +18,9 @@
         }
     },
     "require": {
-        "php": ">=7.2",
+        "php": ">=7.3",
         "ext-swoole": ">=4.5",
-        "hyperf/framework": "~2.0.0"
+        "hyperf/framework": "~2.1.0"
     },
     "config": {
         "sort-packages": true
