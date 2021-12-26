@@ -741,9 +741,16 @@ EOF;
 
         $html = str_replace("{{dispatch}}", $mapping, $html);
         $html = str_replace("{{desc}}", DescriptionCollector::list()[$actionName], $html);
-        $html = str_replace("{{style}}", UsableCollector::list()[$actionName] == false ? "text-decoration: line-through;" : "", $html);
-        $html = str_replace("{{token}}", TokenCollector::list()[$actionName] == true ? static::getTokenHtml() : "", $html);
-
+        if (isset(UsableCollector::list()[$actionName])) {
+            $html = str_replace("{{style}}", UsableCollector::list()[$actionName] == false ? "text-decoration: line-through;" : "", $html);
+        } else {
+            $html = str_replace("{{style}}", "text-decoration: line-through;", $html);
+        }
+        if (isset(TokenCollector::list()[$actionName])) {
+            $html = str_replace("{{token}}", TokenCollector::list()[$actionName]== true ? static::getTokenHtml() : "", $html);
+        } else {
+            $html = str_replace("{{token}}", "", $html);
+        }
         return $html;
     }
 
@@ -801,7 +808,7 @@ EOF;
                     'usable' => UsableCollector::list()[$class] ?? false,
                     'token' => TokenCollector::list()[$class] ?? false,
                 ];
-	    }
+        }
             ksort($tableOfContent, SORT_STRING);
             static::$tableOfContent = $tableOfContent;
         }
@@ -857,7 +864,7 @@ EOF;
                     $html .= '<a class="catalog-item '. $active .'" href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'">'. $text ."</a>";
                     //$html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
                 }
-                $html .= '		</div>    </div>';
+                $html .= '      </div>    </div>';
             }
             static::$tableOfContentHtml[$class] = $html;
         }
@@ -893,7 +900,7 @@ EOF;
                 $html .= '<a class="catalog-item '. $active .'" href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'">'. $text ."</a>";
                 //$html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
             }
-            $html .= '		</div>    </div>';
+            $html .= '      </div>    </div>';
         }
         static::$tableOfContentHtml['index'] = $html;
     }
@@ -917,8 +924,8 @@ EOF;
             static::getErrorCodeHtml();
         }
 
-	$actionMap = ActionCollector::list();
-	if (!isset($actionMap[$action])) {
+    $actionMap = ActionCollector::list();
+    if (!isset($actionMap[$action])) {
             return "Not Found Dispatch";
         }
         $actionName = $actionMap[$action];

@@ -22,6 +22,7 @@ use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
 use Wayhood\HyperfAction\Contract\TokenInterface;
 use Wayhood\HyperfAction\Service\TokenService;
+use Wayhood\HyperfAction\Command\ActionCommand;
 
 class ConfigProvider
 {
@@ -32,6 +33,7 @@ class ConfigProvider
                 TokenInterface::class => TokenService::class
             ],
             'commands' => [
+                ActionCommand::class
             ],
             'annotations' => [
                 'scan' => [

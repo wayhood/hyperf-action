@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 namespace Wayhood\HyperfAction\Middleware;
 
 use Hyperf\Contract\ConfigInterface;
@@ -45,7 +46,8 @@ class ActionMiddleware implements MiddlewareInterface
         $this->config = $config->get('wayhood');
     }
 
-    public function responsesReturn(int $code, string $message) {
+    public function responsesReturn(int $code, string $message)
+    {
         $response = new \stdClass();
         $data = [
             'code' => $code,
@@ -82,7 +84,7 @@ class ActionMiddleware implements MiddlewareInterface
         if (is_null($body)) {
             return $this->responsesReturn(9001, 'payloads结构有误');
         }
-        
+
         $verifyTimestamp = $this->config['verify_timestamp'];
 
         $old_timestamp = 0;
@@ -108,12 +110,12 @@ class ActionMiddleware implements MiddlewareInterface
 
         //分析设备信息
         $extras = [];
-        if (array_key_exists('extras', $body) && is_array($body['extras'])) {
+        if (isset($body['extras']) && is_array($body['extras'])) {
             $extras = $body['extras'];
         }
 
         //多请求处理
-        if (!array_key_exists('request', $body)) {
+        if (!isset($body['request'])) {
             return $this->responsesReturn(9002, 'request无效');
         }
 
