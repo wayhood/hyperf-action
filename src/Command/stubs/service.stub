@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+namespace %NAMESPACE%;
+
+use App\Contract\AbstractService;
+
+
+class %CLASS% extends AbstractService
+{
+    public function get()
+    {
+        // TODO
+    }
+
+    public function list()
+    {
+        // TODO
+    }
+}
