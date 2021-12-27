@@ -33,8 +33,10 @@ class ActionCommand extends GeneratorCommand
     protected function buildClass($name)
     {
         $stub = file_get_contents($this->getStub());
-        $class = str_replace($this->getNamespace($name) . '\\', '', $name);
-        $stub = str_replace('%ACTION%', strtolower($class), $stub);
+        $action = str_replace('App\\Action\\', '', $name);
+        $action = str_replace('Action', '', $action);
+        $action = str_replace('\\', '.', $action);
+        $stub = str_replace('%ACTION%', strtolower($action), $stub);
         return $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
     }
 

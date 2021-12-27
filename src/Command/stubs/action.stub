@@ -20,10 +20,10 @@ use Wayhood\HyperfAction\Annotation\Usable;
  * 以下注解用于生成文档校验数据类型和过滤响应输出
  *
  * 分类
- * @Category("测试")
+ * @Category("临时")
  *
  * 描述
- * @Description("测试请求")
+ * @Description("%ACTION%")
  *
  * 请求参数
  * 格式:  name="名称",  type="类型", require=是否必须, example=示例值, description="描述"
