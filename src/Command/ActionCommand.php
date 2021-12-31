@@ -13,10 +13,7 @@ namespace Wayhood\HyperfAction\Command;
 
 use Hyperf\Command\Annotation\Command;
 use Hyperf\Devtool\Generator\GeneratorCommand;
-/**
- * @Command
- */
-#[Command]
+
 class ActionCommand extends GeneratorCommand
 {
     public function __construct()
