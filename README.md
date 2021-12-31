@@ -24,6 +24,20 @@ Router::get('/doc',
     'Wayhood\HyperfAction\Controller\MainController@doc');
 ```
 
+命令
+=====
+
+显示指定dispatch对应的类，显示所有action
+```shell
+php bin/hyperf.php describe:actions  -d study.list
+php bin/hyperf.php describe:actions
+```
+
+生成命令
+```shell
+php bin/hyperf.php gen:action --namespace 'App\Action\User' LoginAction
+php bin/hyperf.php gen:service --namespace 'App\Service\Test' TestService
+```
 
 创建Action
 =====
