@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace Wayhood\HyperfAction\Command;
 
 use Hyperf\Command\Annotation\Command;
-use Hyperf\Devtool\Generator\GeneratorCommand;
 
 class ActionCommand extends GeneratorCommand
 {
