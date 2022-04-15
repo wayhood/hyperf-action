@@ -1690,7 +1690,11 @@ EOF;
         $jsonData = [];
         foreach ($data as $key => $line) {
             if (is_numeric($key)) {
-                $jsonData[] = static::getResponseParamExampleHtml($line['children']);
+                if (isset($line['children'])) {
+                    $jsonData[] = static::getResponseParamExampleHtml($line['children']);
+                } else {
+                    $jsonData[] = $line['example'];
+                }
                 return $jsonData;
             }
 
