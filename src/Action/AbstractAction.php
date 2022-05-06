@@ -50,7 +50,7 @@ abstract class AbstractAction
 
     abstract public function run($params, $extras, $headers);
 
-    protected function errorReturn(int $errorCode, string $message = "", array $replace = []) {
+    public function errorReturn(int $errorCode, string $message = "", array $replace = []) {
         $errorCodes = ErrorCodeCollector::result()[get_called_class()] ?? "";
 
         if (isset($errorCodes[$errorCode]) && empty($message)) {
@@ -73,7 +73,7 @@ abstract class AbstractAction
         ];
     }
 
-    protected function successReturn($data = [])
+    public function successReturn($data = [])
     {
         $data = ResponseFilter::processResponseData($data, get_called_class());
         if (is_array($data) && count($data) == 0) {
