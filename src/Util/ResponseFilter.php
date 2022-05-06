@@ -89,7 +89,11 @@ class ResponseFilter
         $newData = [];
         foreach ($mapData as $key => $value) {
             if (is_numeric($key)) {
-                $newData = self::filterArrayData($data, $value['children']);
+                if (isset($value['children'])) {
+                    $newData = self::filterArrayData($data, $value['children']);
+                } else {
+                    $newData = $data;
+                }
                 return $newData;
             }
             if (array_key_exists($key, $data)) {
