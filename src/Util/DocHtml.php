@@ -153,9 +153,9 @@ EOF;
      */
     public static $footerHtml = <<<EOF
     </div>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script>
+<script src="https://cdn.wayhood.com/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.wayhood.com/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.wayhood.com/autocomplete.js/0/autocomplete.jquery.min.js"></script>
 <script>
 
     var search_source_data = {{searchData}};
@@ -203,8 +203,8 @@ EOF;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{{name}} 接口文档</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.wayhood.com/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.wayhood.com/npm/font-awesome@4.7.0/css/font-awesome.min.css">
     <style>
     pre {
         display: block;
@@ -988,8 +988,8 @@ EOF;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{{name}} 接口文档</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.wayhood.com/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.wayhood.com/npm/font-awesome@4.7.0/css/font-awesome.min.css">
     <style>
 body, html {
     height: 100%;
@@ -1449,10 +1449,10 @@ sign = ed2eac434ebacdf0d6c3a301cabf6323
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/google-code-prettify@1.0.5/bin/prettify.min.js"></script>
+<script src="https://cdn.wayhood.com/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.wayhood.com/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.wayhood.com/autocomplete.js/0/autocomplete.jquery.min.js"></script>
+<script src="https://cdn.wayhood.com/npm/google-code-prettify@1.0.5/bin/prettify.min.js"></script>
 <script>
     var search_source_data = {$search_data};
 
