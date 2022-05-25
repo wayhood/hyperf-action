@@ -22,7 +22,7 @@ use Wayhood\HyperfAction\Collector\RequestParamCollector;
 /**
  * @Command
  */
-class PostMan extends HyperfCommand
+class GeneratorPostmanCommand extends HyperfCommand
 {
     /**
      * @var ContainerInterface
