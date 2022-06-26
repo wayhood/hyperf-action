@@ -20,7 +20,8 @@
     "require": {
         "php": ">=7.3",
         "ext-swoole": ">=4.5",
-        "hyperf/framework": "~2.2.0"
+        "hyperf/framework": "~2.2.0",
+        "hyperf/validation": "^2.2"
     },
     "config": {
         "sort-packages": true

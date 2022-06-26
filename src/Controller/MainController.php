@@ -8,10 +8,12 @@ use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\Middleware;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
+use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Context;
 use Hyperf\Utils\Exception\ParallelExecutionException;
 use Hyperf\Utils\Parallel;
 use Hyperf\Di\Annotation\Inject;
+use Hyperf\Validation\Contract\ValidatorFactoryInterface;
 use Psr\Container\ContainerInterface;
 use Wayhood\HyperfAction\Annotation\Category;
 use Wayhood\HyperfAction\Collector\ActionCollector;
@@ -19,6 +21,7 @@ use Wayhood\HyperfAction\Collector\CategoryCollector;
 use Wayhood\HyperfAction\Collector\DescriptionCollector;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
+use Wayhood\HyperfAction\Collector\RequestRuleCollector;
 use Wayhood\HyperfAction\Collector\ResponseParamCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
@@ -186,6 +189,18 @@ class MainController
                 $filterActionRequestParams[$params['name']] = $actionRequest['params'][$params['name']];
             }
         }
+        $ruleRequest = RequestRuleCollector::result()[$actionName]??[];
+        $ret_rule = $this->validate_rule($ruleRequest,$actionRequest['params'],$actionMapping);
+        if ($ret_rule!==true)
+        {
+            return $this->response->json([
+                'code' => 0,
+                'timestamp' => time(),
+                'deviation' => 0,
+                'message' => '成功',
+                'response' => $ret_rule
+            ]);
+        }
 
         $okRequest = [
             'mapping' => $actionMapping,
@@ -225,6 +240,19 @@ class MainController
         }
     }
 
+    public function validate_rule($rules, $params, $actionMapping)
+    {
+        $rule = $rules['rules'];
+        $messages = $rules['messages'];
+        $validator = ApplicationContext::getContainer()->get(ValidatorFactoryInterface::class);
+        $validator=$validator->make($params,$rule,$messages);
+        if ($validator->fails())
+        {
+            return $this->systemExceptionReturn(9800,$validator->errors()->first(),$actionMapping);
+        }
+        return true;
+    }
+    
     public function getTokenByHeader($headers)
     {
         foreach ($headers as $key => $value) {
