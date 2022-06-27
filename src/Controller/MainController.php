@@ -13,6 +13,7 @@ use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
+use Wayhood\HyperfAction\Collector\RequestValidateCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
 use Wayhood\HyperfAction\Contract\TokenInterface;
@@ -187,6 +188,21 @@ class MainController
             }
         }
 
+        $defineRequestValidate = RequestValidateCollector::result()[$actionName] ?? [];
+        foreach ($defineRequestValidate as $validate)
+        {
+            $ret = $this->check_validate($validate,$actionRequest['params'],$actionMapping);
+            if ($ret !== true) {
+                return $this->response->json([
+                    'code' => 0,
+                    'timestamp' => time(),
+                    'deviation' => 0,
+                    'message' => '成功',
+                    'response' => $ret
+                ]);
+                break;
+            }
+        }
         $okRequest = [
             'mapping' => $actionMapping,
             'container' => $this->container->get($actionName),
@@ -250,6 +266,18 @@ class MainController
         }
 
         return $this->response->raw(DocHtml::getActionHtml($action, $this->request->getPathInfo()));
+    }
+
+    protected function check_validate($validate, $params, $actionMapping)
+    {
+        $validate_factory = $validate['validate'];
+        $scene = $validate['scene'];
+        if ($scene!==null)
+        {
+            $validate_factory = $validate_factory->scene($scene);
+        }
+        $validate = $validate_factory->make($params,false);
+        return $validate===true?:$this->systemExceptionReturn(9800,$validate->errors()->first(),$actionMapping);
     }
 
 
