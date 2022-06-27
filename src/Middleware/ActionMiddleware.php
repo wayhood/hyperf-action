@@ -79,10 +79,10 @@ class ActionMiddleware implements MiddlewareInterface
         }
 
         $body = $request->getBody()->getContents();
-        $body = @json_decode($body, true);
+        $body = json_decode($body, true);
 
-        if (is_null($body)) {
-            return $this->responsesReturn(9001, 'payloads结构有误');
+        if (json_last_error()!==JSON_ERROR_NONE) {
+            return $this->responsesReturn(9001, 'payloads结构有误.info:['.json_last_error_msg().']');
         }
 
         $verifyTimestamp = $this->config['verify_timestamp'];
