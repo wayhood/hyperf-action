@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wayhood\HyperfAction\Controller;
 
+use Hyperf\Command\Event\BeforeHandle;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\Middleware;
 use Hyperf\HttpServer\Contract\RequestInterface;
@@ -13,6 +14,7 @@ use Hyperf\Utils\Exception\ParallelExecutionException;
 use Hyperf\Utils\Parallel;
 use Hyperf\Di\Annotation\Inject;
 use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Wayhood\HyperfAction\Annotation\Category;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\CategoryCollector;
@@ -23,6 +25,7 @@ use Wayhood\HyperfAction\Collector\ResponseParamCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
 use Wayhood\HyperfAction\Contract\TokenInterface;
+use Wayhood\HyperfAction\Event\BeforeAction;
 use Wayhood\HyperfAction\Util\DocHtml;
 
 /**
@@ -48,6 +51,12 @@ class MainController
      * @var ResponseInterface
      */
     protected $response;
+
+    /**
+     * @Inject
+     * @var EventDispatcherInterface
+     */
+    protected $eventDispatcher;
 
     /**
      * @Inject()
@@ -216,8 +225,10 @@ class MainController
             }
             $this->token->set($token);
         }
-        $beforeResult = $okRequest['container']->beforeRun($okRequest['params'], $extras, $headers);
+        $params = $okRequest['params'];
+        $beforeResult = $okRequest['container']->beforeRun($params, $extras, $headers);
         if ($beforeResult === true) {
+            $this->eventDispatcher->dispatch(new BeforeAction(get_class($okRequest['container']),$params,$extras,$headers));
             $ret = $okRequest['container']->run($okRequest['params'], $extras, $headers);
             return $this->systemReturn($okRequest['mapping'], $ret);
         } else {
