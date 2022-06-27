@@ -33,13 +33,13 @@ class RequestParamCollector extends MetadataCollector
     public static function parseParams() {
         foreach(static::list() as $class => $requestParams) {
             $result = [];
-            foreach($requestParams as $requetParam) {
+            foreach($requestParams as $requestParam) {
                 $result[] = [
-                    'name' => $requetParam->name,
-                    'type' => $requetParam->type,
-                    'require' => $requetParam->require,
-                    'example' => $requetParam->example,
-                    'desc' => $requetParam->description,
+                    'name' => $requestParam->name,
+                    'type' => $requestParam->type,
+                    'require' => $requestParam->require,
+                    'example' => $requestParam->example,
+                    'desc' => $requestParam->description,
                 ];
             }
             static::$result[$class] = $result;
