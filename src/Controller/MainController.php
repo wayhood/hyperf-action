@@ -4,24 +4,15 @@ declare(strict_types=1);
 
 namespace Wayhood\HyperfAction\Controller;
 
-use Hyperf\Command\Event\BeforeHandle;
-use Hyperf\HttpServer\Annotation\Controller;
-use Hyperf\HttpServer\Annotation\Middleware;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
+use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Context;
-use Hyperf\Utils\Exception\ParallelExecutionException;
-use Hyperf\Utils\Parallel;
 use Hyperf\Di\Annotation\Inject;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Wayhood\HyperfAction\Annotation\Category;
 use Wayhood\HyperfAction\Collector\ActionCollector;
-use Wayhood\HyperfAction\Collector\CategoryCollector;
-use Wayhood\HyperfAction\Collector\DescriptionCollector;
-use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
-use Wayhood\HyperfAction\Collector\ResponseParamCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
 use Wayhood\HyperfAction\Contract\TokenInterface;
@@ -250,9 +241,9 @@ class MainController
 
     public function doc()
     {
-        $response = Context::get(\Psr\Http\Message\ResponseInterface::class);
+        $response = ApplicationContext::getContainer()->get(\Psr\Http\Message\ResponseInterface::class);
         $response = $response->withHeader('Content-Type', 'text/html;charset=utf-8');
-        Context::set(\Psr\Http\Message\ResponseInterface::class, $response);
+        ApplicationContext::getContainer()->set(\Psr\Http\Message\ResponseInterface::class, $response);
         $action = $this->request->input("dispatch", "");
         if ($action == "") {
             return $this->response->raw(DocHtml::getIndexHtml($this->request->getUri(), $this->request->getPathInfo()));
