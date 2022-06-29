@@ -1,13 +1,20 @@
 <?php
 
-
+declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 namespace Wayhood\HyperfAction\Service;
 
 use Wayhood\HyperfAction\Contract\TokenInterface;
 
 /**
- * Class TokenService
- * @package App\Service
+ * Class TokenService.
  */
 class TokenService implements TokenInterface
 {
@@ -36,5 +43,4 @@ class TokenService implements TokenInterface
     {
         // TODO: Implement get() method.
     }
-
 }

@@ -155,7 +155,6 @@ class GeneratorPostmanCommand extends HyperfCommand
 
         $filename = $appName . '_postman_environment.json';
         file_put_contents($dir . '/' . $filename, json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-
     }
 
     private function getRequestParams($requestParams, $mapping)

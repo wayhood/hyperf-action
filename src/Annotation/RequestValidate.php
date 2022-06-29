@@ -1,8 +1,15 @@
 <?php
 
-
+declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 namespace Wayhood\HyperfAction\Annotation;
-
 
 use Hyperf\Di\Annotation\AbstractAnnotation;
 use Wayhood\HyperfAction\Collector\RequestValidateCollector;
@@ -14,24 +21,23 @@ use Wayhood\HyperfAction\Collector\RequestValidateCollector;
 class RequestValidate extends AbstractAnnotation
 {
     /**
-     * validate class
+     * validate class.
      * @var string
      */
     public $validate;
 
     /**
-     * 场景
+     * 场景.
      * @var null|string
      */
-    public $scene = null;
+    public $scene;
 
     public function __construct($value = null)
     {
         parent::__construct($value);
         if (is_array($value)) {
             foreach ($value as $key => $val) {
-                switch ($key)
-                {
+                switch ($key) {
                     case 'v':
                         $this->validate = $val;
                         break;

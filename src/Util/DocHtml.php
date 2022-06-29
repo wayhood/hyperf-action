@@ -1,6 +1,14 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 namespace Wayhood\HyperfAction\Util;
 
 use Hyperf\Utils\ApplicationContext;
@@ -16,52 +24,52 @@ use Wayhood\HyperfAction\Collector\UsableCollector;
 class DocHtml
 {
     /**
-     * 目录html
+     * 目录html.
      * @var array
      */
     public static $tableOfContentHtml = [];
 
     /**
-     * 目录内容
+     * 目录内容.
      * @var array
      */
     public static $tableOfContent = [];
 
     /**
-     * 请求参数Html
+     * 请求参数Html.
      * @var array
      */
     public static $requestParamHtmls = [];
 
     /**
-     * 请求参数示例Html
+     * 请求参数示例Html.
      * @var array
      */
     public static $requestParamExampleHtmls = [];
 
     /**
-     * 响应参数Html
+     * 响应参数Html.
      * @var array
      */
     public static $responseParamHtmls = [];
 
     /**
-     * 响应参数示例Html
+     * 响应参数示例Html.
      * @var array
      */
     public static $responseParamExampleHtml = [];
 
     /**
-     * 错误代码html
+     * 错误代码html.
      * @var array
      */
     public static $errorCodeHtml = [];
 
     /**
-     * 左侧html模版
+     * 左侧html模版.
      * @var string
      */
-    public static $leftHtml = <<<EOF
+    public static $leftHtml = <<<'EOF'
     <div class="book-summary">
       <div class="search-box form-group">
           <input type="text" class="form-control" id="inputSearch" placeholder="搜索接口">
@@ -75,10 +83,10 @@ class DocHtml
 EOF;
 
     /**
-     * 右侧html模版
+     * 右侧html模版.
      * @var string
      */
-    public static $rightHtml = <<<EOF
+    public static $rightHtml = <<<'EOF'
     <div class="book-body">
         <div class="body-inner">
             <div class="book-header">
@@ -146,12 +154,11 @@ EOF;
 
 EOF;
 
-
     /**
-     * 底部Html模版
+     * 底部Html模版.
      * @var string
      */
-    public static $footerHtml = <<<EOF
+    public static $footerHtml = <<<'EOF'
     </div>
 <script src="https://cdn.wayhood.com/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
 <script src="https://cdn.wayhood.com/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
@@ -193,10 +200,10 @@ EOF;
 EOF;
 
     /**
-     * 头部Html模版
+     * 头部Html模版.
      * @var string
      */
-    public static $headerHtml = <<<EOF
+    public static $headerHtml = <<<'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -279,26 +286,26 @@ EOF;
             json = JSON.stringify(json);
         }
         reg = /([\{\}])/g;
-        json = json.replace(reg, '\\r\\n$1\\r\\n');
+        json = json.replace(reg, '\r\n$1\r\n');
         reg = /([\[\]])/g;
-        json = json.replace(reg, '\\r\\n$1\\r\\n');
+        json = json.replace(reg, '\r\n$1\r\n');
         reg = /(\,)/g;
-        json = json.replace(reg, '$1\\r\\n');
-        reg = /(\\r\\n\\r\\n)/g;
-        json = json.replace(reg, '\\r\\n');
-        reg = /\\r\\n\,/g;
+        json = json.replace(reg, '$1\r\n');
+        reg = /(\r\n\r\n)/g;
+        json = json.replace(reg, '\r\n');
+        reg = /\r\n\,/g;
         json = json.replace(reg, ',');
         if (!options.newlineAfterColonIfBeforeBraceOrBracket) {
-            reg = /\:\\r\\n\{/g;
+            reg = /\:\r\n\{/g;
             json = json.replace(reg, ':{');
-            reg = /\:\\r\\n\[/g;
+            reg = /\:\r\n\[/g;
             json = json.replace(reg, ':[');
         }
         if (options.spaceAfterColon) {
             reg = /\:/g;
             json = json.replace(reg, ':');
         }
-        (json.split('\\r\\n')).forEach(function (node, index) {
+        (json.split('\r\n')).forEach(function (node, index) {
             //console.log(node);
             var i = 0,
                 indent = 0,
@@ -318,7 +325,7 @@ EOF;
                 padding += PADDING;
             }
     
-            formatted += padding + node + '\\r\\n';
+            formatted += padding + node + '\r\n';
             pad += indent;
         });
         return formatted;
@@ -341,7 +348,7 @@ EOF;
             html = ProcessObject(obj[0], 0, false, false, false);
             document.getElementById(domName).innerHTML = "<PRE class='CodeContainer'>" + html + "</PRE>";
         } catch(e) {
-            alert("json error:\\n" + e.message);
+            alert("json error:\n" + e.message);
             document.getElementById(domName).innerHTML = "";
         }
     }
@@ -418,10 +425,10 @@ EOF;
         for (var i = 0; i < indent; i++) {
             tabs += window.TAB;
         }
-        var funcStrArray = obj.toString().split("\\n");
+        var funcStrArray = obj.toString().split("\n");
         var str = "";
         for (var i = 0; i < funcStrArray.length; i++) {
-            str += ((i == 0) ? "": tabs) + funcStrArray[i] + "\\n";
+            str += ((i == 0) ? "": tabs) + funcStrArray[i] + "\n";
         }
         return str;
     }
@@ -430,8 +437,8 @@ EOF;
         for (var i = 0; i < indent && !isPropertyContent; i++) {
             tabs += window.TAB;
         }
-        if (data != null && data.length > 0 && data.charAt(data.length - 1) != "\\n") {
-            data = data + "\\n";
+        if (data != null && data.length > 0 && data.charAt(data.length - 1) != "\n") {
+            data = data + "\n";
         }
         return tabs + data;
     };
@@ -697,11 +704,10 @@ a {
 <div class="book with-summary">
 EOF;
 
+    public static $searchData = [];
+
     /**
-     * 获取左侧html
-     * @param string $mapping
-     * @param string $actionName
-     * @param string $pathInfo
+     * 获取左侧html.
      * @return string|string[]
      */
     public static function getLeftHtml(string $mapping, string $actionName, string $pathInfo)
@@ -709,50 +715,46 @@ EOF;
         if (count(static::$tableOfContentHtml) == 0) {
             static::getTableOfContentHtml($pathInfo);
         }
-        $html = str_replace("{{tableOfContent}}", static::$tableOfContentHtml[$actionName], static::$leftHtml);
+        $html = str_replace('{{tableOfContent}}', static::$tableOfContentHtml[$actionName], static::$leftHtml);
         return $html;
     }
 
     /**
-     * 获取右侧html
-     * @param string $mapping
-     * @param string $actionName
-     * @param string $pathInfo
+     * 获取右侧html.
      * @return string|string[]
      */
     public static function getRightHtml(string $mapping, string $actionName, string $pathInfo)
     {
         if (isset(static::$requestParamHtmls[$actionName])) {
-            $html = str_replace("{{requestParams}}", static::$requestParamHtmls[$actionName], static::$rightHtml);
+            $html = str_replace('{{requestParams}}', static::$requestParamHtmls[$actionName], static::$rightHtml);
         } else {
-            $html = str_replace("{{requestParams}}", "", static::$rightHtml);
+            $html = str_replace('{{requestParams}}', '', static::$rightHtml);
         }
 
-        $html = str_replace("{{responseParams}}", static::$responseParamHtmls[$actionName], $html);
+        $html = str_replace('{{responseParams}}', static::$responseParamHtmls[$actionName], $html);
         if (isset(static::$requestParamExampleHtmls[$actionName])) {
-            $html = str_replace("{{requestExampleParams}}", static::$requestParamExampleHtmls[$actionName], $html);
-
+            $html = str_replace('{{requestExampleParams}}', static::$requestParamExampleHtmls[$actionName], $html);
         } else {
-            $html = str_replace("{{requestExampleParams}}", static::getEmptyRequestParamExampleHtmls($mapping), $html);
+            $html = str_replace('{{requestExampleParams}}', static::getEmptyRequestParamExampleHtmls($mapping), $html);
         }
-        $html = str_replace("{{responseExampleParams}}", static::$responseParamExampleHtml[$actionName], $html);
+        $html = str_replace('{{responseExampleParams}}', static::$responseParamExampleHtml[$actionName], $html);
         if (isset(static::$errorCodeHtml[$actionName])) {
-            $html = str_replace("{{errorCodes}}", static::$errorCodeHtml[$actionName], $html);
+            $html = str_replace('{{errorCodes}}', static::$errorCodeHtml[$actionName], $html);
         } else {
-            $html = str_replace("{{errorCodes}}", "", $html);
+            $html = str_replace('{{errorCodes}}', '', $html);
         }
 
-        $html = str_replace("{{dispatch}}", $mapping, $html);
-        $html = str_replace("{{desc}}", DescriptionCollector::list()[$actionName], $html);
+        $html = str_replace('{{dispatch}}', $mapping, $html);
+        $html = str_replace('{{desc}}', DescriptionCollector::list()[$actionName], $html);
         if (isset(UsableCollector::list()[$actionName])) {
-            $html = str_replace("{{style}}", UsableCollector::list()[$actionName] == false ? "text-decoration: line-through;" : "", $html);
+            $html = str_replace('{{style}}', UsableCollector::list()[$actionName] == false ? 'text-decoration: line-through;' : '', $html);
         } else {
-            $html = str_replace("{{style}}", "text-decoration: line-through;", $html);
+            $html = str_replace('{{style}}', 'text-decoration: line-through;', $html);
         }
         if (isset(TokenCollector::list()[$actionName])) {
-            $html = str_replace("{{token}}", TokenCollector::list()[$actionName] == true ? static::getTokenHtml() : "", $html);
+            $html = str_replace('{{token}}', TokenCollector::list()[$actionName] == true ? static::getTokenHtml() : '', $html);
         } else {
-            $html = str_replace("{{token}}", "", $html);
+            $html = str_replace('{{token}}', '', $html);
         }
         return $html;
     }
@@ -763,9 +765,8 @@ EOF;
             static::getTableOfContentHtml($pathInfo);
         }
         $search_data = json_encode(static::getSearchData($pathInfo));
-        $html = str_replace("{{searchData}}", $search_data, static::$footerHtml);
+        $html = str_replace('{{searchData}}', $search_data, static::$footerHtml);
         return $html;
-
     }
 
     public static function getEmptyRequestParamExampleHtmls($mapping)
@@ -773,31 +774,27 @@ EOF;
         $params = new \stdClass();
         $request['request'] = [
             'dispatch' => $mapping,
-            'params' => $params
+            'params' => $params,
         ];
-        $result_pretty = json_encode($request, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        return $result_pretty;
+        return json_encode($request, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     /**
-     * 获取头部html
-     * @param string $mapping
-     * @param string $actionName
-     * @param string $pathInfo
+     * 获取头部html.
      * @return string|string[]
      */
     public static function getHeaderHtml(string $mapping, string $actionName, string $pathInfo)
     {
-        $html = str_replace("{{index}}", $pathInfo, static::$headerHtml);
+        $html = str_replace('{{index}}', $pathInfo, static::$headerHtml);
         $config = ApplicationContext::getContainer()->get(\Hyperf\Contract\ConfigInterface::class);
-        $html = str_replace("{{name}}", $config->get('app_name'), $html);
-        $html = str_replace("{{doc_navbar_color}}", '#'.$config->get('wayhood.doc_navbar_color'), $html);
+        $html = str_replace('{{name}}', $config->get('app_name'), $html);
+        $html = str_replace('{{doc_navbar_color}}', '#' . $config->get('wayhood.doc_navbar_color'), $html);
 
         return $html;
     }
 
     /**
-     * 获取目录内容
+     * 获取目录内容.
      * @return array
      */
     public static function getTableOfContent()
@@ -807,7 +804,7 @@ EOF;
             $actions = ActionCollector::list();
             foreach ($actions as $mapping => $class) {
                 $category = CategoryCollector::list()[$class];
-                if (!isset($tableOfContent[$category])) {
+                if (! isset($tableOfContent[$category])) {
                     $tableOfContent[$category] = [];
                 }
 
@@ -825,17 +822,16 @@ EOF;
     }
 
     /**
-     * 获取目录html
-     * @param string $pathInfo
+     * 获取目录html.
      */
     public static function getTableOfContentHtml(string $pathInfo)
     {
         $tableOfContent = static::getTableOfContent();
         $i = 0;
         foreach (ActionCollector::list() as $mapping => $class) {
-            $html = "";
+            $html = '';
             foreach ($tableOfContent as $category => $data) {
-                $i++;
+                ++$i;
                 $html .= <<<EOF
 <div class="panel">
         <div id="heading{$i}" data-parent="#accordion" class="catalog-title" data-toggle="collapse"
@@ -843,7 +839,7 @@ EOF;
             <i class="glyphicon glyphicon-th-list"></i> {$category}
         </div>
 EOF;
-                $in = "";
+                $in = '';
                 foreach ($data as $line) {
                     if ($line['dispatch'] == $mapping) {
                         $in = ' in';
@@ -869,19 +865,19 @@ EOF;
                     }
 
                     $dispatch = '<span class="label label-default">' . $line['dispatch'] . '</span>';
-                    $text = $text . " " . $dispatch . ' ' . $token;
+                    $text = $text . ' ' . $dispatch . ' ' . $token;
 
-                    $html .= '<a class="catalog-item ' . $active . '" href="' . $pathInfo . '?dispatch=' . $line['dispatch'] . '">' . $text . "</a>";
-                    //$html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
+                    $html .= '<a class="catalog-item ' . $active . '" href="' . $pathInfo . '?dispatch=' . $line['dispatch'] . '">' . $text . '</a>';
+                    // $html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
                 }
                 $html .= '      </div>    </div>';
             }
             static::$tableOfContentHtml[$class] = $html;
         }
-        $html = "";
+        $html = '';
         $i = 0;
         foreach ($tableOfContent as $category => $data) {
-            $i++;
+            ++$i;
             $html .= <<<EOF
 <div class="panel">
         <div id="heading{$i}" data-parent="#accordion" class="catalog-title collapsed" data-toggle="collapse"
@@ -905,10 +901,10 @@ EOF;
                 }
 
                 $dispatch = '<span class="label label-default">' . $line['dispatch'] . '</span>';
-                $text = $text . " " . $dispatch . ' ' . $token;
+                $text = $text . ' ' . $dispatch . ' ' . $token;
 
-                $html .= '<a class="catalog-item ' . $active . '" href="' . $pathInfo . '?dispatch=' . $line['dispatch'] . '">' . $text . "</a>";
-                //$html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
+                $html .= '<a class="catalog-item ' . $active . '" href="' . $pathInfo . '?dispatch=' . $line['dispatch'] . '">' . $text . '</a>';
+                // $html .= '         <a href="'. $pathInfo .'?dispatch=' . $line['dispatch'].'" class="list-group-item '. $active .'">'. $text ."</a>";
             }
             $html .= '      </div>    </div>';
         }
@@ -916,9 +912,7 @@ EOF;
     }
 
     /**
-     * 获取其他页html
-     * @param string $action
-     * @param string $pathInfo
+     * 获取其他页html.
      * @return string
      */
     public static function getActionHtml(string $action, string $pathInfo)
@@ -936,8 +930,8 @@ EOF;
         }
 
         $actionMap = ActionCollector::list();
-        if (!isset($actionMap[$action])) {
-            return "Not Found Dispatch";
+        if (! isset($actionMap[$action])) {
+            return 'Not Found Dispatch';
         }
         $actionName = $actionMap[$action];
 
@@ -947,8 +941,6 @@ EOF;
             static::getFooterHtml($action, $actionName, $pathInfo);
         return $html;
     }
-
-    public static $searchData = [];
 
     public static function getSearchData($pathInfo)
     {
@@ -960,8 +952,8 @@ EOF;
             $name = $category;
             foreach ($data as $line) {
                 static::$searchData[] = [
-                    'name' => $name . '.' . $line['name'] . " " . $line['dispatch'],
-                    'url' => $pathInfo . "?dispatch=" . $line['dispatch']
+                    'name' => $name . '.' . $line['name'] . ' ' . $line['dispatch'],
+                    'url' => $pathInfo . '?dispatch=' . $line['dispatch'],
                 ];
             }
         }
@@ -970,14 +962,14 @@ EOF;
     }
 
     /**
-     * 获得首页html
+     * 获得首页html.
      * @param $uri
      * @param $pathInfo
      * @return string
      */
     public static function getIndexHtml($uri, $pathInfo)
     {
-        $url = str_replace($pathInfo, "", $uri);
+        $url = str_replace($pathInfo, '', $uri);
         static::getTableOfContentHtml($pathInfo);
         $tableOfContent = static::$tableOfContentHtml['index'];
         $search_data = json_encode(static::getSearchData($pathInfo));
@@ -1486,19 +1478,18 @@ sign = ed2eac434ebacdf0d6c3a301cabf6323
 </html>
 EOF;
         $config = ApplicationContext::getContainer()->get(\Hyperf\Contract\ConfigInterface::class);
-        $html = str_replace("{{name}}", $config->get('app_name'), $html);
-        $html = str_replace("{{doc_navbar_color}}", '#'.$config->get('wayhood.doc_navbar_color'), $html);
+        $html = str_replace('{{name}}', $config->get('app_name'), $html);
+        $html = str_replace('{{doc_navbar_color}}', '#' . $config->get('wayhood.doc_navbar_color'), $html);
         return $html;
-
     }
 
     /**
-     * 获取token header html
+     * 获取token header html.
      * @return string
      */
     public static function getTokenHtml()
     {
-        $html = <<<EOF
+        return <<<'EOF'
         <h3>Header参数</h3>
         <table class="table table-bordered">
             <tr>
@@ -1513,12 +1504,10 @@ EOF;
             </tr>
         </table>
 EOF;
-
-        return $html;
     }
 
     /**
-     * 获取错误代码html
+     * 获取错误代码html.
      */
     public static function getErrorCodeHtml()
     {
@@ -1526,33 +1515,32 @@ EOF;
         foreach ($errorCodeCollector as $class => $errCode) {
             $html = '';
             foreach ($errCode as $error) {
-                $html .= "<tr><td>" . $error['code'] . "</td>\n";
-                $html .= "<td>" . $error['message'] . "</td></tr>\n";
+                $html .= '<tr><td>' . $error['code'] . "</td>\n";
+                $html .= '<td>' . $error['message'] . "</td></tr>\n";
             }
             static::$errorCodeHtml[$class] = $html;
         }
     }
 
     /**
-     * 获取请求参数html
-     * @param string $action
+     * 获取请求参数html.
      */
     public static function genRequestParamHtml(string $action)
     {
         $requestParamCollector = RequestParamCollector::list();
         $map = ActionCollector::result();
         foreach ($requestParamCollector as $class => $requestParams) {
-            $requestParamHtml = "";
+            $requestParamHtml = '';
             foreach ($requestParams as $requestParam) {
-                $requestParamHtml .= "<tr><td>" . $requestParam->name . "</td>\n";
-                $requestParamHtml .= "<td style=\"word-break:break-all;\">" . $requestParam->type . "</td>\n";
-                $requestParamHtml .= "<td style=\"word-break:break-all;\">" . ($requestParam->require == true ? "true" : "false") . "</td>\n";
+                $requestParamHtml .= '<tr><td>' . $requestParam->name . "</td>\n";
+                $requestParamHtml .= '<td style="word-break:break-all;">' . $requestParam->type . "</td>\n";
+                $requestParamHtml .= '<td style="word-break:break-all;">' . ($requestParam->require == true ? 'true' : 'false') . "</td>\n";
                 if ($requestParam->base64 == true) {
-                    $requestParamHtml .= "<td style=\"word-break:break-all;\">" . htmlentities(base64_decode(strval($requestParam->example))) . "</td>\n";
+                    $requestParamHtml .= '<td style="word-break:break-all;">' . htmlentities(base64_decode(strval($requestParam->example))) . "</td>\n";
                 } else {
-                    $requestParamHtml .= "<td style=\"word-break:break-all;\">" . htmlentities(strval($requestParam->example)) . "</td>\n";
+                    $requestParamHtml .= '<td style="word-break:break-all;">' . htmlentities(strval($requestParam->example)) . "</td>\n";
                 }
-                $requestParamHtml .= "<td style=\"word-break:break-all;\">" . $requestParam->description . "</td></tr>\n";
+                $requestParamHtml .= '<td style="word-break:break-all;">' . $requestParam->description . "</td></tr>\n";
             }
             static::$requestParamHtmls[$class] = $requestParamHtml;
             static::$requestParamExampleHtmls[$class] = static::getRequestParamExampleHtml($map[$class], $requestParams);
@@ -1560,44 +1548,43 @@ EOF;
     }
 
     /**
-     * 获取请求参数示例Html
-     * @param array $requestParams
+     * 获取请求参数示例Html.
      * @return string
      */
     public static function getRequestParamExampleHtml(string $mapping, array $requestParams)
     {
         $req = [
-            'dispatch' => $mapping
+            'dispatch' => $mapping,
         ];
 
         $params = [];
         foreach ($requestParams as $requestParam) {
             if ($requestParam->type == 'string') {
                 $params[$requestParam->name] = strval($requestParam->example);
-            } else if ($requestParam->type == 'int') {
+            } elseif ($requestParam->type == 'int') {
                 $params[$requestParam->name] = intval($requestParam->example);
-                //$html .= intval($requestParam->example);
-            } else if ($requestParam->type == 'float') {
+            // $html .= intval($requestParam->example);
+            } elseif ($requestParam->type == 'float') {
                 $params[$requestParam->name] = floatval($requestParam->example);
-            } else if ($requestParam->type == 'bool') {
+            } elseif ($requestParam->type == 'bool') {
                 $params[$requestParam->name] = boolval($requestParam->example);
-            } else if ($requestParam->type == 'array') {
+            } elseif ($requestParam->type == 'array') {
                 $example = $requestParam->example;
                 if ($requestParam->base64 == true) {
                     $example = base64_decode($example);
                 }
                 $example = @json_decode($example, true);
-                if (!is_array($example)) {
+                if (! is_array($example)) {
                     $example = [];
                 }
                 $params[$requestParam->name] = $example;
-            } else if ($requestParam->type == 'object') {
+            } elseif ($requestParam->type == 'object') {
                 $example = $requestParam->example;
                 if ($requestParam->base64 == true) {
                     $example = base64_decode($example);
                 }
                 $example = @json_decode($example, true);
-                if (!is_array($example)) {
+                if (! is_array($example)) {
                     $example = new \stdClass();
                 }
                 $params[$requestParam->name] = $example;
@@ -1608,15 +1595,13 @@ EOF;
         if (count($params) == 0) {
             $params = new \stdClass();
         }
-        $req["params"] = $params;
+        $req['params'] = $params;
         $request['request'] = $req;
-        $result_pretty = json_encode($request, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        return $result_pretty;
+        return json_encode($request, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
-
     /**
-     * 获取响应参数html
+     * 获取响应参数html.
      * @param $action
      */
     public static function genResponseParamHtml($action)
@@ -1630,27 +1615,25 @@ EOF;
     }
 
     /**
-     * 获取响应参数单条html
-     * @param array $data
-     * @param int $indent
+     * 获取响应参数单条html.
      * @return string
      */
     public static function getResponseParamHtmlOne(array $data, int $indent)
     {
         $html = '';
-        $itString = "";
-        for ($i = 0; $i <= $indent; $i++) {
-            $itString .= "&nbsp;&nbsp;";
+        $itString = '';
+        for ($i = 0; $i <= $indent; ++$i) {
+            $itString .= '&nbsp;&nbsp;';
         }
         foreach ($data as $key => $responseParam) {
-            if (!is_numeric($key)) {
-                $html .= "<tr><td>" . $itString . $key . "</td>\n";
-                $html .= "<td style=\"word-break:break-all;\">" . $responseParam['type'] . "</td>\n";
-                $html .= "<td style=\"word-break:break-all;\">" . $responseParam['example'] . "</td>\n";
-                $html .= "<td style=\"word-break:break-all;\">" . $responseParam['desc'] . "</td></tr>\n";
+            if (! is_numeric($key)) {
+                $html .= '<tr><td>' . $itString . $key . "</td>\n";
+                $html .= '<td style="word-break:break-all;">' . $responseParam['type'] . "</td>\n";
+                $html .= '<td style="word-break:break-all;">' . $responseParam['example'] . "</td>\n";
+                $html .= '<td style="word-break:break-all;">' . $responseParam['desc'] . "</td></tr>\n";
             }
             if (isset($responseParam['children'])) {
-                if (!is_numeric($key)) {
+                if (! is_numeric($key)) {
                     $indent = $indent + 2;
                 }
                 $html .= static::getResponseParamHtmlOne($responseParam['children'], $indent);
@@ -1660,9 +1643,7 @@ EOF;
     }
 
     /**
-     * 获取响应参数示例Html
-     * @param string $mapping
-     * @param array $paramData
+     * 获取响应参数示例Html.
      * @return false|string
      */
     public static function getResponseParamsPreHtml(string $mapping, array $paramData)
@@ -1670,19 +1651,18 @@ EOF;
         $ret = [
             'code' => 0,
             'message' => '成功',
-            'dispatch' => $mapping
+            'dispatch' => $mapping,
         ];
         $ret['data'] = static::getResponseParamExampleHtml($paramData);
 
-        $response["response"] = $ret;
-        //$result_pretty = json_encode($response,JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $response['response'] = $ret;
+        // $result_pretty = json_encode($response,JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $result_pretty = json_encode($response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         return $result_pretty;
     }
 
     /**
-     * 获取响应参数示例数据html
-     * @param array $data
+     * 获取响应参数示例数据html.
      * @return array
      */
     public static function getResponseParamExampleHtml(array $data)

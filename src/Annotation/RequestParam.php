@@ -1,8 +1,15 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 namespace Wayhood\HyperfAction\Annotation;
-
 
 use Hyperf\Di\Annotation\AbstractAnnotation;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
@@ -39,7 +46,7 @@ class RequestParam extends AbstractAnnotation
     public $description = '无';
 
     /**
-     * 示例是否使用base64
+     * 示例是否使用base64.
      * @var bool
      */
     public $base64 = false;
@@ -49,35 +56,32 @@ class RequestParam extends AbstractAnnotation
         parent::__construct($value);
         if (is_array($value)) {
             foreach ($value as $key => $val) {
-                switch($key) {
-                    case "b":
+                switch ($key) {
+                    case 'b':
                         $this->base64 = $val;
                         break;
-                    case "n":
+                    case 'n':
                         $this->name = $val;
                         break;
-                    case "t":
+                    case 't':
                         $this->type = $val;
                         break;
-                    case "r":
+                    case 'r':
                         $this->require = $val;
                         break;
-                    case "e":
+                    case 'e':
                         $this->example = $val;
                         break;
-                    case "d":
+                    case 'd':
                         $this->description = $val;
                         break;
                 }
             }
         }
-
     }
-
 
     public function collectClass(string $className): void
     {
         RequestParamCollector::collectClass($className, static::class, $this);
     }
-
 }

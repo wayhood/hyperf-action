@@ -1,14 +1,20 @@
 <?php
 
 declare(strict_types=1);
-
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 namespace Wayhood\HyperfAction\Controller;
 
+use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Utils\ApplicationContext;
-use Hyperf\Utils\Context;
-use Hyperf\Di\Annotation\Inject;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Wayhood\HyperfAction\Collector\ActionCollector;
@@ -21,8 +27,7 @@ use Wayhood\HyperfAction\Event\BeforeAction;
 use Wayhood\HyperfAction\Util\DocHtml;
 
 /**
- * Class MainController
- * @package Wayhood\HyperfAction\Controller
+ * Class MainController.
  */
 class MainController
 {
@@ -51,7 +56,7 @@ class MainController
     protected $eventDispatcher;
 
     /**
-     * @Inject()
+     * @Inject
      * @var TokenInterface
      */
     protected $token;
@@ -61,10 +66,10 @@ class MainController
         $response = [
             'code' => $errorCode,
             'message' => $message,
-            'data' => new \stdClass()
+            'data' => new \stdClass(),
         ];
 
-        if (!is_null($actionName)) {
+        if (! is_null($actionName)) {
             $response['dispatch'] = $actionName;
         }
         return $response;
@@ -78,7 +83,7 @@ class MainController
             'timestamp' => time(),
             'deviation' => 0,
             'message' => '成功',
-            'response' => $response
+            'response' => $response,
         ]);
     }
 
@@ -87,24 +92,24 @@ class MainController
         $key = $requestParam['name'];
         $require = $requestParam['require'];
         if ($require == 'true') {
-            if (!isset($params[$key])) {
-                return $this->systemExceptionReturn(9901, "缺少参数: " . $key, $actionMapping);
+            if (! isset($params[$key])) {
+                return $this->systemExceptionReturn(9901, '缺少参数: ' . $key, $actionMapping);
             }
         }
 
-        //判断类型
+        // 判断类型
         $type = $requestParam['type'];
         if (isset($params[$key])) {
             $value = $params[$key];
             if ($type == 'string') {
-                if (!is_string($value)) {
-                    return $this->systemExceptionReturn(9902, $key . " 类型不匹配，请查看文档", $actionMapping);
+                if (! is_string($value)) {
+                    return $this->systemExceptionReturn(9902, $key . ' 类型不匹配，请查看文档', $actionMapping);
                 }
             }
 
             if ($type == 'int') {
-                if (!is_int($value)) {
-                    return $this->systemExceptionReturn(9902, $key . " 类型不匹配，请查看文档", $actionMapping);
+                if (! is_int($value)) {
+                    return $this->systemExceptionReturn(9902, $key . ' 类型不匹配，请查看文档', $actionMapping);
                 }
             }
 
@@ -112,14 +117,14 @@ class MainController
                 if (is_int($value)) {
                     $value = floatval($value);
                 }
-                if (!is_float($value)) {
-                    return $this->systemExceptionReturn(9902, $key . " 类型不匹配，请查看文档", $actionMapping);
+                if (! is_float($value)) {
+                    return $this->systemExceptionReturn(9902, $key . ' 类型不匹配，请查看文档', $actionMapping);
                 }
             }
 
             if ($type == 'array') {
-                if (!is_array($value)) {
-                    return $this->systemExceptionReturn(9902, $key . " 类型不匹配，请查看文档", $actionMapping);
+                if (! is_array($value)) {
+                    return $this->systemExceptionReturn(9902, $key . ' 类型不匹配，请查看文档', $actionMapping);
                 }
             }
         }
@@ -129,43 +134,43 @@ class MainController
 
     public function index()
     {
-        $actionRequest = $this->request->getAttribute("actionRequest");
-        $extras = $this->request->getAttribute("extras");
+        $actionRequest = $this->request->getAttribute('actionRequest');
+        $extras = $this->request->getAttribute('extras');
         $headers = $this->request->getHeaders();
 
-        $actionMapping = isset($actionRequest['dispatch'])? $actionRequest['dispatch'] : null;
+        $actionMapping = isset($actionRequest['dispatch']) ? $actionRequest['dispatch'] : null;
         if (is_null($actionMapping)) {
-            $response = $this->systemExceptionReturn(8003, '请求参数有误', is_null($actionMapping) ? "" : $actionMapping);   //请求参数有误
+            $response = $this->systemExceptionReturn(8003, '请求参数有误', is_null($actionMapping) ? '' : $actionMapping);   // 请求参数有误
             return $this->response->json([
                 'code' => 0,
                 'timestamp' => time(),
                 'deviation' => 0,
                 'message' => '成功',
-                'response' => $response
+                'response' => $response,
             ]);
         }
 
         $actionName = ActionCollector::list()[$actionMapping] ?? null;
         if (is_null($actionName)) {
-            $response = $this->systemExceptionReturn(8001, '调度不可用', $actionMapping); //调度名不可用
+            $response = $this->systemExceptionReturn(8001, '调度不可用', $actionMapping); // 调度名不可用
             return $this->response->json([
                 'code' => 0,
                 'timestamp' => time(),
                 'deviation' => 0,
                 'message' => '成功',
-                'response' => $response
+                'response' => $response,
             ]);
         }
 
         $usable = UsableCollector::list()[$actionName] ?? false;
         if ($usable == false) {
-            $response = $this->systemExceptionReturn(8002, '调度暂停使用', $actionMapping); //调度名不可用
+            $response = $this->systemExceptionReturn(8002, '调度暂停使用', $actionMapping); // 调度名不可用
             return $this->response->json([
                 'code' => 0,
                 'timestamp' => time(),
                 'deviation' => 0,
                 'message' => '成功',
-                'response' => $response
+                'response' => $response,
             ]);
         }
 
@@ -179,7 +184,7 @@ class MainController
                     'timestamp' => time(),
                     'deviation' => 0,
                     'message' => '成功',
-                    'response' => $ret
+                    'response' => $ret,
                 ]);
                 break;
             }
@@ -189,16 +194,15 @@ class MainController
         }
 
         $defineRequestValidate = RequestValidateCollector::result()[$actionName] ?? [];
-        foreach ($defineRequestValidate as $validate)
-        {
-            $ret = $this->check_validate($validate,$actionRequest['params'],$actionMapping);
+        foreach ($defineRequestValidate as $validate) {
+            $ret = $this->check_validate($validate, $actionRequest['params'], $actionMapping);
             if ($ret !== true) {
                 return $this->response->json([
                     'code' => 0,
                     'timestamp' => time(),
                     'deviation' => 0,
                     'message' => '成功',
-                    'response' => $ret
+                    'response' => $ret,
                 ]);
                 break;
             }
@@ -207,10 +211,10 @@ class MainController
             'mapping' => $actionMapping,
             'container' => $this->container->get($actionName),
             'params' => $filterActionRequestParams ?? [],
-            'hasToken' => TokenCollector::list()[$actionName] ? true : false
+            'hasToken' => TokenCollector::list()[$actionName] ? true : false,
         ];
 
-        //开始处理
+        // 开始处理
         if ($okRequest['hasToken'] == true) {
             $token = $this->getTokenByHeader($headers);
             $verify = $this->token->verify($token);
@@ -235,12 +239,11 @@ class MainController
         $params = $okRequest['params'];
         $beforeResult = $okRequest['container']->beforeRun($params, $extras, $headers);
         if ($beforeResult === true) {
-            $this->eventDispatcher->dispatch(new BeforeAction(get_class($okRequest['container']),$params,$extras,$headers));
+            $this->eventDispatcher->dispatch(new BeforeAction(get_class($okRequest['container']), $params, $extras, $headers));
             $ret = $okRequest['container']->run($okRequest['params'], $extras, $headers);
             return $this->systemReturn($okRequest['mapping'], $ret);
-        } else {
-            return $this->systemReturn($okRequest['mapping'], $beforeResult);
         }
+        return $this->systemReturn($okRequest['mapping'], $beforeResult);
     }
 
     public function getTokenByHeader($headers)
@@ -252,7 +255,7 @@ class MainController
                 }
             }
         }
-        return "";
+        return '';
     }
 
     public function doc()
@@ -260,8 +263,8 @@ class MainController
         $response = ApplicationContext::getContainer()->get(\Psr\Http\Message\ResponseInterface::class);
         $response = $response->withHeader('Content-Type', 'text/html;charset=utf-8');
         ApplicationContext::getContainer()->set(\Psr\Http\Message\ResponseInterface::class, $response);
-        $action = $this->request->input("dispatch", "");
-        if ($action == "") {
+        $action = $this->request->input('dispatch', '');
+        if ($action == '') {
             return $this->response->raw(DocHtml::getIndexHtml($this->request->getUri(), $this->request->getPathInfo()));
         }
 
@@ -272,13 +275,10 @@ class MainController
     {
         $validate_factory = $validate['validate'];
         $scene = $validate['scene'];
-        if ($scene!==null)
-        {
+        if ($scene !== null) {
             $validate_factory = $validate_factory->scene($scene);
         }
-        $validate = $validate_factory->make($params,false);
-        return $validate===true?:$this->systemExceptionReturn(9800,$validate->errors()->first(),$actionMapping);
+        $validate = $validate_factory->make($params, false);
+        return $validate === true ?: $this->systemExceptionReturn(9800, $validate->errors()->first(), $actionMapping);
     }
-
-
 }

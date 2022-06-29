@@ -9,9 +9,4 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-namespace Wayhood\HyperfAction\Contract;
-
-interface SignInterface
-{
-    public function verify(string $secret, array $request, string $sign);
-}
+require_once dirname(dirname(__FILE__)) . '/vendor/autoload.php';

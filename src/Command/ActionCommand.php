@@ -11,8 +11,6 @@ declare(strict_types=1);
  */
 namespace Wayhood\HyperfAction\Command;
 
-use Hyperf\Command\Annotation\Command;
-
 class ActionCommand extends GeneratorCommand
 {
     public function __construct()

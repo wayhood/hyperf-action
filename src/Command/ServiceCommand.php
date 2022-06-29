@@ -11,8 +11,6 @@ declare(strict_types=1);
  */
 namespace Wayhood\HyperfAction\Command;
 
-use Hyperf\Command\Annotation\Command;
-
 class ServiceCommand extends GeneratorCommand
 {
     public function __construct()

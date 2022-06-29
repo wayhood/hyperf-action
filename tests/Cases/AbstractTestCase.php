@@ -9,14 +9,13 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-namespace Wayhood\HyperfAction\Service;
+namespace HyperfTest\Cases;
 
-use Wayhood\HyperfAction\Contract\SignInterface;
+use PHPUnit\Framework\TestCase;
 
-class SignService implements SignInterface
+/**
+ * Class AbstractTestCase.
+ */
+abstract class AbstractTestCase extends TestCase
 {
-    public function verify(string $secret, array $request, string $sign)
-    {
-        return true;
-    }
 }

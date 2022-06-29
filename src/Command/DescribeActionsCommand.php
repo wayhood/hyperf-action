@@ -60,11 +60,10 @@ class DescribeActionsCommand extends HyperfCommand
         if (! is_null($dispatch)) {
             if (isset($data[$dispatch])) {
                 return [
-                    $dispatch => $data[$dispatch]
+                    $dispatch => $data[$dispatch],
                 ];
-            } else {
-                return [];
             }
+            return [];
         }
         return $data;
     }
