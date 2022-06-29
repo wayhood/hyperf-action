@@ -25,6 +25,7 @@ use Wayhood\HyperfAction\Service\TokenService;
 use Wayhood\HyperfAction\Command\ActionCommand;
 use Wayhood\HyperfAction\Command\ServiceCommand;
 use Wayhood\HyperfAction\Command\DescribeActionsCommand;
+use Wayhood\HyperfAction\Command\GeneratorPostmanCommand;
 
 class ConfigProvider
 {
@@ -37,7 +38,9 @@ class ConfigProvider
             'commands' => [
                 ActionCommand::class,
                 ServiceCommand::class,
-                DescribeActionsCommand::class
+                DescribeActionsCommand::class,
+                GeneratorPostmanCommand::class,
+                ServiceCommand::class
             ],
             'annotations' => [
                 'scan' => [

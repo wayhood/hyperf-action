@@ -11,47 +11,13 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class ResponseParam extends AbstractAnnotation
 {
-    /**
-     * @var string
-     */
-    public $name = '';
-
-    /**
-     * @var string
-     */
-    public $type = 'string';
-
-    /**
-     * @var string
-     */
-    public $example = '无';
-
-    /**
-     * @var string
-     */
-    public $description = '无';
-
-    public function __construct($value = null)
+    public function __construct(
+        public string $name = '',
+        public string $type = 'string',
+        public string $example = '无',
+        public string $description = '无'
+    )
     {
-        parent::__construct($value);
-        if (is_array($value)) {
-            foreach ($value as $key => $val) {
-                switch($key) {
-                    case "n":
-                        $this->name = $val;
-                        break;
-                    case "t":
-                        $this->type = $val;
-                        break;
-                    case "e":
-                        $this->example = $val;
-                        break;
-                    case "d":
-                        $this->description = $val;
-                        break;
-                }
-            }
-        }
 
     }
 

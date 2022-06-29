@@ -8,10 +8,7 @@ use Hyperf\Di\MetadataCollector;
 
 class DescriptionCollector extends MetadataCollector
 {
-    /**
-     * @var array
-     */
-    protected static $container = [];
+    protected static array $container = [];
 
     public static function collectClass(string $class, string $annotation, $value): void
     {

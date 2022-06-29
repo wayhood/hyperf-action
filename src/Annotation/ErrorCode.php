@@ -11,31 +11,10 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class ErrorCode extends AbstractAnnotation
 {
-    /**
-     * @var int
-     */
-    public $code = 1999;
-
-    /**
-     * @var string
-     */
-    public $message = '未知';
-
-    public function __construct($value = null)
+    
+    public function __construct(public int $code = 1999, public string $message = '未知')
     {
-        parent::__construct($value);
-        if (is_array($value)) {
-            foreach ($value as $key => $val) {
-                switch($key) {
-                    case "c":
-                        $this->code = $val;
-                        break;
-                    case "m":
-                        $this->message = $val;
-                        break;
-                }
-            }
-        }
+
 
     }
 

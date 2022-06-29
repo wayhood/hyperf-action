@@ -11,16 +11,8 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS)]
 class Description extends AbstractAnnotation
 {
-    /**
-     * @var string
-     */
-    public $name = '无描述';
-
-
-    public function __construct($value = null)
+    public function __construct(public string $name = '无描述')
     {
-        parent::__construct($value);
-        $this->bindMainProperty('name', $value);
     }
 
 

@@ -11,23 +11,14 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS)]
 class Usable extends AbstractAnnotation
 {
-    /**
-     * @var bool
-     */
-    public $ok = true;
-    
-    public function __construct($value = null)
+    public function __construct(public bool $usable = true)
     {
-        parent::__construct($value);
-        if (!is_null($value)) {
-            $this->bindMainProperty('ok', $value);
-        }
     }
 
 
     public function collectClass(string $className): void
     {
-        UsableCollector::collectClass($className, static::class, $this->ok);
+        UsableCollector::collectClass($className, static::class, $this->usable);
     }
 
 }

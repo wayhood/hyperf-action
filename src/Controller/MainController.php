@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Wayhood\HyperfAction\Controller;
 
+use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\Middleware;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
-use Hyperf\Utils\Context;
+use Hyperf\Context\Context;
 use Hyperf\Utils\Exception\ParallelExecutionException;
 use Hyperf\Utils\Parallel;
 use Hyperf\Di\Annotation\Inject;
@@ -31,29 +32,17 @@ use Wayhood\HyperfAction\Util\DocHtml;
  */
 class MainController
 {
-    /**
-     * @Inject
-     * @var ContainerInterface
-     */
-    protected $container;
+    #[Inject]
+    protected ContainerInterface $container;
 
-    /**
-     * @Inject
-     * @var RequestInterface
-     */
-    protected $request;
+    #[Inject]
+    protected RequestInterface $request;
 
-    /**
-     * @Inject
-     * @var ResponseInterface
-     */
-    protected $response;
+    #[Inject]
+    protected ResponseInterface $response;
 
-    /**
-     * @Inject()
-     * @var TokenInterface
-     */
-    protected $token;
+    #[Inject]
+    protected TokenInterface $token;
 
     public function systemExceptionReturn(int $errorCode, string $message, string $actionName)
     {
@@ -240,14 +229,16 @@ class MainController
     public function doc()
     {
         $response = Context::get(\Psr\Http\Message\ResponseInterface::class);
+        /** @var  $response \Psr\Http\Message\ResponseInterface */
         $response = $response->withHeader('Content-Type', 'text/html;charset=utf-8');
         Context::set(\Psr\Http\Message\ResponseInterface::class, $response);
+
         $action = $this->request->input("dispatch", "");
         if ($action == "") {
-            return $this->response->raw(DocHtml::getIndexHtml($this->request->getUri(), $this->request->getPathInfo()));
-        }
+            return $response->withBody(new SwooleStream(DocHtml::getIndexHtml((string) $this->request->getUri(), $this->request->getPathInfo())));
 
-        return $this->response->raw(DocHtml::getActionHtml($action, $this->request->getPathInfo()));
+        }
+        return $response->withBody(new SwooleStream(DocHtml::getActionHtml($action, $this->request->getPathInfo())));
     }
 
 

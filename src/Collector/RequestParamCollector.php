@@ -8,15 +8,9 @@ use Hyperf\Di\MetadataCollector;
 
 class RequestParamCollector extends MetadataCollector
 {
-    /**
-     * @var array
-     */
-    protected static $container = [];
+    protected static array $container = [];
 
-    /**
-     * @var array
-     */
-    protected static $result = [];
+    protected static array $result = [];
 
     public static function collectClass(string $class, string $annotation, $value): void
     {

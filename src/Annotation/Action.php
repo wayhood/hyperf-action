@@ -11,15 +11,8 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS)]
 class Action extends AbstractAnnotation
 {
-    /**
-     * @var string
-     */
-    public $mapping = '';
-
-    public function __construct($value)
+    public function __construct(public string $mapping = '')
     {
-        parent::__construct($value);
-        $this->bindMainProperty('mapping', $value);
     }
 
     public function collectClass(string $className): void
