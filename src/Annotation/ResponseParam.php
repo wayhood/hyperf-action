@@ -6,11 +6,9 @@ namespace Wayhood\HyperfAction\Annotation;
 
 use Hyperf\Di\Annotation\AbstractAnnotation;
 use Wayhood\HyperfAction\Collector\ResponseParamCollector;
+use Attribute;
 
-/**
- * @Annotation
- * @Target({"CLASS"})
- */
+#[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class ResponseParam extends AbstractAnnotation
 {
     /**

@@ -6,11 +6,9 @@ namespace Wayhood\HyperfAction\Annotation;
 
 use Hyperf\Di\Annotation\AbstractAnnotation;
 use Wayhood\HyperfAction\Collector\UsableCollector;
+use Attribute;
 
-/**
- * @Annotation
- * @Target({"CLASS"})
- */
+#[Attribute(Attribute::TARGET_CLASS)]
 class Usable extends AbstractAnnotation
 {
     /**
