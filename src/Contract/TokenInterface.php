@@ -34,7 +34,6 @@ interface TokenInterface
 
     /**
      * 获得token内容.
-     * @param string $token
      * @return string
      */
     public function get(string $token);
