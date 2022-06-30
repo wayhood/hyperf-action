@@ -19,7 +19,7 @@ class TokenService implements TokenInterface
 {
     public function verify(string $token)
     {
-        return true;
+        return 1;
         // TODO: Implement verify() method.
     }
 
