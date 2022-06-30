@@ -176,7 +176,6 @@ class MainController
                     'message' => '成功',
                     'response' => $ret,
                 ]);
-                break;
             }
             if (isset($actionRequest['params'][$params['name']])) {
                 $filterActionRequestParams[$params['name']] = $actionRequest['params'][$params['name']];
