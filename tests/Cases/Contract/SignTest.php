@@ -8,15 +8,16 @@ declare(strict_types=1);
  * @link     https://github.com/wayhood
  * @license  https://github.com/wayhood/hyperf-action
  */
-namespace HyperfTest\Cases;
+namespace HyperfTest\Cases\Contract;
 
+use HyperfTest\Cases\AbstractTestCase;
 use Wayhood\HyperfAction\Contract\SignInterface;
 
 /**
  * @internal
  * @coversNothing
  */
-class SignServiceTest extends AbstractTestCase
+class SignTest extends AbstractTestCase
 {
     protected function tearDown(): void
     {

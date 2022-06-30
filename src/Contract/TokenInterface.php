@@ -14,9 +14,8 @@ interface TokenInterface
 {
     /**
      * 验证token.
-     * @return mixed
      */
-    public function verify(string $token);
+    public function verify(string $token): int;
 
     /**
      * @return mixed
@@ -25,22 +24,18 @@ interface TokenInterface
 
     /**
      * 生成token.
-     * @param mixed $value
-     * @return string
      */
-    public function generator(array $value);
+    public function generator(array $value): string;
 
     /**
      * 更新token.
-     * @param mixed $value
-     * @return string
      */
-    public function set(string $token);
+    public function set(string $token): string;
 
     /**
      * 获得token内容.
-     * @param mixed $value
+     * @param string $token
      * @return string
      */
-    public function get(string $token);
+    public function get(string $token): string;
 }
