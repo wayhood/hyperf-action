@@ -20,7 +20,7 @@ class BeforeAction
 
     public $extras = [];
 
-    public function __construct(string $action, array $params = [], array $headers = [],array $extras = [])
+    public function __construct(string $action, array $params = [], array $headers = [], array $extras = [])
     {
         $this->action = $action;
         $this->params = $params;
