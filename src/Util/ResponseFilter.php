@@ -1,7 +1,14 @@
 <?php
 
+declare(strict_types=1);
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 namespace Wayhood\HyperfAction\Util;
-
 
 use Wayhood\HyperfAction\Collector\ResponseParamCollector;
 
@@ -10,12 +17,10 @@ class ResponseFilter
     public static function processResponseData($data, $className)
     {
         if (is_array($data) && count($data) == 0) {
-            $data = new \stdClass();
-            return $data;
+            return new \stdClass();
         }
-        //根据配置，过滤响应参数
-        $data = self::filterData($data, ResponseParamCollector::result()[$className]??[], 'array');
-        return $data;
+        // 根据配置，过滤响应参数
+        return self::filterData($data, ResponseParamCollector::result()[$className] ?? [], 'array');
     }
 
     public static function filterArrayData($data, $mapData)
@@ -36,15 +41,16 @@ class ResponseFilter
         return $newData;
     }
 
-    public static function processVarType($type, $value, $example) {
+    public static function processVarType($type, $value, $example)
+    {
         if ($type == 'string') {
             if (is_null($value)) {
                 $value = '';
             }
-            if (!is_string($value)
+            if (! is_string($value)
                 && is_scalar($value)
             ) {
-                //float 转 string 丢失精度 获取$exmaple的精度
+                // float 转 string 丢失精度 获取$exmaple的精度
                 if (is_float($value)) {
                     $tmp = explode('.', $example);
                     if (count($tmp) == 2) {
@@ -58,26 +64,26 @@ class ResponseFilter
                     $value = strval(trim($value));
                 }
             }
-        } else if ($type == 'int') {
+        } elseif ($type == 'int') {
             if (is_null($value)) {
                 $value = 0;
             }
-            if (!is_int($value)
+            if (! is_int($value)
                 && is_scalar($value)
             ) {
                 $value = intval($value);
             }
-        } else if ($type == 'float') {
+        } elseif ($type == 'float') {
             if (is_null($value)) {
                 $value = 0.0;
             }
-            if (!is_float($value)
+            if (! is_float($value)
                 && is_scalar($value)
             ) {
                 $value = floatval($value);
             }
-        } else if ($type == 'array') {
-            if (!is_array($value)) {
+        } elseif ($type == 'array') {
+            if (! is_array($value)) {
                 $value = [$value];
             }
         }
@@ -112,5 +118,4 @@ class ResponseFilter
 
         return $newData;
     }
-
 }

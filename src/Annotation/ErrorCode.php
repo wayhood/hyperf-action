@@ -1,8 +1,14 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 namespace Wayhood\HyperfAction\Annotation;
-
 
 use Hyperf\Di\Annotation\AbstractAnnotation;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
@@ -28,23 +34,20 @@ class ErrorCode extends AbstractAnnotation
         parent::__construct($value);
         if (is_array($value)) {
             foreach ($value as $key => $val) {
-                switch($key) {
-                    case "c":
+                switch ($key) {
+                    case 'c':
                         $this->code = $val;
                         break;
-                    case "m":
+                    case 'm':
                         $this->message = $val;
                         break;
                 }
             }
         }
-
     }
-
 
     public function collectClass(string $className): void
     {
         ErrorCodeCollector::collectClass($className, static::class, $this);
     }
-
 }

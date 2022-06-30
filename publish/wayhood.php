@@ -1,6 +1,13 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 return [
     'verify_timestamp' => env('VERIFY_TIMESTAMP', false),
     'verify_sign' => env('VERIFY_SIGN', false),

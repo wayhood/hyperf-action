@@ -1,13 +1,19 @@
 <?php
 
-
+declare(strict_types=1);
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 namespace Wayhood\HyperfAction\Service;
 
 use Wayhood\HyperfAction\Contract\TokenInterface;
 
 /**
- * Class TokenService
- * @package App\Service
+ * Class TokenService.
  */
 class TokenService implements TokenInterface
 {
@@ -24,17 +30,16 @@ class TokenService implements TokenInterface
 
     public function generator(array $value)
     {
-        // TODO: Implement generator() method.
+        return '';
     }
 
     public function set(string $token)
     {
-        // TODO: Implement set() method.
+        return '';
     }
 
     public function get(string $token)
     {
-        // TODO: Implement get() method.
+        return '';
     }
-
 }

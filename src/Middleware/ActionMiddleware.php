@@ -1,14 +1,18 @@
 <?php
 
 declare(strict_types=1);
-
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 namespace Wayhood\HyperfAction\Middleware;
 
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface as HttpResponse;
-use Hyperf\Utils\ApplicationContext;
-use Hyperf\Utils\Context;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -51,26 +55,25 @@ class ActionMiddleware implements MiddlewareInterface
         $response = new \stdClass();
         $data = [
             'code' => $code,
-            'timestamp' => time(), //服务器时间
-            'deviation' => 0, //误差
+            'timestamp' => time(), // 服务器时间
+            'deviation' => 0, // 误差
             'message' => $message,
-            'response' => $response
+            'response' => $response,
         ];
         return $this->response->json($data);
     }
 
-    //fix 时间戳
+    // fix 时间戳
     public function fixTimestamp($timestamp)
     {
         if (is_numeric($timestamp)) {
             $timestamp = intval($timestamp);
-            if (strlen(strval($timestamp)) == 13) { //有微秒 去掉微秒
+            if (strlen(strval($timestamp)) == 13) { // 有微秒 去掉微秒
                 $timestamp = intval($timestamp / 1000);
             }
         }
         return $timestamp;
     }
-
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -89,7 +92,7 @@ class ActionMiddleware implements MiddlewareInterface
 
         $old_timestamp = 0;
         if ($verifyTimestamp) {
-            if (!isset($body['timestamp'])) {
+            if (! isset($body['timestamp'])) {
                 return $this->responsesReturn(9005, 'timestamp无效');
             }
             $old_timestamp = intval($body['timestamp']);
@@ -108,29 +111,29 @@ class ActionMiddleware implements MiddlewareInterface
             }
         }
 
-        //分析设备信息
+        // 分析设备信息
         $extras = [];
         if (isset($body['extras']) && is_array($body['extras'])) {
             $extras = $body['extras'];
         }
 
-        //多请求处理
-        if (!isset($body['request'])) {
+        // 多请求处理
+        if (! isset($body['request'])) {
             return $this->responsesReturn(9002, 'request无效');
         }
 
-        if (!is_array($body['request'])) {
+        if (! is_array($body['request'])) {
             return $this->responsesReturn(9003, 'request结构有误');
         }
 
-        //验证签名
+        // 验证签名
         $verifySign = $this->config['verify_sign'];
         if ($verifySign) {
-            if (!isset($body['signature'])) {
+            if (! isset($body['signature'])) {
                 return $this->responsesReturn(9008, 'signature结构有误');
             }
             $sign = $this->container->get(SignInterface::class);
-            if (!$sign->verify(strval($old_timestamp), $body['request'], $body['signature'])) {
+            if (! $sign->verify(strval($old_timestamp), $body['request'], $body['signature'])) {
                 return $this->responsesReturn(9007, 'signature无效');
             }
         }

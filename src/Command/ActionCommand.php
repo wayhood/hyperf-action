@@ -2,16 +2,13 @@
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This is an extension of hyperf
+ * Name hyperf action
  *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
  */
 namespace Wayhood\HyperfAction\Command;
-
-use Hyperf\Command\Annotation\Command;
 
 class ActionCommand extends GeneratorCommand
 {
