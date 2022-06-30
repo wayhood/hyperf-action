@@ -15,11 +15,14 @@ use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Utils\Context;
 use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use stdClass;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
 use Wayhood\HyperfAction\Contract\TokenInterface;
+use Wayhood\HyperfAction\Event\BeforeAction;
 use Wayhood\HyperfAction\Util\DocHtml;
 
 /**
@@ -51,12 +54,18 @@ class MainController
      */
     protected $token;
 
-    public function systemExceptionReturn(int $errorCode, string $message, string $actionName)
+    /**
+     * @Inject
+     * @var EventDispatcherInterface
+     */
+    protected $dispatch;
+
+    public function systemExceptionReturn(int $errorCode, string $message, ?string $actionName = null): array
     {
         $response = [
             'code' => $errorCode,
             'message' => $message,
-            'data' => new \stdClass(),
+            'data' => new stdClass(),
         ];
 
         if (! is_null($actionName)) {
@@ -65,7 +74,7 @@ class MainController
         return $response;
     }
 
-    public function systemReturn($mapping, $response)
+    public function systemReturn($mapping, $response): \Psr\Http\Message\ResponseInterface
     {
         $response['dispatch'] = $mapping;
         return $this->response->json([
@@ -128,7 +137,7 @@ class MainController
         $extras = $this->request->getAttribute('extras');
         $headers = $this->request->getHeaders();
 
-        $actionMapping = isset($actionRequest['dispatch']) ? $actionRequest['dispatch'] : null;
+        $actionMapping = $actionRequest['dispatch'] ?? null;
         if (is_null($actionMapping)) {
             $response = $this->systemExceptionReturn(8003, '请求参数有误', is_null($actionMapping) ? '' : $actionMapping);   // 请求参数有误
             return $this->response->json([
@@ -198,13 +207,13 @@ class MainController
                     $ret = [
                         'code' => 8005,
                         'message' => 'token失效',
-                        'data' => new \stdClass(),
+                        'data' => new stdClass(),
                     ];
                 } else {
                     $ret = [
                         'code' => 8006,
                         'message' => '当前账号在其他终端登录',
-                        'data' => new \stdClass(),
+                        'data' => new stdClass(),
                     ];
                 }
                 return $this->systemReturn($okRequest['mapping'], $ret);
@@ -213,6 +222,7 @@ class MainController
         }
         $beforeResult = $okRequest['container']->beforeRun($okRequest['params'], $extras, $headers);
         if ($beforeResult === true) {
+            $this->dispatch->dispatch(new BeforeAction($actionMapping, $okRequest['params'], $headers, $extras));
             $ret = $okRequest['container']->run($okRequest['params'], $extras, $headers);
             return $this->systemReturn($okRequest['mapping'], $ret);
         }
