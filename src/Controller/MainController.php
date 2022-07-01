@@ -10,6 +10,8 @@ declare(strict_types=1);
  */
 namespace Wayhood\HyperfAction\Controller;
 
+use DeathSatan\Hyperf\Validate\Lib\AbstractValidate;
+use Hyperf\Contract\ValidatorInterface;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
@@ -19,6 +21,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use stdClass;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
+use Wayhood\HyperfAction\Collector\RequestValidateCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
 use Wayhood\HyperfAction\Contract\TokenInterface;
@@ -131,6 +134,26 @@ class MainController
         return true;
     }
 
+    protected function checkValidate($validate,$params,$actionMapping)
+    {
+        /**
+         * @var $validate_object AbstractValidate
+         */
+        $validate_object = $validate['validate'];
+        $scene = $validate['scene'];
+        $safe_mode = $validate['safe_mode'];
+        if ($scene!==null)
+        {
+            $validate_object = $validate_object->scene($scene);
+        }
+        $res = $validate_object->make($params,false);
+        if ($res instanceof ValidatorInterface)
+        {
+            return $this->systemExceptionReturn(9998,$res->errors()->first(),$actionMapping);
+        }
+        return true;
+    }
+
     public function index()
     {
         $actionRequest = $this->request->getAttribute('actionRequest');
@@ -188,6 +211,22 @@ class MainController
             }
             if (isset($actionRequest['params'][$params['name']])) {
                 $filterActionRequestParams[$params['name']] = $actionRequest['params'][$params['name']];
+            }
+        }
+
+        $defineRequestValidate = RequestValidateCollector::result()[$actionName] ?? [];
+        foreach ($defineRequestValidate as $validate)
+        {
+            $ret = $this->checkValidate($validate,$actionRequest['params'],$actionMapping);
+            if ($ret !== true)
+            {
+                return $this->response->json([
+                    'code' => 0,
+                    'timestamp' => time(),
+                    'deviation' => 0,
+                    'message' => '成功',
+                    'response' => $ret,
+                ]);
             }
         }
 
