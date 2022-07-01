@@ -39,7 +39,7 @@ class Result
     /**
      * error.
      */
-    public static function error(array $data = [], string $message = 'success', int $code = 1): \Psr\Http\Message\ResponseInterface
+    public static function error(array $data = [], string $message = 'error', int $code = 1): \Psr\Http\Message\ResponseInterface
     {
         return self::systemReturn($data, $message, $code);
     }

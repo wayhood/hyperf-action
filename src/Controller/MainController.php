@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Wayhood\HyperfAction\Controller;
 
 use DeathSatan\Hyperf\Validate\Lib\AbstractValidate;
+use Error;
+use Exception;
 use Hyperf\Contract\ValidatorInterface;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
@@ -26,6 +28,7 @@ use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
 use Wayhood\HyperfAction\Contract\TokenInterface;
 use Wayhood\HyperfAction\Event\BeforeAction;
+use Wayhood\HyperfAction\Result;
 use Wayhood\HyperfAction\Util\DocHtml;
 
 /**
@@ -80,15 +83,10 @@ class MainController
     public function systemReturn($mapping, $response): \Psr\Http\Message\ResponseInterface
     {
         $response['dispatch'] = $mapping;
-        return $this->response->json([
-            'code' => 0,
-            'timestamp' => time(),
-            'deviation' => 0,
-            'message' => '成功',
-            'response' => $response,
-        ]);
+        return Result::systemReturn($response);
     }
 
+    // 验证参数
     public function validateParam($requestParam, $params, $actionMapping)
     {
         $key = $requestParam['name'];
@@ -134,7 +132,61 @@ class MainController
         return true;
     }
 
-    public function index()
+    public function index(): \Psr\Http\Message\ResponseInterface
+    {
+        try {
+            $response = $this->dispatch();
+        } catch (Exception $exception) {
+            return $this->parseExceptionAndError($exception);
+        } catch (Error $error) {
+            return $this->parseExceptionAndError($error);
+        }
+        return $response;
+    }
+
+    public function getTokenByHeader($headers)
+    {
+        foreach ($headers as $key => $value) {
+            if (strtolower($key) == 'authorization') {
+                if (isset($value[0])) {
+                    return $value[0];
+                }
+            }
+        }
+        return '';
+    }
+
+    public function doc()
+    {
+        $response = Context::get(\Psr\Http\Message\ResponseInterface::class);
+        $response = $response->withHeader('Content-Type', 'text/html;charset=utf-8');
+        Context::set(\Psr\Http\Message\ResponseInterface::class, $response);
+        $action = $this->request->input('dispatch', '');
+        if ($action == '') {
+            return $this->response->raw(DocHtml::getIndexHtml($this->request->getUri(), $this->request->getPathInfo()));
+        }
+
+        return $this->response->raw(DocHtml::getActionHtml($action, $this->request->getPathInfo()));
+    }
+
+    /**
+     * @param Error|Exception $except
+     */
+    protected function parseExceptionAndError($except): \Psr\Http\Message\ResponseInterface
+    {
+        if (! in_array(env('APP_ENV'), ['test', 'demo', 'dev'])) {
+            $data = [
+                'trace' => $except->getTrace(),
+                'message' => $except->getMessage(),
+                'exception_file' => $except->getFile(),
+                'exception_line' => $except->getLine(),
+            ];
+            return Result::systemReturn($data, 'system Error', $except->getCode());
+        }
+        return Result::error([], 'System Errors');
+    }
+
+    protected function dispatch(): \Psr\Http\Message\ResponseInterface
     {
         $actionRequest = $this->request->getAttribute('actionRequest');
         $extras = $this->request->getAttribute('extras');
@@ -143,37 +195,19 @@ class MainController
         $actionMapping = $actionRequest['dispatch'] ?? null;
         if (is_null($actionMapping)) {
             $response = $this->systemExceptionReturn(8003, '请求参数有误', is_null($actionMapping) ? '' : $actionMapping);   // 请求参数有误
-            return $this->response->json([
-                'code' => 0,
-                'timestamp' => time(),
-                'deviation' => 0,
-                'message' => '成功',
-                'response' => $response,
-            ]);
+            return Result::systemReturn($response);
         }
 
         $actionName = ActionCollector::list()[$actionMapping] ?? null;
         if (is_null($actionName)) {
             $response = $this->systemExceptionReturn(8001, '调度不可用', $actionMapping); // 调度名不可用
-            return $this->response->json([
-                'code' => 0,
-                'timestamp' => time(),
-                'deviation' => 0,
-                'message' => '成功',
-                'response' => $response,
-            ]);
+            return Result::systemReturn($response);
         }
 
         $usable = UsableCollector::list()[$actionName] ?? false;
         if ($usable == false) {
             $response = $this->systemExceptionReturn(8002, '调度暂停使用', $actionMapping); // 调度名不可用
-            return $this->response->json([
-                'code' => 0,
-                'timestamp' => time(),
-                'deviation' => 0,
-                'message' => '成功',
-                'response' => $response,
-            ]);
+            return Result::systemReturn($response);
         }
 
         $defineRequestParam = RequestParamCollector::result()[$actionName] ?? [];
@@ -181,13 +215,7 @@ class MainController
         foreach ($defineRequestParam as $params) {
             $ret = $this->validateParam($params, $actionRequest['params'], $actionMapping);
             if ($ret !== true) {
-                return $this->response->json([
-                    'code' => 0,
-                    'timestamp' => time(),
-                    'deviation' => 0,
-                    'message' => '成功',
-                    'response' => $ret,
-                ]);
+                return Result::systemReturn($ret);
             }
             if (isset($actionRequest['params'][$params['name']])) {
                 $filterActionRequestParams[$params['name']] = $actionRequest['params'][$params['name']];
@@ -198,13 +226,7 @@ class MainController
         foreach ($defineRequestValidate as $validate) {
             $ret = $this->checkValidate($validate, $actionRequest['params'], $actionMapping);
             if ($ret !== true) {
-                return $this->response->json([
-                    'code' => 0,
-                    'timestamp' => time(),
-                    'deviation' => 0,
-                    'message' => '成功',
-                    'response' => $ret,
-                ]);
+                return Result::systemReturn($ret);
             }
         }
 
@@ -244,31 +266,6 @@ class MainController
             return $this->systemReturn($okRequest['mapping'], $ret);
         }
         return $this->systemReturn($okRequest['mapping'], $beforeResult);
-    }
-
-    public function getTokenByHeader($headers)
-    {
-        foreach ($headers as $key => $value) {
-            if (strtolower($key) == 'authorization') {
-                if (isset($value[0])) {
-                    return $value[0];
-                }
-            }
-        }
-        return '';
-    }
-
-    public function doc()
-    {
-        $response = Context::get(\Psr\Http\Message\ResponseInterface::class);
-        $response = $response->withHeader('Content-Type', 'text/html;charset=utf-8');
-        Context::set(\Psr\Http\Message\ResponseInterface::class, $response);
-        $action = $this->request->input('dispatch', '');
-        if ($action == '') {
-            return $this->response->raw(DocHtml::getIndexHtml($this->request->getUri(), $this->request->getPathInfo()));
-        }
-
-        return $this->response->raw(DocHtml::getActionHtml($action, $this->request->getPathInfo()));
     }
 
     protected function checkValidate($validate, $params, $actionMapping)
