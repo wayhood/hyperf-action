@@ -52,7 +52,7 @@ class ConfigProvider
                         ResponseParamCollector::class,
                         TokenCollector::class,
                         UsableCollector::class,
-                        RequestValidateCollector::class
+                        RequestValidateCollector::class,
                     ],
                 ],
             ],

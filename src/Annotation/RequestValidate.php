@@ -1,6 +1,13 @@
 <?php
 
-
+declare(strict_types=1);
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 namespace Wayhood\HyperfAction\Annotation;
 
 use Hyperf\Di\Annotation\AbstractAnnotation;
@@ -13,20 +20,20 @@ use Wayhood\HyperfAction\Collector\RequestValidateCollector;
 class RequestValidate extends AbstractAnnotation
 {
     /**
-     * 验证器
+     * 验证器.
      * @var string
      */
     public $validate;
 
     /**
-     * 场景
+     * 场景.
      * @var string
      */
-    public $scene = null;
+    public $scene;
 
     /**
-     * 是否开启严格模式
-     * @var boolean
+     * 是否开启严格模式.
+     * @var bool
      */
     public $safe_mode = false;
 
@@ -50,6 +57,7 @@ class RequestValidate extends AbstractAnnotation
             }
         }
     }
+
     public function collectClass(string $className): void
     {
         RequestValidateCollector::collectClass($className, static::class, $this);

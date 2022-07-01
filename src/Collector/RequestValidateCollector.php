@@ -1,8 +1,14 @@
 <?php
 
-
+declare(strict_types=1);
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 namespace Wayhood\HyperfAction\Collector;
-
 
 use Hyperf\Di\MetadataCollector;
 use Hyperf\Utils\ApplicationContext;
@@ -24,10 +30,9 @@ class RequestValidateCollector extends MetadataCollector
         static::$container[$class][] = $value;
     }
 
-    public static function result():array
+    public static function result(): array
     {
-        if (count(static::$result) == 0)
-        {
+        if (count(static::$result) == 0) {
             static::parseValidate();
         }
         return static::$result;
@@ -37,12 +42,11 @@ class RequestValidateCollector extends MetadataCollector
     {
         foreach (static::list() as $class => $requestValidate) {
             $result = [];
-            foreach ($requestValidate as $validate)
-            {
+            foreach ($requestValidate as $validate) {
                 $result[] = [
-                    'validate'  => static::makeValidate($validate->validate),
-                    'scene'     => $validate->scene,
-                    'safe_mode' => $validate->safe_mode
+                    'validate' => static::makeValidate($validate->validate),
+                    'scene' => $validate->scene,
+                    'safe_mode' => $validate->safe_mode,
                 ];
             }
             static::$result[$class] = $result;
@@ -51,9 +55,8 @@ class RequestValidateCollector extends MetadataCollector
 
     protected static function makeValidate($validate)
     {
-        if (!class_exists($validate))
-        {
-            throw new \RuntimeException('验证类:['.$validate.']不存在');
+        if (! class_exists($validate)) {
+            throw new \RuntimeException('验证类:[' . $validate . ']不存在');
         }
         return ApplicationContext::getContainer()->make($validate);
     }

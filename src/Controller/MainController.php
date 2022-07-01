@@ -134,26 +134,6 @@ class MainController
         return true;
     }
 
-    protected function checkValidate($validate,$params,$actionMapping)
-    {
-        /**
-         * @var $validate_object AbstractValidate
-         */
-        $validate_object = $validate['validate'];
-        $scene = $validate['scene'];
-        $safe_mode = $validate['safe_mode'];
-        if ($scene!==null)
-        {
-            $validate_object = $validate_object->scene($scene);
-        }
-        $res = $validate_object->make($params,false);
-        if ($res instanceof ValidatorInterface)
-        {
-            return $this->systemExceptionReturn(9998,$res->errors()->first(),$actionMapping);
-        }
-        return true;
-    }
-
     public function index()
     {
         $actionRequest = $this->request->getAttribute('actionRequest');
@@ -215,11 +195,9 @@ class MainController
         }
 
         $defineRequestValidate = RequestValidateCollector::result()[$actionName] ?? [];
-        foreach ($defineRequestValidate as $validate)
-        {
-            $ret = $this->checkValidate($validate,$actionRequest['params'],$actionMapping);
-            if ($ret !== true)
-            {
+        foreach ($defineRequestValidate as $validate) {
+            $ret = $this->checkValidate($validate, $actionRequest['params'], $actionMapping);
+            if ($ret !== true) {
                 return $this->response->json([
                     'code' => 0,
                     'timestamp' => time(),
@@ -291,5 +269,23 @@ class MainController
         }
 
         return $this->response->raw(DocHtml::getActionHtml($action, $this->request->getPathInfo()));
+    }
+
+    protected function checkValidate($validate, $params, $actionMapping)
+    {
+        /**
+         * @var AbstractValidate $validate_object
+         */
+        $validate_object = $validate['validate'];
+        $scene = $validate['scene'];
+        $safe_mode = $validate['safe_mode'];
+        if ($scene !== null) {
+            $validate_object = $validate_object->scene($scene);
+        }
+        $res = $validate_object->make($params, false);
+        if ($res instanceof ValidatorInterface) {
+            return $this->systemExceptionReturn(9998, $res->errors()->first(), $actionMapping);
+        }
+        return true;
     }
 }
