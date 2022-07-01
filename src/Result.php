@@ -20,10 +20,9 @@ class Result
     /**
      * 系统内置json方式.
      */
-    public static function systemReturn(?string $mapping, array $data = [], string $message = 'success', int $code = 0, int $deviation = 0): \Psr\Http\Message\ResponseInterface
+    public static function systemReturn(array $data = [], string $message = 'success', int $code = 0, int $deviation = 0): \Psr\Http\Message\ResponseInterface
     {
         $response_data = compact('code', 'deviation', 'message');
-        $data['dispatch'] = $mapping;
         $response_data['response'] = $data;
         return self::getResponse()
             ->json($response_data);
@@ -32,17 +31,17 @@ class Result
     /**
      * success.
      */
-    public static function success(?string $mapping, array $data = [], string $message = 'success'): \Psr\Http\Message\ResponseInterface
+    public static function success(array $data = [], string $message = 'success'): \Psr\Http\Message\ResponseInterface
     {
-        return self::systemReturn($mapping, $data, $message);
+        return self::systemReturn($data, $message);
     }
 
     /**
      * error.
      */
-    public static function error(?string $mapping, array $data = [], string $message = 'success', int $code = 1): \Psr\Http\Message\ResponseInterface
+    public static function error(array $data = [], string $message = 'success', int $code = 1): \Psr\Http\Message\ResponseInterface
     {
-        return self::systemReturn($mapping, $data, $message, $code);
+        return self::systemReturn($data, $message, $code);
     }
 
     protected static function getResponse()
