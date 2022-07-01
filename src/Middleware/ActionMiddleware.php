@@ -19,6 +19,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Wayhood\HyperfAction\Contract\SignInterface;
+use Wayhood\HyperfAction\Result;
 
 class ActionMiddleware implements MiddlewareInterface
 {
@@ -50,17 +51,9 @@ class ActionMiddleware implements MiddlewareInterface
         $this->config = $config->get('wayhood');
     }
 
-    public function responsesReturn(int $code, string $message)
+    public function systemError(int $code, string $message): ResponseInterface
     {
-        $response = new \stdClass();
-        $data = [
-            'code' => $code,
-            'timestamp' => time(), // 服务器时间
-            'deviation' => 0, // 误差
-            'message' => $message,
-            'response' => $response,
-        ];
-        return $this->response->json($data);
+        return Result::systemReturn([], $message, $code);
     }
 
     // fix 时间戳
@@ -78,14 +71,14 @@ class ActionMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->request->getMethod() != 'POST') {
-            return $this->responsesReturn(9001, '请求方法不对 必须是post请求');
+            return $this->systemError(9001, '请求方法不对 必须是post请求');
         }
 
         $body = $request->getBody()->getContents();
         $body = @json_decode($body, true);
 
         if (is_null($body)) {
-            return $this->responsesReturn(9001, 'payloads结构有误');
+            return $this->systemError(9001, 'payloads结构有误');
         }
 
         $verifyTimestamp = $this->config['verify_timestamp'];
@@ -93,7 +86,7 @@ class ActionMiddleware implements MiddlewareInterface
         $old_timestamp = 0;
         if ($verifyTimestamp) {
             if (! isset($body['timestamp'])) {
-                return $this->responsesReturn(9005, 'timestamp无效');
+                return $this->systemError(9005, 'timestamp无效');
             }
             $old_timestamp = intval($body['timestamp']);
             $timestamp = $this->fixTimestamp($old_timestamp);
@@ -107,7 +100,7 @@ class ActionMiddleware implements MiddlewareInterface
                 }
                 $message .= '本软件允许误差在 ±600秒' . "\n";
                 $message .= '请将手机时间调成自动后再试';
-                return $this->responsesReturn(9006, $message);
+                return $this->systemError(9006, $message);
             }
         }
 
@@ -119,22 +112,22 @@ class ActionMiddleware implements MiddlewareInterface
 
         // 多请求处理
         if (! isset($body['request'])) {
-            return $this->responsesReturn(9002, 'request无效');
+            return $this->systemError(9002, 'request无效');
         }
 
         if (! is_array($body['request'])) {
-            return $this->responsesReturn(9003, 'request结构有误');
+            return $this->systemError(9003, 'request结构有误');
         }
 
         // 验证签名
         $verifySign = $this->config['verify_sign'];
         if ($verifySign) {
             if (! isset($body['signature'])) {
-                return $this->responsesReturn(9008, 'signature结构有误');
+                return $this->systemError(9008, 'signature结构有误');
             }
             $sign = $this->container->get(SignInterface::class);
             if (! $sign->verify(strval($old_timestamp), $body['request'], $body['signature'])) {
-                return $this->responsesReturn(9007, 'signature无效');
+                return $this->systemError(9007, 'signature无效');
             }
         }
 
