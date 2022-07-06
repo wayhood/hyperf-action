@@ -174,14 +174,14 @@ class MainController
      */
     protected function parseExceptionAndError($except): \Psr\Http\Message\ResponseInterface
     {
-        if (! in_array(env('APP_ENV'), ['test', 'demo', 'dev'])) {
+        if (in_array(env('APP_ENV'), ['test', 'demo', 'dev'])) {
             $data = [
                 'trace' => $except->getTrace(),
                 'message' => $except->getMessage(),
                 'exception_file' => $except->getFile(),
                 'exception_line' => $except->getLine(),
             ];
-            return Result::systemReturn($data, 'system Error', $except->getCode());
+            return Result::systemReturn($data, $except->getMessage(), $except->getCode());
         }
         return Result::error([], 'System Errors');
     }
