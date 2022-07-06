@@ -21,6 +21,7 @@ use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
 use Wayhood\HyperfAction\Command\ActionCommand;
 use Wayhood\HyperfAction\Command\DescribeActionsCommand;
+use Wayhood\HyperfAction\Command\GeneratorCURDCommand;
 use Wayhood\HyperfAction\Command\ServiceCommand;
 use Wayhood\HyperfAction\Contract\TokenInterface;
 use Wayhood\HyperfAction\Service\TokenService;
@@ -37,6 +38,7 @@ class ConfigProvider
                 ActionCommand::class,
                 ServiceCommand::class,
                 DescribeActionsCommand::class,
+                GeneratorCURDCommand::class
             ],
             'annotations' => [
                 'scan' => [

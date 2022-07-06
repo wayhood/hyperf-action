@@ -181,7 +181,7 @@ class MainController
                 'exception_file' => $except->getFile(),
                 'exception_line' => $except->getLine(),
             ];
-            return Result::systemReturn($data, $except->getMessage(), $except->getCode());
+            return Result::systemReturn($data, $except->getMessage(), (int)$except->getCode());
         }
         return Result::error([], 'System Errors');
     }
