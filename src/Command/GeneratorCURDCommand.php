@@ -596,7 +596,9 @@ SQL;
         {
             if ($index===0)
             {
-                $str .= "\n";
+                $str .= <<<HEADE
+ *
+HEADE;
             }
             $str .= <<<REQUEST
  * @RequestParam(n="{$datum['name']}",t="{$datum['type']}",r={$datum['require']},e="{$datum['example']}",d="{$datum['description']}")\n
