@@ -162,26 +162,25 @@ class GeneratorPostmanCommand extends HyperfCommand
         $req = [
             'dispatch' => $mapping,
         ];
-        //处理多维数组
+        // 处理多维数组
         $except_fields = [];
         $fields_example = [];
         foreach ($requestParams as $requestParam) {
-            if (strpos($requestParam->name,'.')!==false)
-            {
-                $except_fields[] = $mapping.'.'.$requestParam->name;
+            if (strpos($requestParam->name, '.') !== false) {
+                $except_fields[] = $mapping . '.' . $requestParam->name;
 
                 if ($requestParam->type == 'string') {
-                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,strval($requestParam->example));
+                    Arr::set($fields_example, $mapping . '.' . $requestParam->name, strval($requestParam->example));
                 } elseif ($requestParam->type == 'int') {
-                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,intval($requestParam->example));
-                    // $html .= intval($requestParam->example);
+                    Arr::set($fields_example, $mapping . '.' . $requestParam->name, intval($requestParam->example));
+                // $html .= intval($requestParam->example);
                 } elseif ($requestParam->type == 'float') {
-                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,floatval($requestParam->example));
+                    Arr::set($fields_example, $mapping . '.' . $requestParam->name, floatval($requestParam->example));
                 } elseif ($requestParam->type == 'bool') {
-                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,boolval($requestParam->example));
-                }elseif ($requestParam->type == 'array') {
+                    Arr::set($fields_example, $mapping . '.' . $requestParam->name, boolval($requestParam->example));
+                } elseif ($requestParam->type == 'array') {
                     $example = $requestParam->example;
-                    $example = str_replace('\'','"',$example);
+                    $example = str_replace('\'', '"', $example);
                     if ($requestParam->base64 == true) {
                         $example = base64_decode($example);
                     }
@@ -189,7 +188,7 @@ class GeneratorPostmanCommand extends HyperfCommand
                     if (! is_array($example)) {
                         $example = [];
                     }
-                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,$example);
+                    Arr::set($fields_example, $mapping . '.' . $requestParam->name, $example);
                 } elseif ($requestParam->type == 'object') {
                     $example = $requestParam->example;
                     if ($requestParam->base64 == true) {
@@ -199,17 +198,16 @@ class GeneratorPostmanCommand extends HyperfCommand
                     if (! is_array($example)) {
                         $example = new \stdClass();
                     }
-                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,$example);
+                    Arr::set($fields_example, $mapping . '.' . $requestParam->name, $example);
                 } else {
-                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,$requestParam->example);
+                    Arr::set($fields_example, $mapping . '.' . $requestParam->name, $requestParam->example);
                 }
             }
         }
 
         $params = [];
         foreach ($requestParams as $requestParam) {
-            if (strpos($requestParam->name,'.') && in_array($mapping.'.'.$requestParam->name,$except_fields))
-            {
+            if (strpos($requestParam->name, '.') && in_array($mapping . '.' . $requestParam->name, $except_fields)) {
                 continue;
             }
 
@@ -223,9 +221,9 @@ class GeneratorPostmanCommand extends HyperfCommand
                 $params[$requestParam->name] = boolval($requestParam->example);
             } elseif ($requestParam->type == 'array') {
                 $example = $requestParam->example;
-                //如果有多维注解
-                if (Arr::has($fields_example,$mapping.'.'.$requestParam->name)){
-                    $params[$requestParam->name] = Arr::get($fields_example,$mapping.'.'.$requestParam->name);
+                // 如果有多维注解
+                if (Arr::has($fields_example, $mapping . '.' . $requestParam->name)) {
+                    $params[$requestParam->name] = Arr::get($fields_example, $mapping . '.' . $requestParam->name);
                     continue;
                 }
 
@@ -239,8 +237,8 @@ class GeneratorPostmanCommand extends HyperfCommand
                 $params[$requestParam->name] = $example;
             } elseif ($requestParam->type == 'object') {
                 $example = $requestParam->example;
-                //如果有多维注解
-                if (isset($fields_example[$requestParam->name])){
+                // 如果有多维注解
+                if (isset($fields_example[$requestParam->name])) {
                     $params[$requestParam->name] = $fields_example[$requestParam->name];
                     continue;
                 }

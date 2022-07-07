@@ -38,7 +38,7 @@ class ConfigProvider
                 ActionCommand::class,
                 ServiceCommand::class,
                 DescribeActionsCommand::class,
-                GeneratorCURDCommand::class
+                GeneratorCURDCommand::class,
             ],
             'annotations' => [
                 'scan' => [

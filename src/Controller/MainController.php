@@ -92,7 +92,7 @@ class MainController
     {
         $key = $requestParam['name'];
         $require = $requestParam['require'];
-        $value = Arr::get($params,$key);
+        $value = Arr::get($params, $key);
         if ($require == 'true') {
             if (! isset($value)) {
                 return $this->systemExceptionReturn(9901, '缺少参数: ' . $key, $actionMapping);
@@ -182,7 +182,7 @@ class MainController
                 'exception_file' => $except->getFile(),
                 'exception_line' => $except->getLine(),
             ];
-            return Result::systemReturn($data, $except->getMessage(), (int)$except->getCode());
+            return Result::systemReturn($data, $except->getMessage(), (int) $except->getCode());
         }
         return Result::error([], 'System Errors');
     }

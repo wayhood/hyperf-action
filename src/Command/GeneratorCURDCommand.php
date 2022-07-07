@@ -1,74 +1,73 @@
 <?php
 
-
+declare(strict_types=1);
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 namespace Wayhood\HyperfAction\Command;
-
 
 use Hyperf\Command\Command;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Database\Model\Model;
-use Hyperf\Database\MySqlConnection;
-use Hyperf\Database\Schema\Schema;
 use Hyperf\DbConnection\Db;
 use Hyperf\Utils\ApplicationContext;
-use Hyperf\Utils\Arr;
 use Hyperf\Utils\CodeGen\Project;
-use Hyperf\Utils\Str;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 class GeneratorCURDCommand extends Command
 {
+    protected $attributes = [];
 
     public function __construct(string $name = null)
     {
         parent::__construct('gen:curd-action');
         $this->setDescription('One click curd');
-        $this->setHelp(<<<HELP
+        $this->setHelp(
+            <<<'HELP'
 Generate actions, models, and services based on the provided table name
 The generated file contains some common operations
 HELP
-);
+        );
     }
-
-    protected function configure()
-    {
-        parent::configure();
-        $this->addOption('force','f',InputOption::VALUE_OPTIONAL,'Whether to force overwrite',false);
-        $this->addUsage('--force');
-        $this->addArgument('model',InputArgument::REQUIRED,'Model class');
-        $this->addUsage('--model App\\Model\\User');
-        $this->addOption('namespace','name',InputOption::VALUE_OPTIONAL,'Action and Service Namespace');
-        $this->addUsage('--namespace User');
-    }
-
 
     public function handle()
     {
         $this->initAttributes();
-        if ($this->attributes === false)
-        {
+        if ($this->attributes === false) {
             return;
         }
         $service = $this->genService($this->attributes);
         $this->attributes['service'] = $service;
         $this->genActions($this->attributes);
     }
-    protected $attributes = [];
+
+    protected function configure()
+    {
+        parent::configure();
+        $this->addOption('force', 'f', InputOption::VALUE_OPTIONAL, 'Whether to force overwrite', false);
+        $this->addUsage('--force');
+        $this->addArgument('model', InputArgument::REQUIRED, 'Model class');
+        $this->addUsage('--model App\\Model\\User');
+        $this->addOption('namespace', 'name', InputOption::VALUE_OPTIONAL, 'Action and Service Namespace');
+        $this->addUsage('--namespace User');
+    }
 
     protected function initAttributes()
     {
-        $force = (boolean)$this->input->getOption('force');
+        $force = (bool) $this->input->getOption('force');
         $model = $this->input->getArgument('model');
         $namespace = $this->input->getOption('namespace');
-        if (!empty($this->attributes))
-        {
+        if (! empty($this->attributes)) {
             return $this->attributes;
         }
-        if (!class_exists($model))
-        {
-            $this->error('NotFound Model Class:['.$model.']');
+        if (! class_exists($model)) {
+            $this->error('NotFound Model Class:[' . $model . ']');
             return false;
         }
         $model_class = $this->getModelClass($model);
@@ -79,7 +78,7 @@ HELP
 select `information_schema`.`TABLES`.TABLE_COMMENT FROM `information_schema`.`TABLES` WHERE `information_schema`.`TABLES`.`TABLE_SCHEMA` = '{$databases}' AND `information_schema`.`TABLES`.`TABLE_NAME`= '{$table}';
 SQL;
         $table_comment = Db::selectOne($table_comment_sql);
-        $table_comment = empty($table_comment->TABLE_COMMENT)?$table:$table_comment->TABLE_COMMENT;
+        $table_comment = empty($table_comment->TABLE_COMMENT) ? $table : $table_comment->TABLE_COMMENT;
 
         $table_fields_comment_sql = <<<SQL
 SELECT
@@ -89,27 +88,27 @@ FROM `information_schema`.`COLUMNS` as cl WHERE `cl`.TABLE_SCHEMA = '{$databases
 SQL;
         $table_fields_comment = Db::select($table_fields_comment_sql);
 
-        $this->attributes =  compact('force','model','namespace','model_class','table_fields_comment','table_comment');
+        $this->attributes = compact('force', 'model', 'namespace', 'model_class', 'table_fields_comment', 'table_comment');
         return $this->attributes;
     }
 
     protected function getModelClass(string $model)
     {
-        return substr($model,strrpos($model,'\\')+1);
+        return substr($model, strrpos($model, '\\') + 1);
     }
 
     protected function genService(array $attributes)
     {
-        $name = $this->qualifyClass($attributes['model_class'],'service');
+        $name = $this->qualifyClass($attributes['model_class'], 'service');
         $path = $this->getPath($name);
-        [$input,$output] = [$this->input,$this->output];
-        if (($input->getOption('force') === false) && $this->alreadyExists($attributes['model_class'],'service')) {
+        [$input,$output] = [$this->input, $this->output];
+        if (($input->getOption('force') === false) && $this->alreadyExists($attributes['model_class'], 'service')) {
             $output->writeln(sprintf('<fg=red>%s</>', $name . ' already exists!'));
             return 0;
         }
         $this->makeDirectory($path);
 
-        file_put_contents($path, $this->buildClass($name,'service'));
+        file_put_contents($path, $this->buildClass($name, 'service'));
 
         $output->writeln(sprintf('<info>%s</info>', $name . ' created successfully.'));
 
@@ -119,21 +118,19 @@ SQL;
 
     protected function genActions(array $attributes)
     {
-        $name = $this->qualifyClass($attributes['model_class'],'action').'\\';
-        $action_list = ['GetAction','SetAction','DelAction','SearchAction'];
-        foreach ($action_list as $action)
-        {
+        $name = $this->qualifyClass($attributes['model_class'], 'action') . '\\';
+        $action_list = ['GetAction', 'SetAction', 'DelAction', 'SearchAction'];
+        foreach ($action_list as $action) {
             $this->attributes['action_current'] = $action;
-            $action_class = $name.$action;
-            $action_path  =$this->getPath($action_class);
-            [$input,$output] = [$this->input,$this->output];
-            if (($input->getOption('force') === false) && is_file($action_path))
-            {
+            $action_class = $name . $action;
+            $action_path = $this->getPath($action_class);
+            [$input,$output] = [$this->input, $this->output];
+            if (($input->getOption('force') === false) && is_file($action_path)) {
                 $output->writeln(sprintf('<fg=red>%s</>', $action_class . ' already exists!'));
                 continue;
             }
             $this->makeDirectory($action_path);
-            file_put_contents($action_path, $this->buildClass($action_class,'action',$action));
+            file_put_contents($action_path, $this->buildClass($action_class, 'action', $action));
 
             $output->writeln(sprintf('<info>%s</info>', $action_class . ' created successfully.'));
 
@@ -143,49 +140,44 @@ SQL;
 
     /**
      * Parse the class name and format according to the root namespace.
-     *
-     * @param string $name
-     * @return string
      */
-    protected function qualifyClass(string $name,string $build_type): string
+    protected function qualifyClass(string $name, string $build_type): string
     {
         $name = ltrim($name, '\\/');
 
         $name = str_replace('/', '\\', $name);
 
         $namespace = $this->build_namespace($build_type);
-        return rtrim($namespace,'\\').'\\'.$name;
+        return rtrim($namespace, '\\') . '\\' . $name;
     }
 
-    protected function build_namespace(string $name):string
+    protected function build_namespace(string $name): string
     {
         $namespace = $this->input->getOption('namespace');
-        switch ($name)
-        {
+        switch ($name) {
             case 'service':
-                return 'App\\Service'.(is_null($namespace)?$namespace:'\\'.$namespace);
+                return 'App\\Service' . (is_null($namespace) ? $namespace : '\\' . $namespace);
             case 'action':
-                return 'App\\Action'.(is_null($namespace)?$namespace:'\\'.$namespace);
+                return 'App\\Action' . (is_null($namespace) ? $namespace : '\\' . $namespace);
         }
-        throw new \Exception($name.'NotFound Namespace ');
+        throw new \Exception($name . 'NotFound Namespace ');
     }
 
     /**
      * Determine if the class already exists.
      *
      * @param string $rawName
-     * @return bool
+     * @param mixed $build_type
      */
-    protected function alreadyExists($rawName,$build_type): bool
+    protected function alreadyExists($rawName, $build_type): bool
     {
-        return is_file($this->getPath($this->qualifyClass($rawName,$build_type)));
+        return is_file($this->getPath($this->qualifyClass($rawName, $build_type)));
     }
 
     /**
      * Get the destination class path.
      *
      * @param string $name
-     * @return string
      */
     protected function getPath($name): string
     {
@@ -197,7 +189,6 @@ SQL;
      * Build the directory for the class if necessary.
      *
      * @param string $path
-     * @return string
      */
     protected function makeDirectory($path): string
     {
@@ -214,20 +205,19 @@ SQL;
      * @param string $name
      * @return string
      */
-    protected function buildClass($name,string $type,?string $ext = null)
+    protected function buildClass($name, string $type, ?string $ext = null)
     {
-        $stub = file_get_contents($this->getStub($type,$ext));
-        return $this->replaceNamespace($stub, $name)->replaceClass($stub, $name,$type);
+        $stub = file_get_contents($this->getStub($type, $ext));
+        return $this->replaceNamespace($stub, $name)->replaceClass($stub, $name, $type);
     }
 
-    protected function getStub(string $type,?string $ext)
+    protected function getStub(string $type, ?string $ext)
     {
-        $path = __DIR__.DIRECTORY_SEPARATOR.'stubs'.DIRECTORY_SEPARATOR.'curd'.DIRECTORY_SEPARATOR;
-        if ($type == 'action')
-        {
-            return $path.$ext.'.stub';
+        $path = __DIR__ . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . 'curd' . DIRECTORY_SEPARATOR;
+        if ($type == 'action') {
+            return $path . $ext . '.stub';
         }
-        return $path.$type.'.stub';
+        return $path . $type . '.stub';
     }
 
     /**
@@ -264,22 +254,20 @@ SQL;
      *
      * @param string $stub
      * @param string $name
+     * @param mixed $type
      * @return string
      */
-    protected function replaceClass($stub, $name,$type)
+    protected function replaceClass($stub, $name, $type)
     {
         $class = str_replace($this->getNamespace($name) . '\\', '', $name);
-        if ($type == 'service')
-        {
+        if ($type == 'service') {
             $model = $this->attributes['model'];
-            $stub = str_replace('%MODEL%','\\'.get_class($model),$stub);
+            $stub = str_replace('%MODEL%', '\\' . get_class($model), $stub);
         }
-        if ($type == 'action')
-        {
-         $stub = $this->replaceActionStub($stub,$name);
+        if ($type == 'action') {
+            $stub = $this->replaceActionStub($stub, $name);
         }
-        $stub = str_replace('%CLASS%', $class, $stub);
-        return $stub;
+        return str_replace('%CLASS%', $class, $stub);
     }
 
     protected function replaceActionStub($stub, $name)
@@ -287,24 +275,23 @@ SQL;
         $action = str_replace('App\\Action\\', '', $name);
         $action = str_replace('Action', '', $action);
         $action = str_replace('\\', '.', $action);
-        $stub = str_replace('%ACTION%',$action,$stub);
-        $stub = str_replace('%SERVICE%',$this->attributes['service'],$stub);
+        $stub = str_replace('%ACTION%', $action, $stub);
+        $stub = str_replace('%SERVICE%', $this->attributes['service'], $stub);
         $request_params = $this->build_request_params();
-        //填充request params注解
-        $stub = str_replace('%REQUESTPARAM%',$request_params,$stub);
+        // 填充request params注解
+        $stub = str_replace('%REQUESTPARAM%', $request_params, $stub);
 
         // 填充分类名
-        $stub = str_replace('%CATEGORY%',$this->attributes['table_comment'],$stub);
+        $stub = str_replace('%CATEGORY%', $this->attributes['table_comment'], $stub);
 
         $response_params = $this->build_response_params();
 
-        //填充response params
-        $stub = str_replace('%RESPONSEPARAM',$response_params,$stub);
-        return $stub;
+        // 填充response params
+        return str_replace('%RESPONSEPARAM', $response_params, $stub);
     }
 
-    //将表字段映射到注解内
-    protected function formatRequest(bool $is_not_need_key_name = false,bool $is_not_need_created_and_updated = false)
+    // 将表字段映射到注解内
+    protected function formatRequest(bool $is_not_need_key_name = false, bool $is_not_need_created_and_updated = false)
     {
         /**
          * @var Model $model
@@ -312,13 +299,13 @@ SQL;
         $model = $this->attributes['model'];
         $except_fields = [];
 
-        //是否不需要映射主键
-        if ($is_not_need_key_name){
+        // 是否不需要映射主键
+        if ($is_not_need_key_name) {
             $except_fields[] = $model->getKeyName();
         }
 
-        //是否不需要映射 时间维护字段
-        if ( $is_not_need_created_and_updated && $model->timestamps){
+        // 是否不需要映射 时间维护字段
+        if ($is_not_need_created_and_updated && $model->timestamps) {
             $except_fields[] = $model::UPDATED_AT;
             $except_fields[] = $model::CREATED_AT;
         }
@@ -326,41 +313,37 @@ SQL;
         $table_comment = $this->attributes['table_comment'];
         $fields_comment = $this->attributes['table_fields_comment'];
         $types[] = [
-            'tinyint','smallint',
-            'mediumint','int','integer','bigint','bool','boolean',
-            'format'=>'array',
-            'example'=>'[\'>|<|!=|=\',123]'
+            'tinyint', 'smallint',
+            'mediumint', 'int', 'integer', 'bigint', 'bool', 'boolean',
+            'format' => 'array',
+            'example' => '[\'>|<|!=|=\',123]',
         ];
         $types[] = [
-            'float','double','decimal',
-            'format'=>'array',
-            'example'=>'[\'>|<|!=|=\',10.24]'
+            'float', 'double', 'decimal',
+            'format' => 'array',
+            'example' => '[\'>|<|!=|=\',10.24]',
         ];
         $types[] = [
-            'varchar','char','tinytext','text','mediumtext','longtext','enum','set',
-            'format'=>'array',
-            'example'=>'[\'like|=\',\'xxx\']'
+            'varchar', 'char', 'tinytext', 'text', 'mediumtext', 'longtext', 'enum', 'set',
+            'format' => 'array',
+            'example' => '[\'like|=\',\'xxx\']',
         ];
         $types[] = [
-            'time','date','datetime','timestamp','year',
-            'format'=>'array',
-            'example'=>'[\'start_date\',\'end_date\']'
+            'time', 'date', 'datetime', 'timestamp', 'year',
+            'format' => 'array',
+            'example' => '[\'start_date\',\'end_date\']',
         ];
         $result = [];
-        //转换类型
-        foreach ($fields_comment as $index=> $item)
-        {
-            //去除掉不需要的字段
-            if (in_array($item->name,$except_fields))
-            {
+        // 转换类型
+        foreach ($fields_comment as $index => $item) {
+            // 去除掉不需要的字段
+            if (in_array($item->name, $except_fields)) {
                 continue;
             }
 
-            //转换type
-            foreach ($types as $type)
-            {
-                if (in_array($item->type,$type))
-                {
+            // 转换type
+            foreach ($types as $type) {
+                if (in_array($item->type, $type)) {
                     $result[$index]['type'] = $type['format'];
                     $result[$index]['example'] = $type['example'];
                     break;
@@ -368,18 +351,18 @@ SQL;
             }
 
             // 判断是否必须传值
-            $result[$index]['require'] = ($item->is_null === 'NO')?'true':'false';
+            $result[$index]['require'] = ($item->is_null === 'NO') ? 'true' : 'false';
 
             // 字段名
             $result[$index]['name'] = $item->name;
             // 如果没有注释就 拼接表的注释 + 字段名
-            $result[$index]['description'] = empty($item->comment)?$table_comment.$item->name:$item->comment;
+            $result[$index]['description'] = empty($item->comment) ? $table_comment . $item->name : $item->comment;
         }
         return $result;
     }
 
-    //将表字段映射到response注解内
-    protected function formatResponse(bool $is_not_need_key_name = false,bool $is_not_need_created_and_updated = false)
+    // 将表字段映射到response注解内
+    protected function formatResponse(bool $is_not_need_key_name = false, bool $is_not_need_created_and_updated = false)
     {
         /**
          * @var Model $model
@@ -387,13 +370,13 @@ SQL;
         $model = $this->attributes['model'];
         $except_fields = [];
 
-        //是否不需要映射主键
-        if ($is_not_need_key_name){
+        // 是否不需要映射主键
+        if ($is_not_need_key_name) {
             $except_fields[] = $model->getKeyName();
         }
 
-        //是否不需要映射 时间维护字段
-        if ( $is_not_need_created_and_updated && $model->timestamps){
+        // 是否不需要映射 时间维护字段
+        if ($is_not_need_created_and_updated && $model->timestamps) {
             $except_fields[] = $model::UPDATED_AT;
             $except_fields[] = $model::CREATED_AT;
         }
@@ -401,41 +384,37 @@ SQL;
         $table_comment = $this->attributes['table_comment'];
         $fields_comment = $this->attributes['table_fields_comment'];
         $types[] = [
-            'tinyint','smallint',
-            'mediumint','int','integer','bigint','bool','boolean',
-            'format'=>'int',
-            'example'=>'1'
+            'tinyint', 'smallint',
+            'mediumint', 'int', 'integer', 'bigint', 'bool', 'boolean',
+            'format' => 'int',
+            'example' => '1',
         ];
         $types[] = [
-            'float','double','decimal',
-            'format'=>'float',
-            'example'=>'10.24'
+            'float', 'double', 'decimal',
+            'format' => 'float',
+            'example' => '10.24',
         ];
         $types[] = [
-            'varchar','char','tinytext','text','mediumtext','longtext','enum','set',
-            'format'=>'string',
-            'example'=>'xxx'
+            'varchar', 'char', 'tinytext', 'text', 'mediumtext', 'longtext', 'enum', 'set',
+            'format' => 'string',
+            'example' => 'xxx',
         ];
         $types[] = [
-            'time','date','datetime','timestamp','year',
-            'format'=>'string',
-            'example'=>'2020-07-01 12:00:00'
+            'time', 'date', 'datetime', 'timestamp', 'year',
+            'format' => 'string',
+            'example' => '2020-07-01 12:00:00',
         ];
         $result = [];
-        //转换类型
-        foreach ($fields_comment as $index=> $item)
-        {
-            //去除掉不需要的字段
-            if (in_array($item->name,$except_fields))
-            {
+        // 转换类型
+        foreach ($fields_comment as $index => $item) {
+            // 去除掉不需要的字段
+            if (in_array($item->name, $except_fields)) {
                 continue;
             }
 
-            //转换type
-            foreach ($types as $type)
-            {
-                if (in_array($item->type,$type))
-                {
+            // 转换type
+            foreach ($types as $type) {
+                if (in_array($item->type, $type)) {
                     $result[$index]['type'] = $type['format'];
                     $result[$index]['example'] = $type['example'];
                     break;
@@ -445,7 +424,7 @@ SQL;
             // 字段名
             $result[$index]['name'] = $item->name;
             // 如果没有注释就 拼接表的注释 + 字段名
-            $result[$index]['description'] = empty($item->comment)?$table_comment.$item->name:$item->comment;
+            $result[$index]['description'] = empty($item->comment) ? $table_comment . $item->name : $item->comment;
         }
         return $result;
     }
@@ -454,31 +433,30 @@ SQL;
     {
         $current_action = $this->attributes['action_current'];
         $table_comment = $this->attributes['table_comment'];
-        switch ($current_action)
-        {
+        switch ($current_action) {
             case 'DelAction':
                 return $this->build_request_comment([[
-                    'name'=>'ids',
-                    'type'=>'array',
-                    'require'=>'true',
-                    'example'=>'[1,2,3]',
-                    'description'=>$table_comment.' ids'
+                    'name' => 'ids',
+                    'type' => 'array',
+                    'require' => 'true',
+                    'example' => '[1,2,3]',
+                    'description' => $table_comment . ' ids',
                 ]]);
             case 'SetAction':
-                $format_request = $this->formatRequest(true,true);
+                $format_request = $this->formatRequest(true, true);
                 $format_request[] = [
-                    'name'=>'ids',
-                    'type'=>'array',
-                    'require'=>'true',
-                    'example'=>'[1,2,3]',
-                    'description'=>$table_comment.' ids'
+                    'name' => 'ids',
+                    'type' => 'array',
+                    'require' => 'true',
+                    'example' => '[1,2,3]',
+                    'description' => $table_comment . ' ids',
                 ];
                 $format_request = $this->format_set_action($format_request);
                 return $this->build_request_comment($format_request);
             case 'GetAction':
             case 'SearchAction':
                 return $this->build_request_comment(
-                  $this->build_search_request()
+                    $this->build_search_request()
                 );
         }
         return ' ';
@@ -487,22 +465,21 @@ SQL;
     protected function build_response_params()
     {
         $current_action = $this->attributes['action_current'];
-        switch ($current_action)
-        {
+        switch ($current_action) {
             case 'DelAction':
                 return $this->build_response_comment([[
-                    'name'=>'status',
-                    'type'=>'bool',
-                    'example'=>'true',
-                    'description'=>'是否成功'
+                    'name' => 'status',
+                    'type' => 'bool',
+                    'example' => 'true',
+                    'description' => '是否成功',
                 ]]);
             case 'SetAction':
-                $format_request = $this->formatResponse(true,true);
+                $format_request = $this->formatResponse(true, true);
                 $format_request[] = [
-                    'name'=>'status',
-                    'type'=>'bool',
-                    'example'=>'true',
-                    'description'=>'是否成功'
+                    'name' => 'status',
+                    'type' => 'bool',
+                    'example' => 'true',
+                    'description' => '是否成功',
                 ];
                 $format_request = $this->format_set_action($format_request);
                 return $this->build_response_comment($format_request);
@@ -515,15 +492,13 @@ SQL;
         return ' ';
     }
 
-    //转换set
+    // 转换set
     protected function format_set_action(array $data)
     {
-        foreach ($data as &$datum)
-        {
-            if ($datum['name']!=='ids')
-            {
+        foreach ($data as &$datum) {
+            if ($datum['name'] !== 'ids') {
                 $datum['require'] = 'false';
-            }else{
+            } else {
                 $datum['require'] = 'true';
             }
         }
@@ -531,58 +506,54 @@ SQL;
         return $data;
     }
 
-    //转换搜索action所需要的注释
+    // 转换搜索action所需要的注释
     protected function build_search_request()
     {
-        $data = $this->formatRequest(false,true);
-        foreach ($data as &$datum)
-        {
-            $datum['name'] = 'search.'.$datum['name'];
+        $data = $this->formatRequest(false, true);
+        foreach ($data as &$datum) {
+            $datum['name'] = 'search.' . $datum['name'];
             $datum['require'] = 'false';
         }
         unset($datum);
         return $data;
     }
 
-    //转换详情action所需要的注释
+    // 转换详情action所需要的注释
     protected function build_detail_response(bool $is_detail)
     {
-        //表注释
+        // 表注释
         $table_comment = $this->attributes['table_comment'];
         $data = $this->formatResponse();
-        if (!$is_detail)
-        {
-            array_unshift($data,[
-                'name'=>'list.0',
-                'type'=>'map',
-                'example'=>'{}',
-                'description'=>$table_comment.'数据对象'
+        if (! $is_detail) {
+            array_unshift($data, [
+                'name' => 'list.0',
+                'type' => 'map',
+                'example' => '{}',
+                'description' => $table_comment . '数据对象',
             ]);
-            array_unshift($data,[
-                'name'=>'list',
-                'type'=>'array',
-                'example'=>'list[]',
-                'description'=>$table_comment.'数据列表',
+            array_unshift($data, [
+                'name' => 'list',
+                'type' => 'array',
+                'example' => 'list[]',
+                'description' => $table_comment . '数据列表',
             ]);
             $data[] = [
-                'name'=>'current_page',
-                'type'=>'int',
-                'example'=>'1',
-                'description'=>'当前页数'
+                'name' => 'current_page',
+                'type' => 'int',
+                'example' => '1',
+                'description' => '当前页数',
             ];
             $data[] = [
-                'name'=>'total',
-                'type'=>'int',
-                'example'=>'10',
-                'description'=>'总数量'
+                'name' => 'total',
+                'type' => 'int',
+                'example' => '10',
+                'description' => '总数量',
             ];
-            foreach ($data as &$datum)
-            {
-                if (in_array($datum['name'],['current_page','total','list.0','list']))
-                {
+            foreach ($data as &$datum) {
+                if (in_array($datum['name'], ['current_page', 'total', 'list.0', 'list'])) {
                     continue;
                 }
-                $datum['name'] = 'list.0.'.$datum['name'];
+                $datum['name'] = 'list.0.' . $datum['name'];
             }
             unset($datum);
         }
@@ -592,8 +563,7 @@ SQL;
     protected function build_request_comment(array $data)
     {
         $str = '';
-        foreach ($data as $index=> $datum)
-        {
+        foreach ($data as $index => $datum) {
             $str .= <<<REQUEST
  * @RequestParam(n="{$datum['name']}",t="{$datum['type']}",r={$datum['require']},e="{$datum['example']}",d="{$datum['description']}")\n
 REQUEST;
@@ -604,12 +574,10 @@ REQUEST;
     protected function build_response_comment(array $data)
     {
         $str = '';
-        foreach ($data as $index=>$datum)
-        {
+        foreach ($data as $index => $datum) {
             $str .= <<<RESPONSE
  * @ResponseParam(n="{$datum['name']}",                t="{$datum['type']}",    e="{$datum['example']}",     d="{$datum['description']}")\n
 RESPONSE;
-
         }
         return $str;
     }

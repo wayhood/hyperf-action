@@ -19,15 +19,15 @@ class Result
 
     /**
      * 系统内置json方式.
+     * @param mixed $data
      */
     public static function systemReturn($data = [], string $message = 'success', int $code = 0, int $deviation = 0): \Psr\Http\Message\ResponseInterface
     {
-        if (!is_array($data)){
-            if (is_object($data) && method_exists($data,'toArray'))
-            {
+        if (! is_array($data)) {
+            if (is_object($data) && method_exists($data, 'toArray')) {
                 $data = $data->toArray();
-            }else{
-                $data = (array)$data;
+            } else {
+                $data = (array) $data;
             }
         }
 
