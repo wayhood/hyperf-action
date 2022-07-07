@@ -309,29 +309,30 @@ SQL;
             $except_fields[] = $model::UPDATED_AT;
             $except_fields[] = $model::CREATED_AT;
         }
-
+        //是否是set action
+        $is_set_action = $this->attributes['action_current']=='SetAction';
         $table_comment = $this->attributes['table_comment'];
         $fields_comment = $this->attributes['table_fields_comment'];
         $types[] = [
             'tinyint', 'smallint',
             'mediumint', 'int', 'integer', 'bigint', 'bool', 'boolean',
-            'format' => 'array',
-            'example' => '[\'>|<|!=|=\',123]',
+            'format' => $is_set_action?'int':'array',
+            'example' => $is_set_action?1:'[\'>|<|!=|=\',123]',
         ];
         $types[] = [
             'float', 'double', 'decimal',
-            'format' => 'array',
-            'example' => '[\'>|<|!=|=\',10.24]',
+            'format' => $is_set_action?'float':'array',
+            'example' => $is_set_action?10.24:'[\'>|<|!=|=\',10.24]',
         ];
         $types[] = [
             'varchar', 'char', 'tinytext', 'text', 'mediumtext', 'longtext', 'enum', 'set',
-            'format' => 'array',
-            'example' => '[\'like|=\',\'xxx\']',
+            'format' => $is_set_action?'string':'array',
+            'example' => $is_set_action?'xxxx':'[\'like|=\',\'xxx\']',
         ];
         $types[] = [
             'time', 'date', 'datetime', 'timestamp', 'year',
-            'format' => 'array',
-            'example' => '[\'start_date\',\'end_date\']',
+            'format' => $is_set_action?'string':'array',
+            'example' => $is_set_action?'2022-07-07 16:48:27':'[\'start_date\',\'end_date\']',
         ];
         $result = [];
         // 转换类型
