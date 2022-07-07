@@ -448,7 +448,7 @@ SQL;
                 $format_request[] = [
                     'name' => 'ids',
                     'type' => 'array',
-                    'require' => 'true',
+                    'require' => 'false',
                     'example' => '[1,2,3]',
                     'description' => $table_comment . ' ids',
                 ];
