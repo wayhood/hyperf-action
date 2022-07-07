@@ -1618,7 +1618,6 @@ EOF;
                 //如果有多维注解
                 if (Arr::has($fields_example,$mapping.'.'.$requestParam->name)){
                     $params[$requestParam->name] = Arr::get($fields_example,$mapping.'.'.$requestParam->name);
-                    var_dump($params[$requestParam->name]);
                     continue;
                 }
 
