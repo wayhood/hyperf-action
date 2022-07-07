@@ -597,7 +597,7 @@ SQL;
             if ($index===0)
             {
                 $str .= <<<HEADE
- *
+\n *
 HEADE;
             }
             $str .= <<<REQUEST
@@ -615,7 +615,7 @@ REQUEST;
             if ($index == 0)
             {
                 $str .= <<<HEADE
- *
+\n *
 HEADE;
             }
             $str .= <<<RESPONSE
