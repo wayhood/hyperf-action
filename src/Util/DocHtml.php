@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Wayhood\HyperfAction\Util;
 
 use Hyperf\Utils\ApplicationContext;
+use Hyperf\Utils\Arr;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\CategoryCollector;
 use Wayhood\HyperfAction\Collector\DescriptionCollector;
@@ -1555,20 +1556,72 @@ EOF;
         $req = [
             'dispatch' => $mapping,
         ];
+        //处理多维数组
+        $except_fields = [];
+        $fields_example = [];
+        foreach ($requestParams as $requestParam) {
+            if (strpos($requestParam->name,'.')!==false)
+            {
+                $except_fields[] = $mapping.'.'.$requestParam->name;
 
+                if ($requestParam->type == 'string') {
+                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,strval($requestParam->example));
+                } elseif ($requestParam->type == 'int') {
+                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,intval($requestParam->example));
+                    // $html .= intval($requestParam->example);
+                } elseif ($requestParam->type == 'float') {
+                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,floatval($requestParam->example));
+                } elseif ($requestParam->type == 'bool') {
+                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,boolval($requestParam->example));
+                }elseif ($requestParam->type == 'array') {
+                    $example = $requestParam->example;
+                    $example = str_replace('\'','"',$example);
+                    if ($requestParam->base64 == true) {
+                        $example = base64_decode($example);
+                    }
+                    $example = @json_decode($example, true);
+                    if (! is_array($example)) {
+                        $example = [];
+                    }
+                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,$example);
+                } elseif ($requestParam->type == 'object') {
+                    $example = $requestParam->example;
+                    if ($requestParam->base64 == true) {
+                        $example = base64_decode($example);
+                    }
+                    $example = @json_decode($example, true);
+                    if (! is_array($example)) {
+                        $example = new \stdClass();
+                    }
+                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,$example);
+                } else {
+                    Arr::set($fields_example,$mapping.'.'.$requestParam->name,$requestParam->example);
+                }
+            }
+        }
         $params = [];
         foreach ($requestParams as $requestParam) {
+            if (strpos($requestParam->name,'.') && in_array($mapping.'.'.$requestParam->name,$except_fields))
+            {
+                continue;
+            }
             if ($requestParam->type == 'string') {
                 $params[$requestParam->name] = strval($requestParam->example);
             } elseif ($requestParam->type == 'int') {
                 $params[$requestParam->name] = intval($requestParam->example);
-            // $html .= intval($requestParam->example);
             } elseif ($requestParam->type == 'float') {
                 $params[$requestParam->name] = floatval($requestParam->example);
             } elseif ($requestParam->type == 'bool') {
                 $params[$requestParam->name] = boolval($requestParam->example);
             } elseif ($requestParam->type == 'array') {
                 $example = $requestParam->example;
+                //如果有多维注解
+                if (Arr::has($fields_example,$mapping.'.'.$requestParam->name)){
+                    $params[$requestParam->name] = Arr::get($fields_example,$mapping.'.'.$requestParam->name);
+                    var_dump($params[$requestParam->name]);
+                    continue;
+                }
+
                 if ($requestParam->base64 == true) {
                     $example = base64_decode($example);
                 }
@@ -1579,6 +1632,12 @@ EOF;
                 $params[$requestParam->name] = $example;
             } elseif ($requestParam->type == 'object') {
                 $example = $requestParam->example;
+                //如果有多维注解
+                if (isset($fields_example[$requestParam->name])){
+                    $params[$requestParam->name] = $fields_example[$requestParam->name];
+                    continue;
+                }
+
                 if ($requestParam->base64 == true) {
                     $example = base64_decode($example);
                 }
