@@ -12,7 +12,12 @@ trait BaseService
     //获取模型
     protected function model():Model
     {
-        return make($this->model);
+        if (empty($this->model))
+        {
+            throw new \Exception(static::class.' NotFound property model');
+        }
+        $model = $this->model;
+        return new $model;
     }
 
     // 获取查询条件
@@ -84,12 +89,9 @@ trait BaseService
     }
 
     // 单条或者批量删除的方法
-    protected function del($ids,bool $is_soft_delete = false)
+    protected function del(array $ids,bool $is_soft_delete = false)
     {
         $model  =$this->model();
-        if (!is_string($ids)) {
-            $ids = explode(',', $ids);
-        }
         if ($is_soft_delete)
         {
             $delete_at = method_exists($model,'getDeletedAtColumn')?
@@ -104,13 +106,17 @@ trait BaseService
     }
 
     //批量修改的方法
-    protected function update(string $ids,array $data)
+    protected function update(array $ids,array $data)
     {
-        $ids = explode(',',$ids);
         $model = $this->model();
+        if (count($ids) == 0 && $model->newQuery()->whereIn($model->getKeyName(),$ids)->count()==0)
+        {
+            return $model->newQuery()
+                        ->insert($data);
+        }
         return $model
                 ->newQuery()
                 ->whereIn($model->getKeyName(),$ids)
-                ->update($data);
+                ->updateOrCreate($data);
     }
 }

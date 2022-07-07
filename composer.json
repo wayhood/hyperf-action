@@ -24,7 +24,9 @@
         "hyperf/command": "^2.2",
         "hyperf/di": "^2.2.0",
         "hyperf/framework": "~2.2.0",
-        "hyperf/translation": "^2.2"
+        "hyperf/translation": "^2.2",
+        "hyperf/utils": "^2.2",
+        "ext-json": "*"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",

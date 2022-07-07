@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace %NAMESPACE%;
 
+use Hyperf\Utils\Arr;
 use Wayhood\HyperfAction\Util\BaseService;
 
 use App\Contract\AbstractService;
@@ -43,9 +44,6 @@ class %CLASS% extends AbstractService
     // 根据id删除单条或者多条数据
     public function delete($params)
     {
-        if (is_array($params['ids'])) {
-            $params['ids'] = implode(',', $params['ids']);
-        }
         $result = $this->del($params['ids']);
         return [
             'status'=>(bool)$result
@@ -55,10 +53,6 @@ class %CLASS% extends AbstractService
     // 根据ids批量更改或者单条更改数据
     public function set($params)
     {
-        if (is_array($params['ids']))
-        {
-            $params['ids'] = implode(',',$params['ids']);
-        }
         $ids = $params['ids'];
         $data = Arr::except($params,'ids');
         $result = $this->update($ids,$data);
