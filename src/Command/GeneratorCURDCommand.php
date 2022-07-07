@@ -612,10 +612,12 @@ REQUEST;
         {
             if ($index == 0)
             {
-                $str .= "\n";
+                $str .= <<<HEADE
+ *
+HEADE;
             }
             $str .= <<<RESPONSE
-* @ResponseParam(n="{$datum['name']}",                t="{$datum['type']}",    e="{$datum['example']}",     d="{$datum['description']}")\n
+ * @ResponseParam(n="{$datum['name']}",                t="{$datum['type']}",    e="{$datum['example']}",     d="{$datum['description']}")\n
 RESPONSE;
 
         }
