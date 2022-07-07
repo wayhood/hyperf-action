@@ -204,7 +204,6 @@ class GeneratorPostmanCommand extends HyperfCommand
                 }
             }
         }
-
         $params = [];
         foreach ($requestParams as $requestParam) {
             if (strpos($requestParam->name, '.') && in_array($mapping . '.' . $requestParam->name, $except_fields)) {
@@ -238,8 +237,8 @@ class GeneratorPostmanCommand extends HyperfCommand
             } elseif ($requestParam->type == 'object') {
                 $example = $requestParam->example;
                 // 如果有多维注解
-                if (isset($fields_example[$requestParam->name])) {
-                    $params[$requestParam->name] = $fields_example[$requestParam->name];
+                if (Arr::has($fields_example, $mapping . '.' . $requestParam->name)) {
+                    $params[$requestParam->name] = Arr::get($fields_example, $mapping . '.' . $requestParam->name);
                     continue;
                 }
                 if ($requestParam->base64 == true) {

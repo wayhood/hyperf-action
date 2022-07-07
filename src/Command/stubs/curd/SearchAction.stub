@@ -56,6 +56,6 @@ class %CLASS% extends AbstractAction
 
     public function run($params, $extras, $headers)
     {
-        return $this->list($params);
+        return $this->service->list($params);
     }
 }

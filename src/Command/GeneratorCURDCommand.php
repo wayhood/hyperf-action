@@ -510,10 +510,35 @@ SQL;
     protected function build_search_request()
     {
         $data = $this->formatRequest(false, true);
+        array_unshift($data,[
+            'name'=>'search',
+            'type'=>'array',
+            'require'=>'false',
+            'description'=>'搜索条件',
+            'example'=>'search[]'
+        ]);
         foreach ($data as &$datum) {
+            if ($datum['name'] == 'search')
+            {
+                continue;
+            }
             $datum['name'] = 'search.' . $datum['name'];
             $datum['require'] = 'false';
         }
+        $data[] = [
+            'name'=>'per_page',
+            'type'=>'int',
+            'require'=>'false',
+            'description'=>'每页数量',
+            'example'=>'10'
+        ];
+        $data[] = [
+            'name'=>'page',
+            'type'=>'int',
+            'require'=>'false',
+            'description'=>'当前多少页',
+            'example'=>'1'
+        ];
         unset($datum);
         return $data;
     }
