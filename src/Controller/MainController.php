@@ -17,6 +17,7 @@ use Hyperf\Contract\ValidatorInterface;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
+use Hyperf\Utils\Arr;
 use Hyperf\Utils\Context;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -91,16 +92,16 @@ class MainController
     {
         $key = $requestParam['name'];
         $require = $requestParam['require'];
+        $value = Arr::get($params,$key);
         if ($require == 'true') {
-            if (! isset($params[$key])) {
+            if (! isset($value)) {
                 return $this->systemExceptionReturn(9901, '缺少参数: ' . $key, $actionMapping);
             }
         }
 
         // 判断类型
         $type = $requestParam['type'];
-        if (isset($params[$key])) {
-            $value = $params[$key];
+        if (isset($value)) {
             if ($type == 'string') {
                 if (! is_string($value)) {
                     return $this->systemExceptionReturn(9902, $key . ' 类型不匹配，请查看文档', $actionMapping);
