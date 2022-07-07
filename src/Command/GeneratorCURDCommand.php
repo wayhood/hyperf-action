@@ -594,12 +594,6 @@ SQL;
         $str = '';
         foreach ($data as $index=> $datum)
         {
-            if ($index===0)
-            {
-                $str .= <<<HEADE
-\n *
-HEADE;
-            }
             $str .= <<<REQUEST
  * @RequestParam(n="{$datum['name']}",t="{$datum['type']}",r={$datum['require']},e="{$datum['example']}",d="{$datum['description']}")\n
 REQUEST;
@@ -612,12 +606,6 @@ REQUEST;
         $str = '';
         foreach ($data as $index=>$datum)
         {
-            if ($index == 0)
-            {
-                $str .= <<<HEADE
-\n *
-HEADE;
-            }
             $str .= <<<RESPONSE
  * @ResponseParam(n="{$datum['name']}",                t="{$datum['type']}",    e="{$datum['example']}",     d="{$datum['description']}")\n
 RESPONSE;
