@@ -40,11 +40,13 @@ HELP
     {
         $this->initAttributes();
         if ($this->attributes === false) {
-            return;
+            return 0;
         }
         $service = $this->genService($this->attributes);
         $this->attributes['service'] = $service;
         $this->genActions($this->attributes);
+
+        return 1;
     }
 
     protected function configure()
@@ -52,16 +54,15 @@ HELP
         parent::configure();
         $this->addOption('force', 'f', InputOption::VALUE_OPTIONAL, 'Whether to force overwrite', false);
         $this->addUsage('--force');
-        $this->addArgument('model', InputArgument::REQUIRED, 'Model class');
         $this->addUsage('--model App\\Model\\User');
-        $this->addOption('namespace', 'name', InputOption::VALUE_OPTIONAL, 'Action and Service Namespace');
+        $this->addOption('namespace', 'names', InputOption::VALUE_OPTIONAL, 'Action and Service Namespace');
         $this->addUsage('--namespace User');
     }
 
     protected function initAttributes()
     {
         $force = (bool) $this->input->getOption('force');
-        $model = $this->input->getArgument('model');
+        $model = $this->input->getArgument('name');
         $namespace = $this->input->getOption('namespace');
         if (! empty($this->attributes)) {
             return $this->attributes;
