@@ -28,6 +28,7 @@ class Result
         }
         return $data;
     }
+
     /**
      * 系统内置json方式.
      * @param mixed $data

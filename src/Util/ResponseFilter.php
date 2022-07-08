@@ -28,8 +28,7 @@ class ResponseFilter
     {
         $newData = [];
         foreach ($data as $k => $v) {
-            if (!is_array($v))
-            {
+            if (! is_array($v)) {
                 $v = Result::convertArray($v);
             }
             $newV = [];
@@ -88,9 +87,8 @@ class ResponseFilter
                 $value = floatval($value);
             }
         } elseif ($type == 'array') {
-            //如果有toArray方法
-            if (is_object($value) && method_exists($value,'toArray'))
-            {
+            // 如果有toArray方法
+            if (is_object($value) && method_exists($value, 'toArray')) {
                 $value = $value->toArray();
             }
             if (! is_array($value)) {

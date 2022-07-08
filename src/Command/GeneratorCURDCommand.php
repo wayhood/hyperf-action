@@ -309,30 +309,30 @@ SQL;
             $except_fields[] = $model::UPDATED_AT;
             $except_fields[] = $model::CREATED_AT;
         }
-        //是否是set action
-        $is_set_action = $this->attributes['action_current']=='SetAction';
+        // 是否是set action
+        $is_set_action = $this->attributes['action_current'] == 'SetAction';
         $table_comment = $this->attributes['table_comment'];
         $fields_comment = $this->attributes['table_fields_comment'];
         $types[] = [
             'tinyint', 'smallint',
             'mediumint', 'int', 'integer', 'bigint', 'bool', 'boolean',
-            'format' => $is_set_action?'int':'array',
-            'example' => $is_set_action?1:'[\'>|<|!=|=\',123]',
+            'format' => $is_set_action ? 'int' : 'array',
+            'example' => $is_set_action ? 1 : '[\'>|<|!=|=\',123]',
         ];
         $types[] = [
             'float', 'double', 'decimal',
-            'format' => $is_set_action?'float':'array',
-            'example' => $is_set_action?10.24:'[\'>|<|!=|=\',10.24]',
+            'format' => $is_set_action ? 'float' : 'array',
+            'example' => $is_set_action ? 10.24 : '[\'>|<|!=|=\',10.24]',
         ];
         $types[] = [
             'varchar', 'char', 'tinytext', 'text', 'mediumtext', 'longtext', 'enum', 'set',
-            'format' => $is_set_action?'string':'array',
-            'example' => $is_set_action?'xxxx':'[\'like|=\',\'xxx\']',
+            'format' => $is_set_action ? 'string' : 'array',
+            'example' => $is_set_action ? 'xxxx' : '[\'like|=\',\'xxx\']',
         ];
         $types[] = [
             'time', 'date', 'datetime', 'timestamp', 'year',
-            'format' => $is_set_action?'string':'array',
-            'example' => $is_set_action?'2022-07-07 16:48:27':'[\'start_date\',\'end_date\']',
+            'format' => $is_set_action ? 'string' : 'array',
+            'example' => $is_set_action ? '2022-07-07 16:48:27' : '[\'start_date\',\'end_date\']',
         ];
         $result = [];
         // 转换类型
@@ -511,34 +511,33 @@ SQL;
     protected function build_search_request()
     {
         $data = $this->formatRequest(false, true);
-        array_unshift($data,[
-            'name'=>'search',
-            'type'=>'array',
-            'require'=>'false',
-            'description'=>'搜索条件',
-            'example'=>'search[]'
+        array_unshift($data, [
+            'name' => 'search',
+            'type' => 'array',
+            'require' => 'false',
+            'description' => '搜索条件',
+            'example' => 'search[]',
         ]);
         foreach ($data as &$datum) {
-            if ($datum['name'] == 'search')
-            {
+            if ($datum['name'] == 'search') {
                 continue;
             }
             $datum['name'] = 'search.' . $datum['name'];
             $datum['require'] = 'false';
         }
         $data[] = [
-            'name'=>'per_page',
-            'type'=>'int',
-            'require'=>'false',
-            'description'=>'每页数量',
-            'example'=>'10'
+            'name' => 'per_page',
+            'type' => 'int',
+            'require' => 'false',
+            'description' => '每页数量',
+            'example' => '10',
         ];
         $data[] = [
-            'name'=>'page',
-            'type'=>'int',
-            'require'=>'false',
-            'description'=>'当前多少页',
-            'example'=>'1'
+            'name' => 'page',
+            'type' => 'int',
+            'require' => 'false',
+            'description' => '当前多少页',
+            'example' => '1',
         ];
         unset($datum);
         return $data;
@@ -550,7 +549,7 @@ SQL;
         // 表注释
         $table_comment = $this->attributes['table_comment'];
         $data = $this->formatResponse();
-        $is_detail =($this->attributes['action_current'] == 'GetAction');
+        $is_detail = ($this->attributes['action_current'] == 'GetAction');
         if (! $is_detail) {
             array_unshift($data, [
                 'name' => 'list.0',
