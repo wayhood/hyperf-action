@@ -33,10 +33,28 @@ trait BaseService
     // 获取查询条件
     protected function getWhere(Model $query, $params)
     {
-        foreach ($params as $key => $value) {
+        foreach ($this->convertWhere($params) as $key => $value) {
             $query = $query->query()->where(...($this->buildWhere($key, $value)));
         }
         return $query;
+    }
+
+    //解析参数
+    protected function convertWhere(array $params):array
+    {
+        foreach ($params as $index => $value)
+        {
+            foreach ($value as $i => $v)
+            {
+                if (is_integer($i))
+                {
+                    continue;
+                }
+                $data[$index.'.'.$i] = $v;
+                unset($data[$index]);
+            }
+        }
+        return $data;
     }
 
     // 根据key和value生成单条查询条件
