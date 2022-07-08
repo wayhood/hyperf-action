@@ -58,6 +58,6 @@ class %CLASS% extends AbstractAction
 
     public function run($params, $extras, $headers)
     {
-        return $this->service->delete($params);
+        return $this->successReturn($this->service->delete($params));
     }
 }

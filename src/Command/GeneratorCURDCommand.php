@@ -287,7 +287,7 @@ SQL;
         $response_params = $this->build_response_params();
 
         // 填充response params
-        return str_replace('%RESPONSEPARAM', $response_params, $stub);
+        return str_replace('%RESPONSEPARAM%', $response_params, $stub);
     }
 
     // 将表字段映射到注解内
