@@ -14,6 +14,7 @@ use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\CategoryCollector;
 use Wayhood\HyperfAction\Collector\DescriptionCollector;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
+use Wayhood\HyperfAction\Collector\IntroductionCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
 use Wayhood\HyperfAction\Collector\RequestValidateCollector;
 use Wayhood\HyperfAction\Collector\ResponseParamCollector;
@@ -55,6 +56,7 @@ class ConfigProvider
                         TokenCollector::class,
                         UsableCollector::class,
                         RequestValidateCollector::class,
+                        IntroductionCollector::class
                     ],
                 ],
             ],
