@@ -109,7 +109,7 @@ trait BaseService
         $model = $this->model();
         if (count($ids) == 0 && $model->newQuery()->whereIn($model->getKeyName(), $ids)->count() == 0) {
             return $model->newQuery()
-                ->insert($data);
+                ->create($data);
         }
         return $model
             ->newQuery()
