@@ -15,6 +15,7 @@ use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Psr\Container\ContainerInterface;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
+use Wayhood\HyperfAction\Result;
 use Wayhood\HyperfAction\Util\ResponseFilter;
 
 abstract class AbstractAction
@@ -75,7 +76,7 @@ abstract class AbstractAction
 
     public function successReturn($data = [])
     {
-        $data = ResponseFilter::processResponseData($data, get_called_class());
+        $data = ResponseFilter::processResponseData(Result::convertArray($data), get_called_class());
         if (is_array($data) && count($data) == 0) {
             $data = new \stdClass();
         }

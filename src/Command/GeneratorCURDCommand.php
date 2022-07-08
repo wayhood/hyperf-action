@@ -487,7 +487,7 @@ SQL;
             case 'GetAction':
             case 'SearchAction':
                 return $this->build_response_comment(
-                    $this->build_detail_response(true)
+                    $this->build_detail_response()
                 );
         }
         return ' ';
@@ -545,11 +545,12 @@ SQL;
     }
 
     // 转换详情action所需要的注释
-    protected function build_detail_response(bool $is_detail)
+    protected function build_detail_response()
     {
         // 表注释
         $table_comment = $this->attributes['table_comment'];
         $data = $this->formatResponse();
+        $is_detail =($this->attributes['action_current'] == 'GetAction');
         if (! $is_detail) {
             array_unshift($data, [
                 'name' => 'list.0',
