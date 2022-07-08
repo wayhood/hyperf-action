@@ -17,11 +17,7 @@ class Result
 {
     protected static $response;
 
-    /**
-     * 系统内置json方式.
-     * @param mixed $data
-     */
-    public static function systemReturn($data = [], string $message = 'success', int $code = 0, int $deviation = 0): \Psr\Http\Message\ResponseInterface
+    public static function convertArray($data): array
     {
         if (! is_array($data)) {
             if (is_object($data) && method_exists($data, 'toArray')) {
@@ -30,6 +26,15 @@ class Result
                 $data = (array) $data;
             }
         }
+        return $data;
+    }
+    /**
+     * 系统内置json方式.
+     * @param mixed $data
+     */
+    public static function systemReturn($data = [], string $message = 'success', int $code = 0, int $deviation = 0): \Psr\Http\Message\ResponseInterface
+    {
+        $data = self::convertArray($data);
 
         $response_data = compact('code', 'deviation', 'message');
         $response_data['response'] = $data;
