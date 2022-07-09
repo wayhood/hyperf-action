@@ -33,14 +33,18 @@ trait BaseService
     // 获取查询条件
     protected function getWhere(Model $query, $params)
     {
+        if (isset($search['relation'])){
+            $query = $query->with($search['relation']);
+            unset($search['relation']);
+        }
         foreach ($this->convertWhere($params) as $key => $value) {
-            $query = $query->query()->where(...($this->buildWhere($key, $value)));
+            $query = $this->buildWhere($query,$key, $value);
         }
         return $query;
     }
 
     //解析参数
-    protected function convertWhere(array $params):array
+    protected function convertWhere(array $params)
     {
         foreach ($params as $index => $value)
         {
@@ -50,49 +54,36 @@ trait BaseService
                 {
                     continue;
                 }
-                $data[$index.'.'.$i] = $v;
-                unset($data[$index]);
+                $params[$index.'.'.$i] = $v;
+                unset($params[$index]);
             }
         }
-        return $data;
+        return $params;
     }
 
     // 根据key和value生成单条查询条件
-    protected function buildWhere($key, $value): array
+    protected function buildWhere($query,$key, $value)
     {
         if (is_string($value)) {
             return [$key, '=', $value];
         }
         if (is_array($value) && count($value) == 2) {
-            return $this->parseWhere($key, $value[0], $value[1]);
+            $type = $value[0];
+            $value = $value[1];
+            switch ($type) {
+                case 'like':
+                    $value = (string)$value;
+                    return $query->where($key,'like','%'.$value.'%');
+                case 'between':
+                    return $query->whereBetween($key, $value);
+                case 'in':
+                    return $query->whereIn($key, $value);;
+            }
+            if (in_array($type, $this->op_condition)) {
+                return $query->where($key,$type,$value);
+            }
         }
         throw new Exception('Where Format error');
-    }
-
-    // 根据key,type,以及value解析查询条件
-    protected function parseWhere($key, $type, $value): array
-    {
-        switch ($type) {
-            case 'like':
-                $value = (string) $value;
-                return [function ($query) use ($value, $key) {
-                    return $query->where($key, 'like', '%' . $value . '%')
-                        ->orWhere($key, 'like', '%' . $value)
-                        ->orWhere($key, 'like', $value . '%');
-                }];
-            case 'between':
-                return [function ($query) use ($key, $value) {
-                    return $query->whereBetween($key, $value);
-                }];
-            case 'in':
-                return [function ($query) use ($value, $key) {
-                    return $query->whereIn($key, $value);
-                }];
-        }
-        if (in_array($type, $this->op_condition)) {
-            return [$key, $type, $value];
-        }
-        throw new Exception('Where Type Format Error');
     }
 
     // 批量插入的方法
