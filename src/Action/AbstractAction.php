@@ -74,7 +74,7 @@ abstract class AbstractAction
         ];
     }
 
-    public function successReturn($data = [])
+    public function successReturn($data = []): array
     {
         $data = ResponseFilter::processResponseData(Result::convertArray($data), get_called_class());
         if (is_array($data) && count($data) == 0) {

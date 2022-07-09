@@ -969,7 +969,7 @@ EOF;
      */
     public static function getIndexHtml($uri, $pathInfo)
     {
-        $url = str_replace($pathInfo, '', $uri);
+        $url = str_replace($pathInfo, '', (string)$uri);
         static::getTableOfContentHtml($pathInfo);
         $tableOfContent = static::$tableOfContentHtml['index'];
         $search_data = json_encode(static::getSearchData($pathInfo));
