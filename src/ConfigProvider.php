@@ -56,7 +56,7 @@ class ConfigProvider
                         TokenCollector::class,
                         UsableCollector::class,
                         RequestValidateCollector::class,
-                        IntroductionCollector::class
+                        IntroductionCollector::class,
                     ],
                 ],
             ],

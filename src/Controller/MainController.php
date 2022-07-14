@@ -20,7 +20,6 @@ use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Utils\Arr;
 use Hyperf\Utils\Context;
 use Psr\Container\ContainerInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
 use stdClass;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
@@ -29,7 +28,6 @@ use Wayhood\HyperfAction\Collector\RequestValidateCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
 use Wayhood\HyperfAction\Contract\TokenInterface;
-use Wayhood\HyperfAction\Event\BeforeAction;
 use Wayhood\HyperfAction\Result;
 use Wayhood\HyperfAction\Util\DocHtml;
 
@@ -173,14 +171,13 @@ class MainController
         $actionRequest = $this->request->getAttribute('actionRequest');
         $actionMapping = $actionRequest['dispatch'] ?? null;
         $actionName = ActionCollector::list()[$actionMapping] ?? null;
-        $errorCodes = ErrorCodeCollector::result()[$actionName]??null;
+        $errorCodes = ErrorCodeCollector::result()[$actionName] ?? null;
         $code = $except->getCode();
-        if (array_key_exists($code,$errorCodes))
-        {
-            //如果已经定义过的error code
+        if (array_key_exists($code, $errorCodes)) {
+            // 如果已经定义过的error code
             $message = $errorCodes[$code]['message'] ?? null;
             return Result::systemReturn(
-                Result::errorReturn($code,$message),
+                Result::errorReturn($code, $message),
             );
         }
 

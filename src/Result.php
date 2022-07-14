@@ -62,18 +62,6 @@ class Result
         return self::systemReturn($data, $message, $code);
     }
 
-    protected static function getRequest():RequestInterface
-    {
-        return ApplicationContext::getContainer()
-                ->get(RequestInterface::class);
-    }
-
-    protected static function getResponse()
-    {
-        return ApplicationContext::getContainer()
-                 ->get(ResponseInterface::class);
-    }
-
     public static function successReturn($data = []): array
     {
         $actionRequest = self::getRequest()->getAttribute('actionRequest');
@@ -97,5 +85,17 @@ class Result
             'message' => $message,
             'data' => [],
         ];
+    }
+
+    protected static function getRequest(): RequestInterface
+    {
+        return ApplicationContext::getContainer()
+            ->get(RequestInterface::class);
+    }
+
+    protected static function getResponse()
+    {
+        return ApplicationContext::getContainer()
+            ->get(ResponseInterface::class);
     }
 }

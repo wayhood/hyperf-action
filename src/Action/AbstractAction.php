@@ -16,7 +16,6 @@ use Hyperf\HttpServer\Contract\ResponseInterface;
 use Psr\Container\ContainerInterface;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
 use Wayhood\HyperfAction\Result;
-use Wayhood\HyperfAction\Util\ResponseFilter;
 
 abstract class AbstractAction
 {
@@ -67,7 +66,7 @@ abstract class AbstractAction
             $errorCode = -1;
             $message = '未知';
         }
-        return Result::errorReturn($errorCode,$message);
+        return Result::errorReturn($errorCode, $message);
     }
 
     public function successReturn($data = []): array

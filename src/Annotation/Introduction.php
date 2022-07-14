@@ -31,6 +31,5 @@ class Introduction extends AbstractAnnotation
 
     public function collectClass(string $className): void
     {
-
     }
 }

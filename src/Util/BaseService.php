@@ -33,28 +33,25 @@ trait BaseService
     // 获取查询条件
     protected function getWhere(Model $query, $params)
     {
-        if (isset($search['relation'])){
+        if (isset($search['relation'])) {
             $query = $query->with($search['relation']);
             unset($search['relation']);
         }
         foreach ($this->convertWhere($params) as $key => $value) {
-            $query = $this->buildWhere($query,$key, $value);
+            $query = $this->buildWhere($query, $key, $value);
         }
         return $query;
     }
 
-    //解析参数
+    // 解析参数
     protected function convertWhere(array $params)
     {
-        foreach ($params as $index => $value)
-        {
-            foreach ($value as $i => $v)
-            {
-                if (is_integer($i))
-                {
+        foreach ($params as $index => $value) {
+            foreach ($value as $i => $v) {
+                if (is_integer($i)) {
                     continue;
                 }
-                $params[$index.'.'.$i] = $v;
+                $params[$index . '.' . $i] = $v;
                 unset($params[$index]);
             }
         }
@@ -62,7 +59,7 @@ trait BaseService
     }
 
     // 根据key和value生成单条查询条件
-    protected function buildWhere($query,$key, $value)
+    protected function buildWhere($query, $key, $value)
     {
         if (is_string($value)) {
             return [$key, '=', $value];
@@ -72,15 +69,15 @@ trait BaseService
             $value = $value[1];
             switch ($type) {
                 case 'like':
-                    $value = (string)$value;
-                    return $query->where($key,'like','%'.$value.'%');
+                    $value = (string) $value;
+                    return $query->where($key, 'like', '%' . $value . '%');
                 case 'between':
                     return $query->whereBetween($key, $value);
                 case 'in':
-                    return $query->whereIn($key, $value);;
+                    return $query->whereIn($key, $value);
             }
             if (in_array($type, $this->op_condition)) {
-                return $query->where($key,$type,$value);
+                return $query->where($key, $type, $value);
             }
         }
         throw new Exception('Where Format error');
