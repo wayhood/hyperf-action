@@ -61,12 +61,6 @@ class MainController
      */
     protected $token;
 
-    /**
-     * @Inject
-     * @var EventDispatcherInterface
-     */
-    protected $dispatch;
-
     public function systemExceptionReturn(int $errorCode, string $message, ?string $actionName = null): array
     {
         $response = [
@@ -262,7 +256,6 @@ class MainController
         }
         $beforeResult = $okRequest['container']->beforeRun($okRequest['params'], $extras, $headers);
         if ($beforeResult === true) {
-            $this->dispatch->dispatch(new BeforeAction($actionMapping, $okRequest['params'], $headers, $extras));
             $ret = $okRequest['container']->run($okRequest['params'], $extras, $headers);
             return $this->systemReturn($okRequest['mapping'], $ret);
         }
