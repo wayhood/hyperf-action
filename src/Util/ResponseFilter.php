@@ -62,10 +62,10 @@ class ResponseFilter
                         $value = number_format($value, $decimal, '.', '');
                     } else {
                         $decimal = 0;
-                        $value = strval(trim($value));
+                        $value = strval(trim((string)$value));
                     }
                 } else {
-                    $value = strval(trim($value));
+                    $value = strval(trim((string)$value));
                 }
             }
         } elseif ($type == 'int') {

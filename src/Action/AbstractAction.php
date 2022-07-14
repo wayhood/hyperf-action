@@ -67,24 +67,12 @@ abstract class AbstractAction
             $errorCode = -1;
             $message = '未知';
         }
-        return [
-            'code' => $errorCode,
-            'message' => $message,
-            'data' => new \stdClass(),
-        ];
+        return Result::errorReturn($errorCode,$message);
     }
 
     public function successReturn($data = []): array
     {
-        $data = ResponseFilter::processResponseData(Result::convertArray($data), get_called_class());
-        if (is_array($data) && count($data) == 0) {
-            $data = new \stdClass();
-        }
-        return [
-            'code' => 0,
-            'message' => '成功',
-            'data' => $data,
-        ];
+        return Result::successReturn($data);
     }
 
     protected function getTokenByHeader($headers)

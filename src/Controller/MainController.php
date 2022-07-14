@@ -23,6 +23,7 @@ use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use stdClass;
 use Wayhood\HyperfAction\Collector\ActionCollector;
+use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
 use Wayhood\HyperfAction\Collector\RequestValidateCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
@@ -169,6 +170,20 @@ class MainController
      */
     protected function parseExceptionAndError($except): \Psr\Http\Message\ResponseInterface
     {
+        $actionRequest = $this->request->getAttribute('actionRequest');
+        $actionMapping = $actionRequest['dispatch'] ?? null;
+        $actionName = ActionCollector::list()[$actionMapping] ?? null;
+        $errorCodes = ErrorCodeCollector::result()[$actionName]??null;
+        $code = $except->getCode();
+        if (array_key_exists($code,$errorCodes))
+        {
+            //如果已经定义过的error code
+            $message = $errorCodes[$code]['message'] ?? null;
+            return Result::systemReturn(
+                Result::errorReturn($code,$message),
+            );
+        }
+
         if (in_array(env('APP_ENV'), ['test', 'demo', 'dev'])) {
             $data = [
                 'trace' => $except->getTrace(),

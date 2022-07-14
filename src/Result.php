@@ -10,8 +10,10 @@ declare(strict_types=1);
  */
 namespace Wayhood\HyperfAction;
 
+use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Utils\ApplicationContext;
+use Wayhood\HyperfAction\Util\ResponseFilter;
 
 class Result
 {
@@ -59,12 +61,37 @@ class Result
         return self::systemReturn($data, $message, $code);
     }
 
+    protected static function getRequest():RequestInterface
+    {
+        return ApplicationContext::getContainer()
+                ->get(RequestInterface::class);
+    }
+
     protected static function getResponse()
     {
-        if (! (self::$response instanceof ResponseInterface)) {
-            self::$response = ApplicationContext::getContainer()
-                ->get(ResponseInterface::class);
+        return ApplicationContext::getContainer()
+                 ->get(ResponseInterface::class);
+    }
+
+    public static function successReturn($data = []): array
+    {
+        $data = ResponseFilter::processResponseData(Result::convertArray($data), get_called_class());
+        if (is_array($data) && count($data) == 0) {
+            $data = [];
         }
-        return self::$response;
+        return [
+            'code' => 0,
+            'message' => '成功',
+            'data' => $data,
+        ];
+    }
+
+    public static function errorReturn(int $errorCode, string $message = '')
+    {
+        return [
+            'code' => $errorCode,
+            'message' => $message,
+            'data' => [],
+        ];
     }
 }
