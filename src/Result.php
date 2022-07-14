@@ -13,6 +13,7 @@ namespace Wayhood\HyperfAction;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Utils\ApplicationContext;
+use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Util\ResponseFilter;
 
 class Result
@@ -75,7 +76,10 @@ class Result
 
     public static function successReturn($data = []): array
     {
-        $data = ResponseFilter::processResponseData(Result::convertArray($data), get_called_class());
+        $actionRequest = self::getRequest()->getAttribute('actionRequest');
+        $actionMapping = $actionRequest['dispatch'] ?? null;
+        $actionName = ActionCollector::list()[$actionMapping] ?? null;
+        $data = ResponseFilter::processResponseData(Result::convertArray($data), $actionName);
         if (is_array($data) && count($data) == 0) {
             $data = [];
         }
