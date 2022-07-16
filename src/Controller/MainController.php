@@ -175,7 +175,6 @@ class MainController
         $errorCodes = ErrorCodeCollector::result()[$actionName] ?? null;
         $code = $except->getCode();
 
-
         // 时间: 2022年7月16日 20:14:15
         // 新增错误日志记录
         $logger = $this->container->get(LoggerFactory::class)->get('action');
@@ -204,7 +203,6 @@ SQL
             ];
             return Result::systemReturn($data, $except->getMessage(), (int) $except->getCode());
         }
-
 
         return Result::error([], 'System Errors');
     }
