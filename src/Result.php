@@ -40,6 +40,11 @@ class Result
     {
         $data = self::convertArray($data);
 
+        if ($data == false)
+        {
+            $data = new \StdClass();
+        }
+
         $response_data = compact('code', 'deviation', 'message');
         $response_data['response'] = $data;
         return self::getResponse()
