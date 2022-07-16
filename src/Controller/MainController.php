@@ -17,6 +17,7 @@ use Hyperf\Contract\ValidatorInterface;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
+use Hyperf\Logger\LoggerFactory;
 use Hyperf\Utils\Arr;
 use Hyperf\Utils\Context;
 use Psr\Container\ContainerInterface;
@@ -173,6 +174,19 @@ class MainController
         $actionName = ActionCollector::list()[$actionMapping] ?? null;
         $errorCodes = ErrorCodeCollector::result()[$actionName] ?? null;
         $code = $except->getCode();
+
+
+        // 时间: 2022年7月16日 20:14:15
+        // 新增错误日志记录
+        $logger = $this->container->get(LoggerFactory::class)->get('action');
+        $date = date('Y-m-d H:i:s');
+        $logger->error(
+            <<<SQL
+{$date} ActionError {$except->getMessage()}
+{$except->getTraceAsString()}
+SQL
+        );
+
         if (array_key_exists($code, $errorCodes)) {
             // 如果已经定义过的error code
             $message = $errorCodes[$code]['message'] ?? null;
@@ -190,6 +204,8 @@ class MainController
             ];
             return Result::systemReturn($data, $except->getMessage(), (int) $except->getCode());
         }
+
+
         return Result::error([], 'System Errors');
     }
 
