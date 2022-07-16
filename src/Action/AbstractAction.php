@@ -1,10 +1,18 @@
 <?php
+
+declare(strict_types=1);
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 namespace Wayhood\HyperfAction\Action;
 
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
-use Hyperf\Logger\LoggerFactory;
 use Psr\Container\ContainerInterface;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
 use Wayhood\HyperfAction\Util\ResponseFilter;
@@ -15,6 +23,7 @@ abstract class AbstractAction
      * @var array
      */
     protected $errorCodes = [];
+
     /**
      * @Inject
      * @var ContainerInterface
@@ -33,25 +42,16 @@ abstract class AbstractAction
      */
     protected $response;
 
-    protected function getTokenByHeader($headers) {
-        foreach($headers as $key => $value) {
-            if (strtolower($key) == 'authorization') {
-                if (isset($value[0])) {
-                    return $value[0];
-                }
-            }
-        }
-        return "";
-    }
-
-    public function beforeRun($params, $extras, $headers) {
+    public function beforeRun($params, $extras, $headers)
+    {
         return true;
     }
 
     abstract public function run($params, $extras, $headers);
 
-    public function errorReturn(int $errorCode, string $message = "", array $replace = []) {
-        $errorCodes = ErrorCodeCollector::result()[get_called_class()] ?? "";
+    public function errorReturn(int $errorCode, string $message = '', array $replace = [])
+    {
+        $errorCodes = ErrorCodeCollector::result()[get_called_class()] ?? '';
 
         if (isset($errorCodes[$errorCode]) && empty($message)) {
             $message = $errorCodes[$errorCode]['message'];
@@ -69,7 +69,7 @@ abstract class AbstractAction
         return [
             'code' => $errorCode,
             'message' => $message,
-            'data' => new \stdClass()
+            'data' => new \stdClass(),
         ];
     }
 
@@ -86,4 +86,15 @@ abstract class AbstractAction
         ];
     }
 
+    protected function getTokenByHeader($headers)
+    {
+        foreach ($headers as $key => $value) {
+            if (strtolower($key) == 'authorization') {
+                if (isset($value[0])) {
+                    return $value[0];
+                }
+            }
+        }
+        return '';
+    }
 }

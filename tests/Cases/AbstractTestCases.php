@@ -8,9 +8,14 @@ declare(strict_types=1);
  * @link     https://github.com/wayhood
  * @license  https://github.com/wayhood/hyperf-action
  */
-namespace Wayhood\HyperfAction\Contract;
+namespace Wayhood\HyperfAction\Tests\Cases;
 
-interface SignInterface
+use PHPUnit\Framework\TestCase;
+
+/**
+ * @internal
+ * @coversNothing
+ */
+class AbstractTestCases extends TestCase
 {
-    public function verify(string $secret, array $request, string $sign);
 }

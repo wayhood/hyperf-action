@@ -1,8 +1,14 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 namespace Wayhood\HyperfAction\Collector;
-
 
 use Hyperf\Di\MetadataCollector;
 
@@ -17,17 +23,19 @@ class RequestParamCollector extends MetadataCollector
         static::$container[$class][] = $value;
     }
 
-    public static function result() {
+    public static function result()
+    {
         if (count(static::$result) == 0) {
             static::parseParams();
         }
         return static::$result;
     }
 
-    public static function parseParams() {
-        foreach(static::list() as $class => $requestParams) {
+    public static function parseParams()
+    {
+        foreach (static::list() as $class => $requestParams) {
             $result = [];
-            foreach($requestParams as $requetParam) {
+            foreach ($requestParams as $requetParam) {
                 $result[] = [
                     'name' => $requetParam->name,
                     'type' => $requetParam->type,

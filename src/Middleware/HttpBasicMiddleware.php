@@ -1,19 +1,25 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 namespace Wayhood\HyperfAction\Middleware;
 
-
+use Hyperf\Context\Context;
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface as HttpResponse;
-use Hyperf\Utils\Context;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Hyperf\Contract\ConfigInterface;
 
 class HttpBasicMiddleware implements MiddlewareInterface
 {
@@ -47,13 +53,13 @@ class HttpBasicMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        list($username, $password) = $this->getAuthCredentials($request->getHeaders());
-        if ($username != $this->config->get("wayhood.doc_auth_user") || $password != $this->config->get("wayhood.doc_auth_pass")) {
+        [$username, $password] = $this->getAuthCredentials($request->getHeaders());
+        if ($username != $this->config->get('wayhood.doc_auth_user') || $password != $this->config->get('wayhood.doc_auth_pass')) {
             $response = Context::get(ResponseInterface::class);
-            $response = $response->withHeader('Server', $this->config->get("app_name"))
+            $response = $response->withHeader('Server', $this->config->get('app_name'))
                 ->withHeader('WWW-Authenticate', 'Basic realm="auth api"');
             Context::set(ResponseInterface::class, $response);
-            return $response->withStatus(401)->withBody(new SwooleStream("Your request was made with invalid credentials."));
+            return $response->withStatus(401)->withBody(new SwooleStream('Your request was made with invalid credentials.'));
         }
         return $handler->handle($request);
     }
@@ -75,6 +81,6 @@ class HttpBasicMiddleware implements MiddlewareInterface
             }
         }
 
-        return ["", ""];
+        return ['', ''];
     }
 }

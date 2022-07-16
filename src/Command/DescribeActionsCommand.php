@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This is an extension of hyperf
+ * Name hyperf action
  *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
  */
 namespace Wayhood\HyperfAction\Command;
 
@@ -60,11 +59,10 @@ class DescribeActionsCommand extends HyperfCommand
         if (! is_null($dispatch)) {
             if (isset($data[$dispatch])) {
                 return [
-                    $dispatch => $data[$dispatch]
+                    $dispatch => $data[$dispatch],
                 ];
-            } else {
-                return [];
             }
+            return [];
         }
         return $data;
     }
