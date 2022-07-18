@@ -14,17 +14,26 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "HyperfTest\\": "tests"
+            "Wayhood\\HyperfAction\\Tests\\": "tests"
         }
     },
     "require": {
-        "php": ">=7.3",
-        "ext-swoole": ">=4.5",
-        "hyperf/framework": "~2.2.0"
+        "php": ">=8.0",
+        "ext-swoole": ">=4.6",
+        "hyperf/di": "~3.0.x-dev",
+        "hyperf/utils": "~3.0.x-dev",
+        "hyperf/command": "~3.0.x-dev"
+    },
+    "require-dev": {
+        "hyperf/testing": "^3.0.x-dev",
+        "phpunit/phpunit": "^9.5.0",
+        "phpstan/phpstan": "^1.8.0",
+        "friendsofphp/php-cs-fixer": "^3.8.0"
     },
     "config": {
         "sort-packages": true
     },
+    "minimum-stability": "dev",
     "scripts": {
         "test": "co-phpunit -c phpunit.xml --colors=always",
         "analyse": "phpstan analyse --memory-limit 300M -l 0 ./src",

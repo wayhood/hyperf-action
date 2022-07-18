@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This is an extension of hyperf
+ * Name hyperf action
  *
- * @link     https://www.hyperf.io
- * @document https://doc.hyperf.io
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
  */
-
 namespace Wayhood\HyperfAction;
 
 use Wayhood\HyperfAction\Collector\ActionCollector;
@@ -20,11 +18,12 @@ use Wayhood\HyperfAction\Collector\RequestParamCollector;
 use Wayhood\HyperfAction\Collector\ResponseParamCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
+use Wayhood\HyperfAction\Command\ActionCommand;
+use Wayhood\HyperfAction\Command\DescribeActionsCommand;
+use Wayhood\HyperfAction\Command\GeneratorPostmanCommand;
+use Wayhood\HyperfAction\Command\ServiceCommand;
 use Wayhood\HyperfAction\Contract\TokenInterface;
 use Wayhood\HyperfAction\Service\TokenService;
-use Wayhood\HyperfAction\Command\ActionCommand;
-use Wayhood\HyperfAction\Command\ServiceCommand;
-use Wayhood\HyperfAction\Command\DescribeActionsCommand;
 
 class ConfigProvider
 {
@@ -32,12 +31,14 @@ class ConfigProvider
     {
         return [
             'dependencies' => [
-                TokenInterface::class => TokenService::class
+                TokenInterface::class => TokenService::class,
             ],
             'commands' => [
                 ActionCommand::class,
                 ServiceCommand::class,
-                DescribeActionsCommand::class
+                DescribeActionsCommand::class,
+                GeneratorPostmanCommand::class,
+                ServiceCommand::class,
             ],
             'annotations' => [
                 'scan' => [

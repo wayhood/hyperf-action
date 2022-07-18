@@ -1,50 +1,28 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 namespace Wayhood\HyperfAction\Annotation;
 
-
+use Attribute;
 use Hyperf\Di\Annotation\AbstractAnnotation;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
 
-/**
- * @Annotation
- * @Target({"CLASS"})
- */
+#[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 class ErrorCode extends AbstractAnnotation
 {
-    /**
-     * @var int
-     */
-    public $code = 1999;
-
-    /**
-     * @var string
-     */
-    public $message = '未知';
-
-    public function __construct($value = null)
+    public function __construct(public int $code = 1999, public string $message = '未知')
     {
-        parent::__construct($value);
-        if (is_array($value)) {
-            foreach ($value as $key => $val) {
-                switch($key) {
-                    case "c":
-                        $this->code = $val;
-                        break;
-                    case "m":
-                        $this->message = $val;
-                        break;
-                }
-            }
-        }
-
     }
-
 
     public function collectClass(string $className): void
     {
         ErrorCodeCollector::collectClass($className, static::class, $this);
     }
-
 }

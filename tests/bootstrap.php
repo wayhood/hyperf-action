@@ -8,9 +8,4 @@ declare(strict_types=1);
  * @link     https://github.com/wayhood
  * @license  https://github.com/wayhood/hyperf-action
  */
-namespace Wayhood\HyperfAction\Contract;
-
-interface SignInterface
-{
-    public function verify(string $secret, array $request, string $sign);
-}
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';

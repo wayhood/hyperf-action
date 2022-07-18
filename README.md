@@ -7,7 +7,7 @@
 配置
 =====
 ```shell
-composer require hyperf-action2
+composer require hyperf-action
 ```
 
 

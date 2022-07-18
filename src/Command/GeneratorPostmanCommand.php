@@ -2,16 +2,14 @@
 
 declare(strict_types=1);
 /**
- * This file is part of Hyperf.
+ * This is an extension of hyperf
+ * Name hyperf action
  *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
  */
 namespace Wayhood\HyperfAction\Command;
 
-use Hyperf\Command\Annotation\Command;
 use Hyperf\Command\Command as HyperfCommand;
 use Psr\Container\ContainerInterface;
 use Wayhood\HyperfAction\Collector\ActionCollector;
@@ -19,9 +17,6 @@ use Wayhood\HyperfAction\Collector\CategoryCollector;
 use Wayhood\HyperfAction\Collector\DescriptionCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
 
-/**
- * @Command
- */
 class GeneratorPostmanCommand extends HyperfCommand
 {
     /**
@@ -155,7 +150,6 @@ class GeneratorPostmanCommand extends HyperfCommand
 
         $filename = $appName . '_postman_environment.json';
         file_put_contents($dir . '/' . $filename, json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-
     }
 
     private function getRequestParams($requestParams, $mapping)
