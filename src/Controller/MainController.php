@@ -10,6 +10,7 @@ declare(strict_types=1);
  */
 namespace Wayhood\HyperfAction\Controller;
 
+use DeathSatan\Hyperf\Validate\Lib\AbstractValidate;
 use Hyperf\Context\Context;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpMessage\Stream\SwooleStream;
@@ -20,6 +21,7 @@ use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
+use Wayhood\HyperfAction\Collector\ValidateCollector;
 use Wayhood\HyperfAction\Contract\TokenInterface;
 use Wayhood\HyperfAction\Util\DocHtml;
 
@@ -111,6 +113,17 @@ class MainController
         return true;
     }
 
+    protected function validate(AbstractValidate $validate,array $params,string $action)
+    {
+        $result = $validate->make($params,false);
+        if ($result->fails())
+        {
+            $error = $result->errors()->first();
+            return $this->systemExceptionReturn(9000,$error,$action);
+        }
+        return true;
+    }
+
     public function index()
     {
         $actionRequest = $this->request->getAttribute('actionRequest');
@@ -151,6 +164,23 @@ class MainController
                 'message' => '成功',
                 'response' => $response,
             ]);
+        }
+
+        //进行验证器验证
+        $validates = ValidateCollector::result()[$actionName] ?? [];
+        foreach ($validates as $validate)
+        {
+            $ret = $this->validate($validate,$actionRequest['params'],$actionMapping);
+            if ($ret!==true)
+            {
+                return $this->response->json([
+                    'code' => 0,
+                    'timestamp' => time(),
+                    'deviation' => 0,
+                    'message' => '成功',
+                    'response' => $ret,
+                ]);
+            }
         }
 
         $defineRequestParam = RequestParamCollector::result()[$actionName] ?? [];
