@@ -14,7 +14,7 @@ class Validate extends \Hyperf\Di\Annotation\AbstractAnnotation
      * @param string $validate 验证器
      * @param string|array $scene 验证场景
      */
-    public function __construct(public string $validate,public string|array $scene){
+    public function __construct(public string $validate,public null|string|array $scene = null){
         $this->validate();
     }
 
