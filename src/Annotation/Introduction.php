@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Wayhood\HyperfAction\Annotation;
 
 use Hyperf\Di\Annotation\AbstractAnnotation;
+use Wayhood\HyperfAction\Collector\IntroductionCollector;
 
 /**
  * @Annotation
@@ -31,5 +32,6 @@ class Introduction extends AbstractAnnotation
 
     public function collectClass(string $className): void
     {
+        IntroductionCollector::collectClass($className,static::class,$this);
     }
 }

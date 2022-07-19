@@ -16,6 +16,7 @@ use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\CategoryCollector;
 use Wayhood\HyperfAction\Collector\DescriptionCollector;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
+use Wayhood\HyperfAction\Collector\IntroductionCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
 use Wayhood\HyperfAction\Collector\ResponseParamCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
@@ -101,6 +102,10 @@ EOF;
                         <div class="col-lg-11" style="padding:5px;">
                             <h1 style="{{style}}">{{dispatch}} ({{desc}})</h1>
                             {{token}}
+                            <h3>接口简介</h3>
+                            <div style="display: block">
+                            {{introduction}}
+                            </div>
                             <h3>请求参数</h3>
                             <table class="table table-bordered">
                                 <tr>
@@ -755,6 +760,13 @@ EOF;
             $html = str_replace('{{token}}', TokenCollector::list()[$actionName] == true ? static::getTokenHtml() : '', $html);
         } else {
             $html = str_replace('{{token}}', '', $html);
+        }
+        if (isset(IntroductionCollector::list()[$actionName]))
+        {
+            $introduction = IntroductionCollector::list()[$actionName];
+            $html = str_replace('{{introduction}}',$introduction->name??'',$html);
+        }else{
+            $html = str_replace('{{introduction}}','空',$html);
         }
         return $html;
     }
