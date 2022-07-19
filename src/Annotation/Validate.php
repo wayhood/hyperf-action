@@ -1,6 +1,13 @@
 <?php
 
-
+declare(strict_types=1);
+/**
+ * This is an extension of hyperf
+ * Name hyperf action
+ *
+ * @link     https://github.com/wayhood
+ * @license  https://github.com/wayhood/hyperf-action
+ */
 namespace Wayhood\HyperfAction\Annotation;
 
 use Attribute;
@@ -16,19 +23,20 @@ class Validate extends \Hyperf\Di\Annotation\AbstractAnnotation
     /**
      * Validate constructor.
      * @param string $validate 验证器
-     * @param string|array $scene 验证场景
+     * @param array|string $scene 验证场景
      */
-    public function __construct(public string $validate,public null|string|array $scene = null){
-        $this->validate();
-    }
-
-    protected function validate()
+    public function __construct(public string $validate, public null|string|array $scene = null)
     {
-        $this->validate = $this->container->make($this->validate);
+        $this->validate();
     }
 
     public function collectClass(string $className): void
     {
         parent::collectClass($className);
+    }
+
+    protected function validate()
+    {
+        $this->validate = $this->container->make($this->validate);
     }
 }

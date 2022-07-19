@@ -113,17 +113,6 @@ class MainController
         return true;
     }
 
-    protected function validate(AbstractValidate $validate,array $params,string $action)
-    {
-        $result = $validate->make($params,false);
-        if ($result->fails())
-        {
-            $error = $result->errors()->first();
-            return $this->systemExceptionReturn(9000,$error,$action);
-        }
-        return true;
-    }
-
     public function index()
     {
         $actionRequest = $this->request->getAttribute('actionRequest');
@@ -166,13 +155,11 @@ class MainController
             ]);
         }
 
-        //进行验证器验证
+        // 进行验证器验证
         $validates = ValidateCollector::result()[$actionName] ?? [];
-        foreach ($validates as $validate)
-        {
-            $ret = $this->validate($validate,$actionRequest['params'],$actionMapping);
-            if ($ret!==true)
-            {
+        foreach ($validates as $validate) {
+            $ret = $this->validate($validate, $actionRequest['params'], $actionMapping);
+            if ($ret !== true) {
                 return $this->response->json([
                     'code' => 0,
                     'timestamp' => time(),
@@ -263,5 +250,15 @@ class MainController
             return $response->withBody(new SwooleStream(DocHtml::getIndexHtml((string) $this->request->getUri(), $this->request->getPathInfo())));
         }
         return $response->withBody(new SwooleStream(DocHtml::getActionHtml($action, $this->request->getPathInfo())));
+    }
+
+    protected function validate(AbstractValidate $validate, array $params, string $action)
+    {
+        $result = $validate->make($params, false);
+        if ($result->fails()) {
+            $error = $result->errors()->first();
+            return $this->systemExceptionReturn(9000, $error, $action);
+        }
+        return true;
     }
 }
