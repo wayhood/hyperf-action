@@ -33,9 +33,9 @@ trait BaseService
     // 获取查询条件
     protected function getWhere(Model $query, $params)
     {
-        if (isset($search['relation'])) {
-            $query = $query->with($search['relation']);
-            unset($search['relation']);
+        if (isset($params['relation'])) {
+            $query = $query->with($params['relation']);
+            unset($params['relation']);
         }
         foreach ($this->convertWhere($params) as $key => $value) {
             $query = $this->buildWhere($query, $key, $value);
