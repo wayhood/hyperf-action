@@ -4,11 +4,15 @@
 namespace Wayhood\HyperfAction\Annotation;
 
 use Attribute;
-use Hyperf\Utils\ApplicationContext;
+use Hyperf\Di\Annotation\Inject;
+use Psr\Container\ContainerInterface;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 class Validate extends \Hyperf\Di\Annotation\AbstractAnnotation
 {
+    #[Inject]
+    protected ContainerInterface $container;
+
     /**
      * Validate constructor.
      * @param string $validate 验证器
@@ -20,7 +24,7 @@ class Validate extends \Hyperf\Di\Annotation\AbstractAnnotation
 
     protected function validate()
     {
-        $this->validate = ApplicationContext::getContainer()->make($this->validate);
+        $this->validate = $this->container->make($this->validate);
     }
 
     public function collectClass(string $className): void
