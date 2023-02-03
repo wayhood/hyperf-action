@@ -14,8 +14,9 @@ interface TokenInterface
 {
     /**
      * 验证token.
+     * 0 token失效 -1 被踢  1正常.
      */
-    public function verify(string $token): bool;
+    public function verify(string $token): int;
 
     public function has(string $token): bool;
 
@@ -38,5 +39,5 @@ interface TokenInterface
      * @param string $token
      * @return string
      */
-    public function get(string $token): string;
+    public function get(string $token): ?string;
 }

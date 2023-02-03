@@ -17,9 +17,9 @@ use Wayhood\HyperfAction\Contract\TokenInterface;
  */
 class TokenService implements TokenInterface
 {
-    public function verify(string $token): bool
+    public function verify(string $token): int
     {
-        return true;
+        return 1;
     }
 
     public function has(string $token): bool
