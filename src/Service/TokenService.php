@@ -17,28 +17,26 @@ use Wayhood\HyperfAction\Contract\TokenInterface;
  */
 class TokenService implements TokenInterface
 {
-    public function verify(string $token)
+    public function verify(string $token): bool
     {
         return true;
-        // TODO: Implement verify() method.
     }
 
-    public function has(string $token)
+    public function has(string $token): bool
     {
-        // TODO: Implement has() method.
+        return true;
     }
 
-    public function generator(array $value)
-    {
-        return '';
-    }
-
-    public function set(string $token)
+    public function generator(array $value): string
     {
         return '';
     }
 
-    public function get(string $token)
+    public function set(string $token): void
+    {
+    }
+
+    public function get(string $token): string
     {
         return '';
     }

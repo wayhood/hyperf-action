@@ -22,31 +22,10 @@ use Wayhood\HyperfAction\Contract\SignInterface;
 
 class ActionMiddleware implements MiddlewareInterface
 {
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
+    protected array $config;
 
-    /**
-     * @var RequestInterface
-     */
-    protected $request;
-
-    /**
-     * @var HttpResponse
-     */
-    protected $response;
-
-    /**
-     * @var array
-     */
-    protected $config;
-
-    public function __construct(ConfigInterface $config, ContainerInterface $container, HttpResponse $response, RequestInterface $request)
+    public function __construct(ConfigInterface $config, protected ContainerInterface $container, protected HttpResponse $response, protected RequestInterface $request)
     {
-        $this->container = $container;
-        $this->response = $response;
-        $this->request = $request;
         $this->config = $config->get('wayhood');
     }
 

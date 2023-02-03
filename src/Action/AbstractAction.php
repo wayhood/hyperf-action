@@ -19,30 +19,18 @@ use Wayhood\HyperfAction\Util\ResponseFilter;
 
 abstract class AbstractAction
 {
-    /**
-     * @var array
-     */
-    protected $errorCodes = [];
+    protected array $errorCodes = [];
 
-    /**
-     * @Inject
-     * @var ContainerInterface
-     */
-    protected $container;
+    #[Inject]
+    protected ContainerInterface $container;
 
-    /**
-     * @Inject
-     * @var RequestInterface
-     */
-    protected $request;
+    #[Inject]
+    protected RequestInterface $request;
 
-    /**
-     * @Inject
-     * @var ResponseInterface
-     */
-    protected $response;
+    #[Inject]
+    protected ResponseInterface $response;
 
-    public function beforeRun($params, $extras, $headers)
+    public function beforeRun($params, $extras, $headers): bool
     {
         return true;
     }

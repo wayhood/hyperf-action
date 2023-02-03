@@ -21,21 +21,11 @@ use Wayhood\HyperfAction\Collector\ActionCollector;
 
 class DescribeActionsCommand extends HyperfCommand
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
 
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    public function __construct(ContainerInterface $container, ConfigInterface $config)
+    public function __construct(protected ContainerInterface $container, protected ConfigInterface $config)
     {
         parent::__construct('describe:actions');
-        $this->container = $container;
-        $this->config = $config;
+
     }
 
     public function handle()

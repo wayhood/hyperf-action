@@ -19,14 +19,14 @@
     },
     "require": {
         "php": ">=8.0",
-        "ext-swoole": ">=4.6",
-        "hyperf/di": "~3.0.x-dev",
-        "hyperf/utils": "~3.0.x-dev",
-        "hyperf/command": "~3.0.x-dev",
-        "death_satan/hyperf-validate": "~3.0.x-dev"
+        "ext-swoole": ">=4.8",
+        "hyperf/di": "~3.0.0",
+        "hyperf/utils": "~3.0.0",
+        "hyperf/command": "~3.0.0",
+        "death_satan/hyperf-validate": "~3.0.0"
     },
     "require-dev": {
-        "hyperf/testing": "^3.0.x-dev",
+        "hyperf/testing": "^3.0.0",
         "phpunit/phpunit": "^9.5.0",
         "phpstan/phpstan": "^1.8.0",
         "friendsofphp/php-cs-fixer": "^3.8.0"

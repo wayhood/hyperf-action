@@ -24,15 +24,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class GeneratorCommand extends Command
 {
-    /**
-     * @var InputInterface
-     */
-    protected $input;
+    protected InputInterface $input;
 
-    /**
-     * @var OutputInterface
-     */
-    protected $output;
+    protected OutputInterface $output;
 
     public function configure()
     {

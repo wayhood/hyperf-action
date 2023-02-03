@@ -23,32 +23,8 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class HttpBasicMiddleware implements MiddlewareInterface
 {
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
-
-    /**
-     * @var ConfigInterface
-     */
-    protected $config;
-
-    /**
-     * @var RequestInterface
-     */
-    protected $request;
-
-    /**
-     * @var HttpResponse
-     */
-    protected $response;
-
-    public function __construct(ContainerInterface $container, ConfigInterface $config, HttpResponse $response, RequestInterface $request)
+    public function __construct(protected ContainerInterface $container, protected ConfigInterface $config, protected HttpResponse $response, protected RequestInterface $request)
     {
-        $this->container = $container;
-        $this->response = $response;
-        $this->request = $request;
-        $this->config = $config;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -64,7 +40,7 @@ class HttpBasicMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    public function getAuthCredentials(array $headers)
+    public function getAuthCredentials(array $headers): array
     {
         if (isset($headers['authorization'])) {
             $auth_token = $headers['authorization'][0];

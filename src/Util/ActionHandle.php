@@ -10,10 +10,11 @@ declare(strict_types=1);
  */
 namespace Wayhood\HyperfAction\Util;
 
+use DeathSatan\Hyperf\Validate\Contract\CustomHandle;
 use DeathSatan\Hyperf\Validate\Lib\AbstractValidate;
 use Hyperf\HttpServer\Contract\RequestInterface;
 
-class ActionHandle implements \DeathSatan\Hyperf\Validate\Contract\CustomHandle
+class ActionHandle implements CustomHandle
 {
     public function __construct(protected RequestInterface $request)
     {

@@ -24,51 +24,43 @@ class DocHtml
 {
     /**
      * 目录html.
-     * @var array
      */
-    public static $tableOfContentHtml = [];
+    public static array $tableOfContentHtml = [];
 
     /**
      * 目录内容.
-     * @var array
      */
-    public static $tableOfContent = [];
+    public static array $tableOfContent = [];
 
     /**
      * 请求参数Html.
-     * @var array
      */
-    public static $requestParamHtmls = [];
+    public static array $requestParamHtmls = [];
 
     /**
      * 请求参数示例Html.
-     * @var array
      */
-    public static $requestParamExampleHtmls = [];
+    public static array $requestParamExampleHtmls = [];
 
     /**
      * 响应参数Html.
-     * @var array
      */
-    public static $responseParamHtmls = [];
+    public static array $responseParamHtmls = [];
 
     /**
      * 响应参数示例Html.
-     * @var array
      */
-    public static $responseParamExampleHtml = [];
+    public static array $responseParamExampleHtml = [];
 
     /**
      * 错误代码html.
-     * @var array
      */
-    public static $errorCodeHtml = [];
+    public static array $errorCodeHtml = [];
 
     /**
      * 左侧html模版.
-     * @var string
      */
-    public static $leftHtml = <<<'EOF'
+    public static string $leftHtml = <<<'EOF'
     <div class="book-summary">
       <div class="search-box form-group">
           <input type="text" class="form-control" id="inputSearch" placeholder="搜索接口">
@@ -83,9 +75,8 @@ EOF;
 
     /**
      * 右侧html模版.
-     * @var string
      */
-    public static $rightHtml = <<<'EOF'
+    public static string $rightHtml = <<<'EOF'
     <div class="book-body">
         <div class="body-inner">
             <div class="book-header">
@@ -155,9 +146,8 @@ EOF;
 
     /**
      * 底部Html模版.
-     * @var string
      */
-    public static $footerHtml = <<<'EOF'
+    public static string $footerHtml = <<<'EOF'
     </div>
 <script src="https://cdn.wayhood.com/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
 <script src="https://cdn.wayhood.com/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
@@ -200,9 +190,8 @@ EOF;
 
     /**
      * 头部Html模版.
-     * @var string
      */
-    public static $headerHtml = <<<'EOF'
+    public static string $headerHtml = <<<'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -703,7 +692,7 @@ a {
 <div class="book with-summary">
 EOF;
 
-    public static $searchData = [];
+    public static array $searchData = [];
 
     /**
      * 获取左侧html.

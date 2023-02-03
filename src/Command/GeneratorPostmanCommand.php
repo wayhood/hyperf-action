@@ -19,15 +19,8 @@ use Wayhood\HyperfAction\Collector\RequestParamCollector;
 
 class GeneratorPostmanCommand extends HyperfCommand
 {
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
-
-    public function __construct(ContainerInterface $container)
+    public function __construct(protected ContainerInterface $container)
     {
-        $this->container = $container;
-
         parent::__construct('gen:postman');
     }
 
