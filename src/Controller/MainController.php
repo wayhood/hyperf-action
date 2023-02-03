@@ -34,10 +34,10 @@ class MainController
     protected ContainerInterface $container;
 
     #[Inject]
-    protected RequestInterface $request;
+    protected ?RequestInterface $request;
 
     #[Inject]
-    protected ResponseInterface $response;
+    protected ?ResponseInterface $response;
 
     #[Inject]
     protected TokenInterface $token;
