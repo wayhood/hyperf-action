@@ -25,10 +25,10 @@ abstract class AbstractAction
     protected ContainerInterface $container;
 
     #[Inject]
-    protected RequestInterface $request;
+    protected ?RequestInterface $request;
 
     #[Inject]
-    protected ResponseInterface $response;
+    protected ?ResponseInterface $response;
 
     public function beforeRun($params, $extras, $headers): bool
     {
