@@ -35,9 +35,9 @@ abstract class AbstractAction
         return true;
     }
 
-    abstract public function run($params, $extras, $headers);
+    abstract public function run($params, $extras, $headers): array;
 
-    public function errorReturn(int $errorCode, string $message = '', array $replace = [])
+    public function errorReturn(int $errorCode, string $message = '', array $replace = []): array
     {
         $errorCodes = ErrorCodeCollector::result()[get_called_class()] ?? '';
 
@@ -61,7 +61,7 @@ abstract class AbstractAction
         ];
     }
 
-    public function successReturn($data = [])
+    public function successReturn($data = []): array
     {
         $data = ResponseFilter::processResponseData($data, get_called_class());
         if (is_array($data) && count($data) == 0) {
@@ -74,7 +74,7 @@ abstract class AbstractAction
         ];
     }
 
-    protected function getTokenByHeader($headers)
+    protected function getTokenByHeader($headers): string
     {
         foreach ($headers as $key => $value) {
             if (strtolower($key) == 'authorization') {
