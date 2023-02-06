@@ -102,10 +102,12 @@ class ResponseFilter
                 }
                 return $newData;
             }
-            if (array_key_exists($key, $data)) {
-                $newData[$key] = self::processVarType($value['type'], $data[$key], $value['example']);
-                if (array_key_exists('children', $value)) {
-                    $newData[$key] = self::filterData($newData[$key], $value['children'], $value['type']);
+            if (is_array($data)) {
+                if (array_key_exists($key, $data)) {
+                    $newData[$key] = self::processVarType($value['type'], $data[$key], $value['example']);
+                    if (array_key_exists('children', $value)) {
+                        $newData[$key] = self::filterData($newData[$key], $value['children'], $value['type']);
+                    }
                 }
             }
         }
