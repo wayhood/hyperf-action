@@ -36,7 +36,7 @@ class TokenService implements TokenInterface
     {
     }
 
-    public function get(string $token): string
+    public function get(string $token): mixed
     {
         return '';
     }
