@@ -39,5 +39,5 @@ interface TokenInterface
      * @param string $token
      * @return string
      */
-    public function get(string $token): ?string;
+    public function get(string $token): mixed;
 }
