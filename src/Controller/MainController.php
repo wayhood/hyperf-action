@@ -18,6 +18,7 @@ use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Logger\LoggerFactory;
+use Hyperf\Utils\Arr;
 use Psr\Container\ContainerInterface;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
@@ -76,16 +77,16 @@ class MainController
     {
         $key = $requestParam['name'];
         $require = $requestParam['require'];
+        $value = Arr::get($params, $key);
         if ($require == 'true') {
-            if (! isset($params[$key])) {
+            if (! isset($value)) {
                 return $this->systemExceptionReturn(9901, '缺少参数: ' . $key, $actionMapping);
             }
         }
 
         // 判断类型
         $type = $requestParam['type'];
-        if (isset($params[$key])) {
-            $value = $params[$key];
+        if (isset($value)) {
             if ($type == 'string') {
                 if (! is_string($value)) {
                     return $this->systemExceptionReturn(9902, $key . ' 类型不匹配，请查看文档', $actionMapping);
@@ -320,7 +321,6 @@ SQL
      */
     protected function validate(array $validateConfig, array $params, string $action)
     {
-
         $safeMode = $validateConfig['safe_mode'];
         $scene = $validateConfig['scene'];
         /**
