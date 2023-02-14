@@ -14,12 +14,12 @@ use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\CategoryCollector;
 use Wayhood\HyperfAction\Collector\DescriptionCollector;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
+use Wayhood\HyperfAction\Collector\IntroductionCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
 use Wayhood\HyperfAction\Collector\RequestValidateCollector;
 use Wayhood\HyperfAction\Collector\ResponseParamCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
-use Wayhood\HyperfAction\Collector\ValidateCollector;
 use Wayhood\HyperfAction\Command\ActionCommand;
 use Wayhood\HyperfAction\Command\DescribeActionsCommand;
 use Wayhood\HyperfAction\Command\GeneratorPostmanCommand;
@@ -56,7 +56,8 @@ class ConfigProvider
                         ResponseParamCollector::class,
                         TokenCollector::class,
                         UsableCollector::class,
-                        RequestValidateCollector::class
+                        RequestValidateCollector::class,
+                        IntroductionCollector::class,
                     ],
                 ],
             ],
