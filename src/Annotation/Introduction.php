@@ -26,6 +26,6 @@ class Introduction extends AbstractAnnotation
 
     public function collectClass(string $className): void
     {
-        IntroductionCollector::collectClass($className,static::class,$this);
+        IntroductionCollector::collectClass($className, static::class, $this);
     }
 }
