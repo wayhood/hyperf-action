@@ -20,10 +20,11 @@
     "require": {
         "php": ">=8.0",
         "ext-swoole": ">=4.8",
-        "hyperf/di": "~3.0.0",
-        "hyperf/utils": "~3.0.0",
+        "death_satan/hyperf-validate": "~3.0.0",
         "hyperf/command": "~3.0.0",
-        "death_satan/hyperf-validate": "~3.0.0"
+        "hyperf/di": "~3.0.0",
+        "hyperf/logger": "~3.0.0",
+        "hyperf/utils": "~3.0.0"
     },
     "require-dev": {
         "hyperf/testing": "^3.0.0",

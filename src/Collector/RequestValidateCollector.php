@@ -11,12 +11,14 @@ declare(strict_types=1);
 namespace Wayhood\HyperfAction\Collector;
 
 use Hyperf\Di\MetadataCollector;
+use Hyperf\Utils\ApplicationContext;
+use Wayhood\HyperfAction\Annotation\RequestValidate;
 
-class ValidateCollector extends MetadataCollector
+class RequestValidateCollector extends MetadataCollector
 {
     protected static array $container = [];
 
-    protected static $result = [];
+    protected static array $result = [];
 
     public static function collectClass(string $class, string $annotation, $value): void
     {
@@ -36,12 +38,20 @@ class ValidateCollector extends MetadataCollector
         foreach (static::list() as $class => $validates) {
             $result = [];
             foreach ($validates as $validate) {
-                $result[] = [
-                    'validate' => $validate->validate,
-                    'scene' => $validate->scene,
-                ];
+                if ($validate instanceof RequestValidate) {
+                    $result[] = [
+                        'validate' => self::makeValidate($validate->validate),
+                        'scene' => $validate->scene,
+                        'safe_mode' => $validate->safeMode,
+                    ];
+                }
             }
-            self::$result[$class] = $result;
+            static::$result[$class] = $result;
         }
+    }
+
+    private static function makeValidate(string $validateClass)
+    {
+        return ApplicationContext::getContainer()->make($validateClass);
     }
 }

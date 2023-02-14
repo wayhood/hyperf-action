@@ -12,17 +12,21 @@ namespace Wayhood\HyperfAction\Controller;
 
 use DeathSatan\Hyperf\Validate\Lib\AbstractValidate;
 use Hyperf\Context\Context;
+use Hyperf\Contract\ValidatorInterface;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
+use Hyperf\Logger\LoggerFactory;
 use Psr\Container\ContainerInterface;
 use Wayhood\HyperfAction\Collector\ActionCollector;
+use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
+use Wayhood\HyperfAction\Collector\RequestValidateCollector;
 use Wayhood\HyperfAction\Collector\TokenCollector;
 use Wayhood\HyperfAction\Collector\UsableCollector;
-use Wayhood\HyperfAction\Collector\ValidateCollector;
 use Wayhood\HyperfAction\Contract\TokenInterface;
+use Wayhood\HyperfAction\Result;
 use Wayhood\HyperfAction\Util\DocHtml;
 
 /**
@@ -115,6 +119,23 @@ class MainController
 
     public function index()
     {
+        try {
+            $response = $this->dispatch();
+        } catch (\Exception $exception) {
+            $response = $this->parseExceptionAndError($exception);
+        } catch (\Error $error) {
+            $response = $this->parseExceptionAndError($error);
+        }
+        return $response;
+    }
+
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \DeathSatan\Hyperf\Validate\Exceptions\ValidateException
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function dispatch()
+    {
         $actionRequest = $this->request->getAttribute('actionRequest');
         $extras = $this->request->getAttribute('extras');
         $headers = $this->request->getHeaders();
@@ -154,11 +175,10 @@ class MainController
                 'response' => $response,
             ]);
         }
-
-        // 进行验证器验证
-        $validates = ValidateCollector::result()[$actionName] ?? [];
-        foreach ($validates as $validate) {
-            $ret = $this->validate($validate, $actionRequest['params'], $actionMapping);
+        // 验证器验证 requestValidate注解
+        $requestValidates = RequestValidateCollector::result()[$actionName] ?? [];
+        foreach ($requestValidates as $requestValidate) {
+            $ret = $this->validate($requestValidate, $actionRequest['params'], $actionMapping);
             if ($ret !== true) {
                 return $this->response->json([
                     'code' => 0,
@@ -252,12 +272,67 @@ class MainController
         return $response->withBody(new SwooleStream(DocHtml::getActionHtml($action, $this->request->getPathInfo())));
     }
 
-    protected function validate(AbstractValidate $validate, array $params, string $action)
+    /**
+     * @param \Error|\Exception $except
+     */
+    protected function parseExceptionAndError($except): \Psr\Http\Message\ResponseInterface
     {
-        $result = $validate->make($params, false);
-        if ($result->fails()) {
-            $error = $result->errors()->first();
-            return $this->systemExceptionReturn(9000, $error, $action);
+        $actionRequest = $this->request->getAttribute('actionRequest');
+        $actionMapping = $actionRequest['dispatch'] ?? null;
+        $actionName = ActionCollector::list()[$actionMapping] ?? null;
+        $errorCodes = ErrorCodeCollector::result()[$actionName] ?? null;
+        $code = $except->getCode();
+
+        // 时间: 2022年7月16日 20:14:15
+        // 新增错误日志记录
+        $logger = $this->container->get(LoggerFactory::class)->get('action');
+        $date = date('Y-m-d H:i:s');
+        $logger->error(
+            <<<SQL
+{$date} ActionError {$except->getMessage()}
+{$except->getTraceAsString()}
+SQL
+        );
+
+        if (array_key_exists($code, $errorCodes)) {
+            // 如果已经定义过的error code
+            $message = $errorCodes[$code]['message'] ?? null;
+            return Result::systemReturn(
+                Result::errorReturn($code, $message),
+            );
+        }
+
+        if (in_array(env('APP_ENV'), ['test', 'demo', 'dev'])) {
+            $data = [
+                'trace' => $except->getTrace(),
+                'message' => $except->getMessage(),
+                'exception_file' => $except->getFile(),
+                'exception_line' => $except->getLine(),
+            ];
+            return Result::systemReturn($data, $except->getMessage(), (int) $except->getCode());
+        }
+
+        return Result::error([], 'System Errors');
+    }
+
+    /**
+     * @throws \DeathSatan\Hyperf\Validate\Exceptions\ValidateException
+     */
+    protected function validate(array $validateConfig, array $params, string $action)
+    {
+
+        $safeMode = $validateConfig['safe_mode'];
+        $scene = $validateConfig['scene'];
+        /**
+         * @var AbstractValidate $validate
+         */
+        $validate = $validateConfig['validate'];
+        if ($scene != null) {
+            $validate->scene($scene);
+        }
+        $res = $validate->make($params, $safeMode);
+        if ($res instanceof ValidatorInterface) {
+            return $this->systemExceptionReturn(9998, $res->errors()->first(), $action);
         }
         return true;
     }
