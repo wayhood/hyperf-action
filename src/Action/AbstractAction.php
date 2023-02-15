@@ -30,7 +30,7 @@ abstract class AbstractAction
     #[Inject]
     protected ?ResponseInterface $response;
 
-    public function beforeRun($params, $extras, $headers): bool
+    public function beforeRun($params, $extras, $headers): bool|array
     {
         return true;
     }

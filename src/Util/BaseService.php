@@ -19,7 +19,7 @@ use Hyperf\Database\Model\Model;
 trait BaseService
 {
     // 可以匹配的类型
-    protected $op_condition = [
+    protected array $op_condition = [
         '=', '<>', '!=', '>', '<', '>=', '<=',
     ];
 

@@ -20,9 +20,6 @@ class ActionHandle implements CustomHandle
     {
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function provide(object $current, AbstractValidate $validate, string $scene = null): array
     {
         $actionRequest = $this->request->getAttribute('actionRequest');
