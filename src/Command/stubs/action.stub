@@ -38,7 +38,7 @@ use Wayhood\HyperfAction\Annotation\Usable;
 #[Token(token: false)]
 class %CLASS% extends AbstractAction
 {
-    public function run($params, $extras, $headers)
+    public function run($params, $extras, $headers): array
     {
         return $this->successReturn([
             'user' => [
