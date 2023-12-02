@@ -18,7 +18,7 @@ use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Logger\LoggerFactory;
-use Hyperf\Utils\Arr;
+use Hyperf\Collection\Arr;
 use Psr\Container\ContainerInterface;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\ErrorCodeCollector;
@@ -29,6 +29,7 @@ use Wayhood\HyperfAction\Collector\UsableCollector;
 use Wayhood\HyperfAction\Contract\TokenInterface;
 use Wayhood\HyperfAction\Result;
 use Wayhood\HyperfAction\Util\DocHtml;
+use function Hyperf\Support\env;
 
 /**
  * Class MainController.

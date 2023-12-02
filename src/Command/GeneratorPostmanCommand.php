@@ -16,6 +16,7 @@ use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\CategoryCollector;
 use Wayhood\HyperfAction\Collector\DescriptionCollector;
 use Wayhood\HyperfAction\Collector\RequestParamCollector;
+use function Hyperf\Support\env;
 
 class GeneratorPostmanCommand extends HyperfCommand
 {
