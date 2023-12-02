@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Wayhood\HyperfAction\Collector;
 
 use Hyperf\Di\MetadataCollector;
-use Hyperf\Utils\ApplicationContext;
+use Hyperf\Context\ApplicationContext;
 use Wayhood\HyperfAction\Annotation\RequestValidate;
 
 class RequestValidateCollector extends MetadataCollector
