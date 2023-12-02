@@ -10,7 +10,7 @@ declare(strict_types=1);
  */
 namespace Wayhood\HyperfAction\Util;
 
-use Hyperf\Utils\ApplicationContext;
+use Hyperf\Context\ApplicationContext;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Collector\CategoryCollector;
 use Wayhood\HyperfAction\Collector\DescriptionCollector;
