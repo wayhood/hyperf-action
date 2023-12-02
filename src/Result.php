@@ -12,7 +12,7 @@ namespace Wayhood\HyperfAction;
 
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
-use Hyperf\Utils\ApplicationContext;
+use Hyperf\Context\ApplicationContext;
 use Wayhood\HyperfAction\Collector\ActionCollector;
 use Wayhood\HyperfAction\Util\ResponseFilter;
 
