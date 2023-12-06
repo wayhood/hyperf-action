@@ -282,13 +282,14 @@ class MainController
         $actionRequest = $this->request->getAttribute('actionRequest');
         $actionMapping = $actionRequest['dispatch'] ?? null;
         $actionName = ActionCollector::list()[$actionMapping] ?? null;
-        $errorCodes = ErrorCodeCollector::result()[$actionName] ?? null;
+        $errorCodes = ErrorCodeCollector::result()[$actionName] ?? [];
         $code = $except->getCode();
 
         // 时间: 2022年7月16日 20:14:15
         // 新增错误日志记录
         $logger = $this->container->get(LoggerFactory::class)->get('action');
         $date = date('Y-m-d H:i:s');
+        $logger->error($date. ' '. $actionMapping);
         $logger->error(
             <<<SQL
 {$date} ActionError {$except->getMessage()}
@@ -302,6 +303,10 @@ SQL
             return Result::systemReturn(
                 Result::errorReturn($code, $message),
             );
+        } else {
+            return Result::systemReturn(
+                Result::errorReturn($code, '未知错误'),
+            );
         }
 
         if (in_array(env('APP_ENV'), ['test', 'demo', 'dev'])) {
@@ -314,7 +319,7 @@ SQL
             return Result::systemReturn($data, $except->getMessage(), (int) $except->getCode());
         }
 
-        return Result::error([], 'System Errors');
+        return Result::error([], '系统错误');
     }
 
     /**
